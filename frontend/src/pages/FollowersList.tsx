@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import Avatar from "../components/Avatar";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -11,6 +12,7 @@ export default function FollowersList({
 }: any) {
   const [followers, setFollowers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [listMode, setListMode] = useState<"grid" | "list">("grid");
 
   useEffect(() => {
     if (!token || !currentUserId) return;
@@ -23,9 +25,10 @@ export default function FollowersList({
   }, [token, currentUserId]);
 
   function avatarUrl(u: any) {
-    if (!u?.avatar) return "/default.png";
+    if (!u?.avatar) return "https://ui-avatars.com/api/?name=User&background=0D8ABC&color=fff";
     if (u.avatar.startsWith("http")) return u.avatar;
-    return API + u.avatar;
+    if (u.avatar.startsWith("/")) return API + u.avatar;
+    return API + "/uploads/" + u.avatar;
   }
 
   async function toggleFollow(u: any) {
@@ -45,53 +48,118 @@ export default function FollowersList({
   }
 
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-semibold mb-4">Followers</h2>
+    <div className="p-6">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold">👥 Followers</h2>
+        
+        <select
+          value={listMode}
+          onChange={(e) => setListMode(e.target.value as any)}
+          className="input px-4 py-2 rounded-md"
+        >
+          <option value="grid">Grid</option>
+          <option value="list">List</option>
+        </select>
+      </div>
 
       {loading ? (
-        <div>Loading…</div>
+        <div className="text-slate-600 dark:text-slate-400">Loading…</div>
       ) : followers.length === 0 ? (
-        <div className="opacity-70 text-sm">No followers yet.</div>
-      ) : (
-        <div className="grid gap-4">
+        <div className="text-slate-600 dark:text-slate-400 text-center py-12">
+          <div className="text-4xl mb-3">👥</div>
+          <div>No followers yet.</div>
+        </div>
+      ) : listMode === "grid" ? (
+        /* GRID MODE */
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {followers.map((u) => (
             <div
               key={u._id}
-              className="flex items-center gap-3 p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+              className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-5 flex flex-col items-center text-center shadow-sm hover:shadow-lg transition-all min-h-[280px]"
             >
-              <img
+              <Avatar
                 src={avatarUrl(u)}
-                className="w-12 h-12 rounded-lg object-cover border border-gray-300 dark:border-gray-600"
+                className="w-20 h-20 rounded-lg object-cover cursor-pointer mb-3 flex-shrink-0"
                 onClick={() => onShowProfile(u)}
+                alt={u.username}
               />
 
               <div
-                className="flex-1"
+                className="mt-1 font-semibold cursor-pointer truncate w-full text-slate-900 dark:text-slate-100"
                 onClick={() => onShowProfile(u)}
               >
-                <div className="font-semibold">{u.username}</div>
-                <div className="text-xs opacity-70">{u.email}</div>
+                {u.username}
               </div>
 
-              {/* Follow Back / Unfollow */}
-              <button
-                onClick={() => toggleFollow(u)}
-                className={`px-4 py-1.5 rounded-lg text-sm font-medium ${
-                  u.isFollowed
-                    ? "bg-gray-200 dark:bg-gray-700 text-black dark:text-white"
-                    : "bg-green-500 text-white"
-                }`}
-              >
-                {u.isFollowed ? "Unfollow" : "Follow Back"}
-              </button>
+              <div className="text-xs text-slate-600 dark:text-slate-400 truncate w-full mb-4">
+                {u.email}
+              </div>
 
-              {/* Message */}
-              <button
-                onClick={() => onOpenConversation({ partnerId: u._id })}
-                className="px-4 py-1.5 rounded-lg bg-gradient-to-r from-cyan-400 to-purple-500 text-white"
+              <div className="flex flex-col gap-2 mt-auto w-full">
+                <button
+                  onClick={() => onOpenConversation({ partnerId: u._id })}
+                  className="w-full px-4 py-2 rounded-md bg-gradient-to-r from-cyan-400 to-purple-500 text-white text-sm font-medium hover:shadow-md transition-shadow"
+                >
+                  Message
+                </button>
+
+                <button
+                  onClick={() => toggleFollow(u)}
+                  className={`w-full px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                    u.isFollowed
+                      ? "bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-slate-100 hover:bg-slate-300 dark:hover:bg-slate-600"
+                      : "bg-green-500 text-white hover:bg-green-600"
+                  }`}
+                >
+                  {u.isFollowed ? "Unfollow" : "Follow Back"}
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        /* LIST MODE */
+        <div className="flex flex-col gap-3">
+          {followers.map((u) => (
+            <div
+              key={u._id}
+              className="flex items-center gap-3 p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:shadow-md transition-all flex-wrap sm:flex-nowrap"
+            >
+              <Avatar
+                src={avatarUrl(u)}
+                className="w-14 h-14 rounded-lg object-cover cursor-pointer flex-shrink-0"
+                onClick={() => onShowProfile(u)}
+                alt={u.username}
+              />
+
+              <div
+                className="flex-1 cursor-pointer min-w-0"
+                onClick={() => onShowProfile(u)}
               >
-                Message
-              </button>
+                <div className="font-semibold text-slate-900 dark:text-slate-100 truncate">{u.username}</div>
+                <div className="text-sm text-slate-600 dark:text-slate-400 truncate">{u.email}</div>
+              </div>
+
+              <div className="flex gap-2 w-full sm:w-auto">
+                <button
+                  onClick={() => onOpenConversation({ partnerId: u._id })}
+                  className="flex-1 sm:flex-none px-4 py-2 rounded-md bg-gradient-to-r from-cyan-400 to-purple-500 text-white text-sm font-medium hover:shadow-md transition-shadow"
+                >
+                  Message
+                </button>
+
+                <button
+                  onClick={() => toggleFollow(u)}
+                  className={`flex-1 sm:flex-none px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                    u.isFollowed
+                      ? "bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-slate-100 hover:bg-slate-300 dark:hover:bg-slate-600"
+                      : "bg-green-500 text-white hover:bg-green-600"
+                  }`}
+                >
+                  {u.isFollowed ? "Unfollow" : "Follow Back"}
+                </button>
+              </div>
             </div>
           ))}
         </div>
