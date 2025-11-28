@@ -315,9 +315,24 @@ body {
    RESPONSIVE
    ========================================================= */
 @media (max-width: 820px) {
-  .layout { flex-direction: column; }
-  .sidebar { width: 100%; }
-  .message { max-width: 92%; }
+  .layout { 
+    flex-direction: column; 
+    gap: 1rem;
+    padding: 0.5rem !important;
+  }
+  
+  .sidebar { 
+    width: 100%; 
+    margin-bottom: 1rem;
+  }
+  
+  .main {
+    width: 100%;
+  }
+  
+  .message { 
+    max-width: 85%; 
+  }
   
   /* Make reactions wrap and stay inside bubble on mobile */
   .message .flex.gap-2 {
@@ -330,20 +345,41 @@ body {
     padding: 0.25rem 0.5rem;
   }
   
-  /* Composer responsive */
+  /* Composer responsive - full width stacking */
   .composer {
-    flex-wrap: wrap;
+    flex-direction: column;
+    gap: 0.75rem;
   }
   
-  .composer input[type="file"] {
+  .composer > div {
     width: 100%;
-    max-width: 100%;
-    margin-top: 0.5rem;
   }
   
   .composer .input {
-    min-width: 100%;
-    flex: 1 1 100%;
+    width: 100%;
+  }
+  
+  .composer .btn {
+    width: 100%;
+  }
+  
+  /* Image preview thumbnails responsive */
+  .composer > div:first-child {
+    overflow-x: auto;
+  }
+  
+  /* Profile modal responsive */
+  .profile-modal,
+  .modal-box {
+    max-width: 95vw !important;
+    margin: 1rem;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  
+  /* Image preview modal responsive */
+  .modal-box .grid {
+    grid-template-columns: 1fr !important;
   }
 }
 
@@ -363,11 +399,12 @@ body {
 
 .profile-modal .modal-box {
   background: #ffffff !important;          /* light mode */
+  color: #0f172a !important;              /* dark text for light mode */
 }
 
 .dark .profile-modal .modal-box {
   background: #0f172a !important;          /* TRUE solid dark (no fade) */
-  color: #e6eef8 !important;
+  color: #e6eef8 !important;              /* light text for dark mode */
   border: 1px solid rgba(255,255,255,0.12) !important;
 }
 
@@ -375,4 +412,17 @@ body {
 .profile-modal .modal-box {
   backdrop-filter: none !important;
   box-shadow: 0 10px 35px rgba(0,0,0,0.45) !important;
+}
+
+/* Ensure all text elements are visible */
+.dark .profile-modal .text-xs,
+.dark .profile-modal .opacity-70,
+.dark .profile-modal .text-muted {
+  color: #9aa7bb !important;
+}
+
+:root.light .profile-modal .text-xs,
+:root.light .profile-modal .opacity-70,
+:root.light .profile-modal .text-muted {
+  color: #64748b !important;
 }

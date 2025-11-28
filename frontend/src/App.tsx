@@ -1104,12 +1104,12 @@ const myStatus =
       {/* ---------------- PROFILE MODAL ---------------- */}
       {profileOpen && (
         <div
-          className="fixed inset-0 flex items-center justify-center z-50"
+          className="fixed inset-0 flex items-center justify-center z-50 px-4"
           style={{ background: "rgba(0,0,0,0.45)" }}
           onClick={() => setProfileOpen(false)}
         >
           <div
-            className="bg-white dark:bg-slate-900 rounded-lg p-6 w-full max-w-sm shadow-2xl"
+            className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg p-6 w-full max-w-sm shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             {profileLoading ? (
@@ -1178,12 +1178,12 @@ const myStatus =
       {/* ---------------- IMAGE PREVIEW MODAL ---------------- */}
       {imagePreviewOpen && selectedImages.length > 0 && (
         <div
-          className="fixed inset-0 flex items-center justify-center z-50"
+          className="fixed inset-0 flex items-center justify-center z-50 p-4"
           style={{ background: "rgba(0,0,0,0.75)" }}
           onClick={() => setImagePreviewOpen(false)}
         >
           <div
-            className="bg-white dark:bg-slate-900 rounded-lg p-6 w-full max-w-3xl shadow-2xl max-h-[90vh] overflow-auto"
+            className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg p-6 w-full max-w-3xl shadow-2xl max-h-[90vh] overflow-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-4">
