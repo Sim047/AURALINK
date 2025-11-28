@@ -765,7 +765,7 @@ const myStatus =
   
   // ---- MAIN LAYOUT ----
   return (
-    <div className="layout container flex gap-4 p-4 min-h-screen relative">
+    <div className={`layout container flex gap-4 p-4 min-h-screen relative ${view === 'chat' ? 'chat-active' : ''}`}>
       {/* ---------------- SIDEBAR ---------------- */}
       <aside className={`sidebar transition-all duration-300 ${isFullPageView ? 'sidebar-collapsed' : 'sidebar-expanded'}`}>
         <div>
