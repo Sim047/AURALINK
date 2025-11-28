@@ -770,22 +770,24 @@ const myStatus =
       <aside className={`sidebar transition-all duration-300 ${isFullPageView ? 'sidebar-collapsed' : 'sidebar-expanded'}`}>
         <div>
           {/* Header / Logo / Theme toggle */}
-          <div className="flex items-center justify-between mb-6 px-2">
-            <div className="flex flex-col items-center">
+          <div className="flex flex-col items-center mb-6">
+            <div className="flex items-center justify-between w-full px-2 mb-4">
+              <button
+                className="p-2 rounded-lg border border-slate-600 hover:bg-slate-700/40"
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              >
+                {theme === "dark" ? "☀️" : "🌙"}
+              </button>
+            </div>
+            
+            <div className="flex flex-col items-center gap-3">
               <img
                 src={logo}
-                className="w-16 h-16 rounded-xl mb-2 object-cover"
+                className="w-20 h-20 rounded-xl object-cover shadow-lg"
                 alt="logo"
               />
-              <h2 className="text-xl font-bold">BANJA</h2>
+              <h2 className="text-2xl font-bold tracking-wide">BANJA</h2>
             </div>
-
-            <button
-              className="p-2 rounded-lg border border-slate-600 hover:bg-slate-700/40"
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            >
-              {theme === "dark" ? "☀️" : "🌙"}
-            </button>
           </div>
 
           {/* CURRENT USER */}
@@ -921,32 +923,46 @@ const myStatus =
         </div>
 
         {/* LOGOUT - Always visible */}
-        <button 
-          className={`btn w-full mt-6 ${isFullPageView ? 'p-3' : ''}`} 
-          onClick={logout}
-          title={isFullPageView ? "Log Out" : ""}
-        >
-          {isFullPageView ? (
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="mx-auto"
-            >
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-              <polyline points="16 17 21 12 16 7" />
-              <line x1="21" y1="12" x2="9" y2="12" />
-            </svg>
-          ) : (
-            'Log Out'
+        <div>
+          <button 
+            className={`btn w-full mt-6 ${isFullPageView ? 'p-3' : ''}`} 
+            onClick={logout}
+            title={isFullPageView ? "Log Out" : ""}
+          >
+            {isFullPageView ? (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="mx-auto"
+              >
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
+            ) : (
+              'Log Out'
+            )}
+          </button>
+          
+          {/* Copyright */}
+          {!isFullPageView && (
+            <div className="mt-4 pt-4 border-t border-slate-700 text-center">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                © {new Date().getFullYear()}
+              </p>
+              <p className="text-xs font-semibold text-slate-600 dark:text-slate-300 mt-1">
+                SIMON KATHULU
+              </p>
+            </div>
           )}
-        </button>
+        </div>
       </aside>
 
       {/* ---------------- MAIN VIEW ---------------- */}
