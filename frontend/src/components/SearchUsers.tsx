@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
-const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API = import.meta.env.VITE_API_URL || "";
 const PLACEHOLDER = "https://placehold.co/48x48?text=U";
 
 export default function SearchUsers({
@@ -24,10 +24,22 @@ export default function SearchUsers({
     const t = setTimeout(() => {
       setLoading(true);
       axios
-        .get(API + "/api/users/all?search=" + encodeURIComponent(q), {
+        .get(API + "/api/users/all", {
+          params: { search: q },
           headers: { Authorization: "Bearer " + token }
         })
-        .then((r) => setResults(r.data || []))
+        .then((r) => {
+          const data = r.data || [];
+          // Filter results client-side to ensure search works
+          const filtered = data.filter((u: any) => {
+            const searchLower = q.toLowerCase();
+            return (
+              u.username?.toLowerCase().includes(searchLower) ||
+              u.email?.toLowerCase().includes(searchLower)
+            );
+          });
+          setResults(filtered);
+        })
         .catch((e) => {
           console.error("search users err", e);
           setResults([]);

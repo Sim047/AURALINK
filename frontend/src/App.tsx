@@ -16,6 +16,7 @@ import ConversationsList from "./components/ConversationsList";
 import AllUsers from "./pages/AllUsers";
 import FollowersList from "./pages/FollowersList";
 import FollowingList from "./pages/FollowingList";
+import logo from "./assets/logo.png";
 
 dayjs.extend(localizedFormat);
 dayjs.extend(relativeTime);
@@ -722,7 +723,7 @@ const myStatus =
           <div className="flex items-center justify-between mb-6 px-2">
             <div className="flex flex-col items-center">
               <img
-                src="/src/assets/logo.png"
+                src={logo}
                 className="w-16 h-16 rounded-xl mb-2 object-cover"
                 alt="logo"
               />
