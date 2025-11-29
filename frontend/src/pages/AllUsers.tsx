@@ -21,7 +21,10 @@ export default function AllUsers({ token, onOpenConversation, currentUserId }: a
   const [search, setSearch] = useState("");
   const [processingId, setProcessingId] = useState<string | null>(null);
 
-  const [listMode, setListMode] = useState<"grid" | "list">("grid");
+  const [listMode, setListMode] = useState<"grid" | "list">(() => {
+    // Default to grid on mobile, list on desktop
+    return window.innerWidth <= 820 ? "grid" : "grid";
+  });
 
   // Profile Modal
   const [profileOpen, setProfileOpen] = useState(false);
@@ -258,23 +261,23 @@ export default function AllUsers({ token, onOpenConversation, currentUserId }: a
         </div>
       ) : listMode === "grid" ? (
         /* -------------------- GRID MODE -------------------- */
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
           {users.map((u) => (
             <div
               key={u._id}
               className="
                 bg-white dark:bg-slate-800
                 rounded-xl border border-gray-200 dark:border-gray-700
-                p-5 flex flex-col items-center text-center 
+                p-3 sm:p-5 flex flex-col items-center text-center 
                 shadow-sm hover:shadow-lg transition-all
-                min-h-[280px]
+                min-h-[260px] sm:min-h-[280px]
               "
             >
               {/* Avatar */}
-              <div className="relative group mb-3 flex-shrink-0">
+              <div className="relative group mb-2 sm:mb-3 flex-shrink-0">
                 <Avatar
                   src={avatarUrl(u)}
-                  className="w-20 h-20 rounded-lg object-cover cursor-pointer transition-transform group-hover:scale-105"
+                  className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-cover cursor-pointer transition-transform group-hover:scale-105"
                   onClick={() => previewImage(u)}
                   alt={u.username}
                 />
@@ -301,21 +304,21 @@ export default function AllUsers({ token, onOpenConversation, currentUserId }: a
 
               {/* Username */}
               <div
-                className="mt-1 font-semibold cursor-pointer truncate w-full text-slate-900 dark:text-slate-100"
+                className="mt-1 font-semibold cursor-pointer truncate w-full text-slate-900 dark:text-slate-100 text-sm sm:text-base"
                 onClick={() => openProfile(u._id)}
               >
                 {u.username}
               </div>
 
               {/* Email */}
-              <div className="text-xs text-slate-600 dark:text-slate-400 truncate w-full mb-4">
+              <div className="text-xs text-slate-600 dark:text-slate-400 truncate w-full mb-3 sm:mb-4">
                 {u.email}
               </div>
 
               {/* Buttons */}
-              <div className="flex flex-col gap-2 mt-auto w-full">
+              <div className="flex flex-col gap-1.5 sm:gap-2 mt-auto w-full">
                 <button
-                  className="w-full px-4 py-2 rounded-md bg-gradient-to-r from-cyan-400 to-purple-500 text-white text-sm font-medium hover:shadow-md transition-shadow"
+                  className="w-full px-3 py-1.5 sm:px-4 sm:py-2 rounded-md bg-gradient-to-r from-cyan-400 to-purple-500 text-white text-xs sm:text-sm font-medium hover:shadow-md transition-shadow"
                   onClick={() => startConversation(u)}
                   disabled={processingId === u._id}
                 >
@@ -324,7 +327,7 @@ export default function AllUsers({ token, onOpenConversation, currentUserId }: a
 
                 {u._id !== currentUserId && (
                   <button
-                    className="w-full px-4 py-2 rounded-md bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-slate-100 text-sm font-medium hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
+                    className="w-full px-3 py-1.5 sm:px-4 sm:py-2 rounded-md bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-slate-100 text-xs sm:text-sm font-medium hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
                     onClick={() => followToggle(u, !u.isFollowed)}
                     disabled={processingId === u._id}
                   >
