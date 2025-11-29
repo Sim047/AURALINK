@@ -102,17 +102,31 @@ router.get('/:id/messages', auth, async (req, res) => {
 
 /**
  * DELETE /api/conversations/:id
- * deletes conversation and its messages
+ * deletes conversation for current user only (removes them from participants, hides messages)
  */
 router.delete('/:id', auth, async (req, res) => {
   try {
+    const userId = req.user.id;
     const convId = req.params.id;
 
-    // remove messages that have room = convId
-    await Message.deleteMany({ room: convId });
+    // Hide all messages in this conversation for the current user
+    await Message.updateMany(
+      { room: convId },
+      { $addToSet: { hiddenFor: userId } }
+    );
 
-    // remove conversation document
-    await Conversation.findByIdAndDelete(convId);
+    // Remove current user from conversation participants
+    const conv = await Conversation.findByIdAndUpdate(
+      convId,
+      { $pull: { participants: userId } },
+      { new: true }
+    );
+
+    // If no participants left, delete the conversation completely
+    if (conv && conv.participants.length === 0) {
+      await Conversation.findByIdAndDelete(convId);
+      await Message.deleteMany({ room: convId });
+    }
 
     res.json({ success: true });
   } catch (err) {
