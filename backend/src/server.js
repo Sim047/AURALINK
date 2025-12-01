@@ -17,6 +17,10 @@ import messageRoutes from "./routes/messages.js";
 import fileRoutes from "./routes/files.js";
 import statusRoutes from "./routes/status.js";
 import conversationsRoutes from "./routes/conversations.js";
+import coachesRoutes from "./routes/coaches.js";
+import eventsRoutes from "./routes/events.js";
+import servicesRoutes from "./routes/services.js";
+import bookingsRoutes from "./routes/bookings.js";
 
 // MODELS
 import Message from "./models/Message.js";
@@ -146,6 +150,10 @@ app.use("/api/messages", messageRoutes);
 app.use("/api/files", fileRoutes);
 app.use("/api/status", statusRoutes);
 app.use("/api/conversations", conversationsRoutes);
+app.use("/api/coaches", coachesRoutes);
+app.use("/api/events", eventsRoutes);
+app.use("/api/services", servicesRoutes);
+app.use("/api/bookings", bookingsRoutes);
 
 // lightweight health check (useful for probes / verify deployment)
 app.get('/', (req, res) => res.json({ ok: true, service: 'banja-backend' }));

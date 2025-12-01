@@ -12,6 +12,7 @@ import {
   Filter,
   X
 } from "lucide-react";
+import BookingModal from "../components/BookingModal";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -60,6 +61,10 @@ export default function Discover({ token, onViewProfile }: any) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSport, setSelectedSport] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  
+  // Booking modal state
+  const [bookingModalOpen, setBookingModalOpen] = useState(false);
+  const [bookingData, setBookingData] = useState<any>(null);
 
   useEffect(() => {
     loadData();
@@ -72,51 +77,74 @@ export default function Discover({ token, onViewProfile }: any) {
       setLoading(true);
       
       // Load coaches
-      const coachRes = await axios.get(`${API}/api/users/all`, {
+      const coachParams = new URLSearchParams();
+      if (selectedSport) coachParams.append('sport', selectedSport);
+      if (searchQuery) coachParams.append('search', searchQuery);
+      coachParams.append('limit', '6');
+      coachParams.append('featured', 'true');
+      
+      const coachRes = await axios.get(`${API}/api/coaches?${coachParams}`, {
         headers: { Authorization: `Bearer ${token}` },
-        params: { sport: selectedSport }
       });
       
-      // Mock data for now - replace with actual API calls
-      setCoaches(coachRes.data || []);
+      // Transform coach data to match expected format
+      const transformedCoaches = (coachRes.data.coaches || []).map((coach: any) => ({
+        _id: coach._id,
+        username: coach.userId?.username || 'Coach',
+        avatar: coach.userId?.avatar,
+        sport: coach.sports?.[0] || 'Coach',
+        location: coach.location?.city || '',
+        rating: coach.rating?.average || 0,
+        hourlyRate: coach.pricing?.hourlyRate || 0,
+        verified: coach.verified,
+      }));
       
-      setEvents([
-        {
-          _id: "1",
-          title: "5v5 Football Clinic",
-          date: "May 18-22",
-          time: "4:00 PM",
-          location: "Central Park",
-          participants: 12,
-          maxParticipants: 20
-        },
-        {
-          _id: "2",
-          title: "Evening Bootcamp",
-          date: "June 10-15",
-          time: "6:00 PM",
-          location: "Fitness Studio A",
-          participants: 8,
-          maxParticipants: 15
-        }
-      ]);
-
-      setServices([
-        {
-          _id: "1",
-          name: "Personalized Training",
-          description: "One-on-one coaching session",
-          price: 200,
-          provider: "Elite Coaches"
-        },
-        {
-          _id: "2",
-          name: "Group Fitness Classes",
-          description: "Fun group workout sessions",
-          price: 50,
-          provider: "Fitness Hub"
-        }
-      ]);
+      setCoaches(transformedCoaches);
+      
+      // Load events
+      const eventParams = new URLSearchParams();
+      if (selectedSport) eventParams.append('sport', selectedSport);
+      eventParams.append('limit', '4');
+      eventParams.append('status', 'published');
+      
+      const eventRes = await axios.get(`${API}/api/events?${eventParams}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      
+      // Transform event data
+      const transformedEvents = (eventRes.data.events || []).map((event: any) => ({
+        _id: event._id,
+        title: event.title,
+        date: new Date(event.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        time: event.time || new Date(event.startDate).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
+        location: event.location?.name || event.location?.city || 'TBD',
+        participants: event.capacity?.current || 0,
+        maxParticipants: event.capacity?.max || 0,
+      }));
+      
+      setEvents(transformedEvents);
+      
+      // Load services
+      const serviceParams = new URLSearchParams();
+      if (selectedSport) serviceParams.append('sport', selectedSport);
+      serviceParams.append('limit', '4');
+      serviceParams.append('active', 'true');
+      serviceParams.append('featured', 'true');
+      
+      const serviceRes = await axios.get(`${API}/api/services?${serviceParams}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      
+      // Transform service data
+      const transformedServices = (serviceRes.data.services || []).map((service: any) => ({
+        _id: service._id,
+        name: service.name,
+        description: service.description,
+        price: service.pricing?.amount || 0,
+        provider: service.provider?.username || 'Provider',
+      }));
+      
+      setServices(transformedServices);
       
     } catch (err) {
       console.error("Error loading discover data:", err);
@@ -124,6 +152,25 @@ export default function Discover({ token, onViewProfile }: any) {
       setLoading(false);
     }
   }
+
+  const openBookingModal = (type: string, item: any) => {
+    setBookingData({ type, ...item });
+    setBookingModalOpen(true);
+  };
+
+  const handleJoinEvent = async (eventId: string) => {
+    try {
+      await axios.post(`${API}/api/events/${eventId}/join`, {}, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      
+      // Reload events to update participant count
+      loadData();
+    } catch (err: any) {
+      console.error("Join event error:", err);
+      alert(err.response?.data?.error || "Failed to join event");
+    }
+  };
 
   const filteredCoaches = coaches.filter(coach =>
     coach.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -252,7 +299,7 @@ export default function Discover({ token, onViewProfile }: any) {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {events.map((event) => (
-              <EventCard key={event._id} event={event} />
+              <EventCard key={event._id} event={event} onJoin={handleJoinEvent} />
             ))}
           </div>
         </section>
@@ -270,11 +317,29 @@ export default function Discover({ token, onViewProfile }: any) {
 
           <div className="space-y-3">
             {services.map((service) => (
-              <ServiceCard key={service._id} service={service} />
+              <ServiceCard key={service._id} service={service} onBook={openBookingModal} />
             ))}
           </div>
         </section>
       </div>
+
+      {/* Booking Modal */}
+      {bookingModalOpen && bookingData && (
+        <BookingModal
+          isOpen={bookingModalOpen}
+          onClose={() => setBookingModalOpen(false)}
+          bookingType={bookingData.type}
+          itemId={bookingData._id}
+          itemName={bookingData.name || bookingData.title}
+          providerId={bookingData.provider}
+          providerName={bookingData.provider}
+          price={bookingData.price}
+          token={token}
+          onSuccess={() => {
+            loadData();
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -347,7 +412,7 @@ function CoachCard({ coach, onViewProfile }: { coach: Coach; onViewProfile: any 
 }
 
 // Event Card Component
-function EventCard({ event }: { event: Event }) {
+function EventCard({ event, onJoin }: { event: Event; onJoin: (id: string) => void }) {
   return (
     <div className="bg-white dark:bg-[#0f172a] rounded-2xl p-4 border border-gray-200 dark:border-gray-800 hover:shadow-lg transition-shadow">
       <div className="flex items-start gap-4">
@@ -378,7 +443,10 @@ function EventCard({ event }: { event: Event }) {
           </div>
         </div>
 
-        <button className="px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white text-sm font-medium rounded-lg transition">
+        <button 
+          onClick={() => onJoin(event._id)}
+          className="px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white text-sm font-medium rounded-lg transition"
+        >
           Join
         </button>
       </div>
@@ -387,7 +455,7 @@ function EventCard({ event }: { event: Event }) {
 }
 
 // Service Card Component
-function ServiceCard({ service }: { service: Service }) {
+function ServiceCard({ service, onBook }: { service: Service; onBook: (type: string, item: any) => void }) {
   return (
     <div className="bg-white dark:bg-[#0f172a] rounded-2xl p-4 border border-gray-200 dark:border-gray-800 hover:shadow-lg transition-shadow">
       <div className="flex items-center justify-between">
@@ -410,7 +478,10 @@ function ServiceCard({ service }: { service: Service }) {
             </div>
             <div className="text-xs text-gray-500">per session</div>
           </div>
-          <button className="px-6 py-2.5 bg-teal-500 hover:bg-teal-600 text-white text-sm font-medium rounded-lg transition whitespace-nowrap">
+          <button 
+            onClick={() => onBook('service', service)}
+            className="px-6 py-2.5 bg-teal-500 hover:bg-teal-600 text-white text-sm font-medium rounded-lg transition whitespace-nowrap"
+          >
             Book Now
           </button>
         </div>
