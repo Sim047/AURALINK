@@ -22,14 +22,6 @@ router.get("/my-bookings", auth, async (req, res) => {
       .populate("provider", "username email avatar")
       .populate("service", "name category pricing")
       .populate("event", "title sport startDate location")
-      .populate({
-        path: "coach",
-        select: "userId sports",
-        populate: {
-          path: "userId",
-          select: "username email avatar"
-        }
-      })
       .sort({ createdAt: -1 })
       .limit(Number(limit));
 
