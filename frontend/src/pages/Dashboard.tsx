@@ -12,7 +12,9 @@ import {
   AlertCircle,
   ArrowRight,
   BookOpen,
-  Plus
+  Plus,
+  Sparkles,
+  Trophy
 } from "lucide-react";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
