@@ -12,8 +12,7 @@ import {
   Award,
   Sparkles,
   DollarSign,
-  ArrowRight,
-  Star
+  ArrowRight
 } from "lucide-react";
 
 dayjs.extend(relativeTime);
@@ -149,43 +148,10 @@ export default function Discover({ token, onViewProfile }: any) {
   const [loading, setLoading] = useState(true);
   const [showAllSports, setShowAllSports] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
-  const [favoriteSports, setFavoriteSports] = useState<string[]>([]);
 
   useEffect(() => {
     loadEvents();
-    loadFavoriteSports();
   }, [token, selectedSport]);
-
-  async function loadFavoriteSports() {
-    if (!token) return;
-    try {
-      const res = await axios.get(`${API}/api/users/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setFavoriteSports(res.data.favoriteSports || []);
-    } catch (err) {
-      console.error("Error loading favorite sports:", err);
-    }
-  }
-
-  async function toggleFavoriteSport(sportName: string) {
-    try {
-      if (favoriteSports.includes(sportName)) {
-        await axios.delete(`${API}/api/users/favorite-sports/${encodeURIComponent(sportName)}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setFavoriteSports(favoriteSports.filter(s => s !== sportName));
-      } else {
-        await axios.post(`${API}/api/users/favorite-sports`, 
-          { sport: sportName },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        setFavoriteSports([...favoriteSports, sportName]);
-      }
-    } catch (err) {
-      console.error("Error toggling favorite sport:", err);
-    }
-  }
 
   async function loadEvents() {
     if (!token) return;
@@ -334,18 +300,6 @@ export default function Discover({ token, onViewProfile }: any) {
                     {sport.name}
                   </h3>
                 </div>
-                {/* Favorite Star Button */}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleFavoriteSport(sport.name);
-                  }}
-                  className="absolute top-2 right-2 p-1.5 rounded-full bg-slate-900/80 hover:bg-slate-800 transition-all z-10"
-                >
-                  <Star 
-                    className={`w-4 h-4 ${favoriteSports.includes(sport.name) ? 'fill-yellow-400 text-yellow-400' : 'text-slate-400'}`}
-                  />
-                </button>
               </div>
             ))}
           </div>
