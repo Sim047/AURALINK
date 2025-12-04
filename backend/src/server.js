@@ -216,15 +216,8 @@ io.on("connection", (socket) => {
     }
   });
 
-  // DELETE MESSAGE
-  socket.on("delete_message", async ({ room, messageId }) => {
-    try {
-      await Message.findByIdAndDelete(messageId);
-      io.to(room).emit("message_deleted", messageId);
-    } catch (err) {
-      console.error("delete_message error:", err);
-    }
-  });
+  // DELETE MESSAGE - handled by REST endpoint (/api/messages/:id DELETE)
+  // Per-user hiding is done via REST API which properly notifies only the hiding user
 
   // REACT TO MESSAGE
   socket.on("react", async ({ room, messageId, userId, emoji }) => {

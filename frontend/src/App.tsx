@@ -236,14 +236,14 @@ async function saveEdit(id: string) {
 async function deleteMessage(id: string) {
   if (!token) return;
   
-  // Optimistic update - remove message immediately
+  // Optimistic update - remove message immediately from my view
   setMessages((m) => m.filter((x) => x._id !== id));
   
   try {
+    // REST endpoint handles per-user hiding and sends socket event only to me
     await axios.delete(API + "/api/messages/" + id, {
       headers: { Authorization: "Bearer " + token }
     });
-    socket.emit("delete_message", { messageId: id });
   } catch (e) {
     console.error("Delete failed", e);
     // Could reload messages here if delete failed
@@ -371,8 +371,9 @@ function onMyStatusUpdated(newStatus: any) {
       );
     });
 
-    socket.on("message_deleted", (id: string) => {
-      setMessages((m) => m.filter((x) => x._id !== id));
+    socket.on("message_hidden", ({ messageId }: { messageId: string }) => {
+      // Only remove from my view when I hide a message
+      setMessages((m) => m.filter((x) => x._id !== messageId));
     });
 
     socket.on("status_update", (payload: any) => {
