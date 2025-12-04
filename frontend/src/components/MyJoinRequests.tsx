@@ -34,6 +34,7 @@ export default function MyJoinRequests({ token }: { token: string }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log("MyJoinRequests component mounted, token:", !!token);
     loadMyRequests();
   }, [token]);
 

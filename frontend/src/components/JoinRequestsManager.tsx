@@ -32,6 +32,7 @@ export default function JoinRequestsManager({ token }: { token: string }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log("JoinRequestsManager component mounted, token:", !!token);
     loadRequests();
   }, [token]);
 
