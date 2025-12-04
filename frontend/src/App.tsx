@@ -571,6 +571,30 @@ function onMyStatusUpdated(newStatus: any) {
   }
 
   function toggleReaction(msg: any, emoji: string) {
+    const uid = String(user?._id || user?.id);
+    
+    // Optimistic update - update UI immediately
+    setMessages((m) => m.map((message) => {
+      if (message._id !== msg._id) return message;
+      
+      const reactions = message.reactions || [];
+      const existingReactionIndex = reactions.findIndex(
+        (r: any) => r.userId === uid && r.emoji === emoji
+      );
+      
+      let newReactions;
+      if (existingReactionIndex >= 0) {
+        // Remove reaction
+        newReactions = reactions.filter((_: any, i: number) => i !== existingReactionIndex);
+      } else {
+        // Add reaction
+        newReactions = [...reactions, { userId: uid, emoji }];
+      }
+      
+      return { ...message, reactions: newReactions };
+    }));
+    
+    // Send to server
     socket.emit("react", {
       room: inDM && activeConversation ? activeConversation._id : room,
       messageId: msg._id,
