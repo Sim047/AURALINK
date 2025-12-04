@@ -922,7 +922,7 @@ function onMyStatusUpdated(newStatus: any) {
                   </button>
                 </div>
               ) : (
-                <div className="mt-2">{m.text}</div>
+                <div className="mt-2 break-words" style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>{m.text}</div>
               )}
 
               <div className="flex gap-2 mt-2 items-center text-sm">
@@ -1382,11 +1382,7 @@ function onMyStatusUpdated(newStatus: any) {
               <div className="relative flex items-end">
                 <textarea
                   className="input w-full p-3 pr-[120px] rounded-2xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-500 dark:placeholder:text-slate-400 border border-slate-300 dark:border-slate-600 resize-none overflow-y-auto overflow-x-hidden min-h-[48px] max-h-[200px]"
-                  style={{ 
-                    wordBreak: 'break-word',
-                    overflowWrap: 'break-word',
-                    whiteSpace: 'pre-wrap'
-                  }}
+                  wrap="soft"
                   value={text}
                   onChange={onComposerChange}
                   onKeyDown={handleKeyPress}
