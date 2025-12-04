@@ -213,6 +213,13 @@ function cancelEdit() {
 
 async function saveEdit(id: string) {
   if (!token) return;
+  
+  // Optimistic update - update message immediately
+  setMessages((m) => m.map((msg) => 
+    msg._id === id ? { ...msg, text: editingText, edited: true } : msg
+  ));
+  setEditingMessageId(null);
+  
   try {
     await axios.put(
       API + "/api/messages/" + id,
@@ -220,14 +227,18 @@ async function saveEdit(id: string) {
       { headers: { Authorization: "Bearer " + token } }
     );
     socket.emit("edit_message", { messageId: id, text: editingText });
-    setEditingMessageId(null);
   } catch (e) {
     console.error("Edit failed", e);
+    // Could revert the edit here if it failed
   }
 }
 
 async function deleteMessage(id: string) {
   if (!token) return;
+  
+  // Optimistic update - remove message immediately
+  setMessages((m) => m.filter((x) => x._id !== id));
+  
   try {
     await axios.delete(API + "/api/messages/" + id, {
       headers: { Authorization: "Bearer " + token }
@@ -235,6 +246,7 @@ async function deleteMessage(id: string) {
     socket.emit("delete_message", { messageId: id });
   } catch (e) {
     console.error("Delete failed", e);
+    // Could reload messages here if delete failed
   }
 }
 
@@ -1141,8 +1153,8 @@ function onMyStatusUpdated(newStatus: any) {
 
         {/* CHAT / DM PAGE */}
         {view === "chat" && (
-          <div className="flex flex-col h-full">
-            <header className="flex items-center justify-between mb-4 flex-shrink-0">
+          <div className="flex flex-col h-full max-h-full">
+            <header className="flex items-center justify-between pb-4 flex-shrink-0">
               {inDM && activeConversation ? (
                 <div className="flex items-center gap-3">
                   {(() => {
@@ -1344,7 +1356,7 @@ function onMyStatusUpdated(newStatus: any) {
             </header>
 
             {/* MESSAGE LIST */}
-            <section className="flex-1 overflow-y-auto p-2 min-h-0">
+            <section className="flex-1 overflow-y-auto p-2 min-h-0 mb-4">
               <div className="flex flex-col gap-4">
                 {renderMessages()}
                 <div ref={messagesEndRef} />
@@ -1353,7 +1365,7 @@ function onMyStatusUpdated(newStatus: any) {
 
             {/* MESSAGE COMPOSER */}
             <form
-              className="composer mt-4 flex flex-col gap-2 flex-shrink-0"
+              className="composer flex flex-col gap-2 flex-shrink-0 sticky bottom-0"
               onSubmit={sendMessage}
             >
               {/* Image Preview Bar */}
