@@ -1400,7 +1400,7 @@ function onMyStatusUpdated(newStatus: any) {
 
               <div className="relative flex items-end">
                 <textarea
-                  className="input w-full pt-3 pl-3 pr-[120px] pb-14 rounded-2xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-500 dark:placeholder:text-slate-400 border border-slate-300 dark:border-slate-600 resize-none overflow-y-auto overflow-x-hidden min-h-[72px] max-h-[140px]"
+                  className="input w-full pt-3 pl-3 pr-[120px] pb-[72px] rounded-2xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-500 dark:placeholder:text-slate-400 border border-slate-300 dark:border-slate-600 resize-none overflow-y-auto overflow-x-hidden min-h-[96px] max-h-[160px]"
                   wrap="soft"
                   value={text}
                   onChange={onComposerChange}
@@ -1410,7 +1410,7 @@ function onMyStatusUpdated(newStatus: any) {
                   onInput={(e: any) => {
                     // Auto-resize textarea as user types
                     e.target.style.height = 'auto';
-                    e.target.style.height = Math.min(e.target.scrollHeight, 140) + 'px';
+                    e.target.style.height = Math.min(e.target.scrollHeight, 160) + 'px';
                   }}
                 />
                 <div className="absolute right-3 bottom-3 flex items-center gap-1 bg-white dark:bg-slate-800 rounded-full pl-2">
