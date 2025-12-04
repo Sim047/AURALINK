@@ -197,12 +197,14 @@ export default function Discover({ token, onViewProfile }: any) {
 
   const submitJoinRequest = async (eventId: string, txCode: string) => {
     try {
-      await axios.post(`${API}/api/events/${eventId}/join`, 
+      console.log("Submitting join request for event:", eventId, "with txCode:", txCode);
+      const response = await axios.post(`${API}/api/events/${eventId}/join`, 
         { transactionCode: txCode }, 
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
+      console.log("Join request response:", response.data);
       alert("Join request submitted successfully! The event organizer will review your request.");
       setJoinModalOpen(false);
       setTransactionCode("");

@@ -189,6 +189,7 @@ router.get("/my/created", auth, async (req, res) => {
 router.post("/:id/join", auth, async (req, res) => {
   try {
     const { transactionCode } = req.body;
+    console.log("Join request received:", { eventId: req.params.id, userId: req.user.id, transactionCode });
     const event = await Event.findById(req.params.id);
 
     if (!event) {
@@ -202,9 +203,10 @@ router.post("/:id/join", auth, async (req, res) => {
 
     // Check if already has pending request
     const existingRequest = event.joinRequests.find(
-      req => req.user.toString() === req.user.id && req.status === "pending"
+      request => request.user.toString() === req.user.id && request.status === "pending"
     );
     if (existingRequest) {
+      console.log("User already has pending request");
       return res.status(400).json({ error: "You already have a pending join request" });
     }
 
@@ -222,6 +224,7 @@ router.post("/:id/join", auth, async (req, res) => {
     });
 
     await event.save();
+    console.log("Join request created, total requests:", event.joinRequests.length);
     await event.populate("joinRequests.user", "username avatar");
 
     // Emit socket notification to event organizer
@@ -345,11 +348,14 @@ router.post("/:id/reject-request/:requestId", auth, async (req, res) => {
 // GET my join requests (events I've requested to join)
 router.get("/my-join-requests", auth, async (req, res) => {
   try {
+    console.log("Fetching join requests for user:", req.user.id);
     const events = await Event.find({
       "joinRequests.user": req.user.id,
     })
       .populate("organizer", "username avatar")
       .populate("joinRequests.user", "username avatar");
+
+    console.log("Found events with requests:", events.length);
 
     const myRequests = events.map(event => {
       const request = event.joinRequests.find(
@@ -367,6 +373,7 @@ router.get("/my-join-requests", auth, async (req, res) => {
       };
     });
 
+    console.log("Returning requests:", myRequests.length);
     res.json(myRequests);
   } catch (err) {
     console.error("Get my join requests error:", err);

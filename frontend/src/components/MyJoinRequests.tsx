@@ -42,9 +42,11 @@ export default function MyJoinRequests({ token }: { token: string }) {
     
     try {
       setLoading(true);
+      console.log("MyJoinRequests: Fetching join requests...");
       const res = await axios.get(`${API}/api/events/my-join-requests`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      console.log("MyJoinRequests: Received data:", res.data);
       setRequests(res.data);
     } catch (err) {
       console.error("Error loading my join requests:", err);
@@ -67,6 +69,8 @@ export default function MyJoinRequests({ token }: { token: string }) {
   }
 
   const pendingRequests = requests.filter(r => r.request.status === "pending");
+  
+  console.log("MyJoinRequests: Total requests:", requests.length, "Pending:", pendingRequests.length);
 
   if (pendingRequests.length === 0) {
     return null; // Only show pending requests

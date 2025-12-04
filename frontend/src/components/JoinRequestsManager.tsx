@@ -40,9 +40,11 @@ export default function JoinRequestsManager({ token }: { token: string }) {
     
     try {
       setLoading(true);
+      console.log("JoinRequestsManager: Fetching event requests...");
       const res = await axios.get(`${API}/api/events/my-events-requests`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      console.log("JoinRequestsManager: Received data:", res.data);
       setRequests(res.data);
     } catch (err) {
       console.error("Error loading join requests:", err);
