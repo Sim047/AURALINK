@@ -820,8 +820,6 @@ function onMyStatusUpdated(newStatus: any) {
       )}
 
       {/* ---------------- MAIN VIEW ---------------- */}
-      <main className="flex-1 flex flex-col p-4 lg:p-6 overflow-auto"
-      {/* ---------------- MAIN VIEW ---------------- */}
       <main className="flex-1 flex flex-col p-4 lg:p-6 overflow-auto">
         {/* DASHBOARD PAGE */}
         {view === "dashboard" && (

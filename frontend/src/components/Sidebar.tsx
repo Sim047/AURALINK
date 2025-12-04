@@ -13,19 +13,17 @@ import {
   Home,
   Search,
   CalendarDays,
-  UserCircle,
   MessageCircle,
   LogOut,
   Sun,
-  Moon,
-  Upload
+  Moon
 } from "lucide-react";
 import Avatar from "./Avatar";
 import StatusPicker from "./StatusPicker";
 import SearchUsers from "./SearchUsers";
 import logo from "../assets/logo.png";
 
-const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API = (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
 
 interface SidebarProps {
   token: string;
@@ -83,22 +81,20 @@ export default function Sidebar({
       setError(false);
       const res = await axios.get(`${API}/api/users/me`, {
         headers: { Authorization: `Bearer ${token}` },
-        validateStatus: (status) => status < 500, // Don't throw on 4xx errors
+        validateStatus: (status) => status < 500,
       });
       
       if (res.status === 404) {
-        // Backend endpoint not available yet - use defaults
         setFollowers(0);
         setFollowing(0);
         setError(true);
         return;
       }
       
-      const user = res.data;
-      setFollowers(Array.isArray(user.followers) ? user.followers.length : 0);
-      setFollowing(Array.isArray(user.following) ? user.following.length : 0);
+      const userData = res.data;
+      setFollowers(Array.isArray(userData.followers) ? userData.followers.length : 0);
+      setFollowing(Array.isArray(userData.following) ? userData.following.length : 0);
     } catch (err: any) {
-      // Only log unexpected errors (5xx server errors)
       console.error("Sidebar stats error:", err);
       setError(true);
       setFollowers(0);
@@ -164,7 +160,7 @@ export default function Sidebar({
   const MobileToggle = () => (
     <button
       onClick={() => setIsMobileOpen(!isMobileOpen)}
-      className="lg:hidden fixed top-4 right-4 z-50 p-3 bg-slate-800 hover:bg-slate-700 rounded-xl border border-slate-600 shadow-lg transition-all"
+      className="lg:hidden fixed top-4 left-4 z-50 p-3 bg-slate-800 hover:bg-slate-700 rounded-xl border border-slate-600 shadow-lg transition-all"
     >
       {isMobileOpen ? (
         <X className="w-5 h-5 text-white" />
@@ -240,7 +236,7 @@ export default function Sidebar({
             />
             <div className="flex-1 min-w-0">
               <div className="font-bold truncate">{user?.username}</div>
-              <div className="text-xs opacity-70 truncate">{user?.role?.toUpperCase()}</div>
+              <div className="text-xs opacity-70 truncate">{user?.role?.toUpperCase() || "USER"}</div>
             </div>
           </div>
 
@@ -455,72 +451,6 @@ export default function Sidebar({
           </div>
         )}
       </div>
-    </div>
-  );
-              <div
-                key={index}
-                onClick={stat.onClick}
-                className={`
-                  relative overflow-hidden rounded-xl p-4 cursor-pointer
-                  transition-all duration-300 hover:scale-105 hover:shadow-xl
-                  ${isCollapsed ? 'aspect-square' : ''}
-                `}
-                style={{
-                  background: `linear-gradient(135deg, var(--tw-gradient-stops))`,
-                }}
-              >
-                <div className={`absolute inset-0 bg-gradient-to-br ${stat.color} opacity-90`}></div>
-                
-                <div className="relative z-10">
-                  <div className={`flex ${isCollapsed ? 'flex-col items-center justify-center h-full' : 'items-center justify-between'}`}>
-                    <div className={isCollapsed ? 'mb-2' : ''}>
-                      <Icon className="w-6 h-6 text-white" />
-                    </div>
-                    
-                    {!isCollapsed && (
-                      <div className="text-right">
-                        <p className="text-2xl font-bold text-white">
-                          {stat.value}
-                        </p>
-                        <p className="text-xs text-white/80 mt-0.5">
-                          {stat.label}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                  
-                  {isCollapsed && (
-                    <div className="text-center mt-2">
-                      <p className="text-lg font-bold text-white">{stat.value}</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })
-        )}
-
-        {error && !loading && (
-          <div className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl">
-            <p className="text-xs text-yellow-400 text-center">
-              {isCollapsed ? '⚠️' : 'Unable to load stats'}
-            </p>
-          </div>
-        )}
-      </div>
-
-      {/* Footer - Refresh button */}
-      {!isCollapsed && (
-        <div className="p-4 border-t border-slate-700">
-          <button
-            onClick={loadUserStats}
-            disabled={loading}
-            className="w-full px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-all text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? 'Refreshing...' : 'Refresh Stats'}
-          </button>
-        </div>
-      )}
     </div>
   );
 
