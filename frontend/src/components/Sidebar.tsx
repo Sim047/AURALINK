@@ -243,13 +243,6 @@ export default function Sidebar({
             </div>
           </div>
 
-          {myStatus && (
-            <div className="text-xs flex gap-1 items-center mb-3" style={{ color: 'var(--text-secondary)' }}>
-              <span>{myStatus.emoji}</span>
-              <span className="opacity-80 truncate">{myStatus.mood}</span>
-            </div>
-          )}
-
           <StatusPicker
             token={token}
             currentStatus={myStatus}
