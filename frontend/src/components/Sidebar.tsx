@@ -509,9 +509,9 @@ export default function Sidebar({
       {/* Unified Sidebar */}
       <div
         className={`
-          fixed lg:sticky top-0 left-0 h-screen
+          fixed lg:relative top-0 left-0 h-screen
           border-r shadow-2xl
-          transition-all duration-300 z-40
+          transition-all duration-300 z-40 flex-shrink-0
           ${isCollapsed ? 'w-20' : 'w-80'}
           ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}
