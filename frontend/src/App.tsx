@@ -70,6 +70,13 @@ export default function App() {
     // Log for debugging
     console.log(`Theme switched to: ${theme}`);
   }, [theme]);
+  
+  // Request notification permission on mount
+  useEffect(() => {
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission();
+    }
+  }, []);
 
   const toggleTheme = () => {
     const newTheme = theme === "dark" ? "light" : "dark";
@@ -257,7 +264,11 @@ function onMyStatusUpdated(newStatus: any) {
 
     socket.auth = { token, user };
     socket.connect();
-    socket.emit("join_room", room);
+    
+    // Join initial room
+    const initialRoom = inDM && activeConversation ? activeConversation._id : room;
+    socket.emit("join_room", initialRoom);
+    console.log("[Socket] Joined room:", initialRoom);
 
     socket.on("receive_message", (msg: any) => {
       setMessages((m) => {
@@ -288,6 +299,27 @@ function onMyStatusUpdated(newStatus: any) {
         // Also mark as read immediately if chat is visible (view === "chat")
         if (view === "chat") {
           socket.emit("message_read", { messageId: msg._id, userId: user?._id });
+        }
+        
+        // Show browser notification for messages from others
+        if ("Notification" in window && Notification.permission === "granted") {
+          const senderName = msg.sender?.username || "Someone";
+          const messageText = msg.text || (msg.fileUrl ? "Sent an image" : "New message");
+          const notification = new Notification(`${senderName}`, {
+            body: messageText.substring(0, 100),
+            icon: msg.sender?.avatar ? (msg.sender.avatar.startsWith("http") ? msg.sender.avatar : API + "/uploads/" + msg.sender.avatar) : SAMPLE_AVATAR,
+            tag: msg._id,
+            requireInteraction: false
+          });
+          
+          // Auto-close after 5 seconds
+          setTimeout(() => notification.close(), 5000);
+          
+          // Focus window when clicking notification
+          notification.onclick = () => {
+            window.focus();
+            notification.close();
+          };
         }
       }
     });
@@ -331,7 +363,16 @@ function onMyStatusUpdated(newStatus: any) {
       socket.removeAllListeners();
       socket.disconnect();
     };
-  }, [token, user, room, view]);
+  }, [token, user, view]);
+  
+  // Rejoin socket room when room or conversation changes
+  useEffect(() => {
+    if (!socket.connected) return;
+    
+    const targetRoom = inDM && activeConversation ? activeConversation._id : room;
+    console.log("[Socket] Switching to room:", targetRoom);
+    socket.emit("join_room", targetRoom);
+  }, [room, inDM, activeConversation]);
 
   // LOAD ROOM MESSAGES ------------------------------------------
   useEffect(() => {
@@ -694,7 +735,9 @@ function onMyStatusUpdated(newStatus: any) {
     setView("chat");
 
     if (socket.connected) {
-      socket.emit("join_room", conv._id || conv.id);
+      const roomId = conv._id || conv.id;
+      console.log("[Socket] Opening conversation, joining room:", roomId);
+      socket.emit("join_room", roomId);
     }
   }
 
