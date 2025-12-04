@@ -14,12 +14,17 @@ export default function StatusPicker({ token, currentStatus, onUpdated }: any) {
     if (!token) return;
     try {
       setSaving(true);
+      console.log("StatusPicker: Saving status:", { mood, emoji });
       const res = await axios.post(
         API + "/api/status",
         { mood, emoji },
         { headers: { Authorization: "Bearer " + token } }
       );
-      if (res.data) onUpdated(res.data);
+      console.log("StatusPicker: Received response:", res.data);
+      if (res.data) {
+        console.log("StatusPicker: Calling onUpdated with:", res.data);
+        onUpdated(res.data);
+      }
       setOpen(false);
     } catch (err) {
       console.error("status save error", err);
@@ -31,7 +36,9 @@ export default function StatusPicker({ token, currentStatus, onUpdated }: any) {
   async function clearStatus() {
     if (!token) return;
     try {
+      console.log("StatusPicker: Clearing status");
       await axios.delete(API + "/api/status", { headers: { Authorization: "Bearer " + token } });
+      console.log("StatusPicker: Status cleared, calling onUpdated(null)");
       onUpdated(null);
       setMood("");
       setEmoji("");

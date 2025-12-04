@@ -173,7 +173,12 @@ async function deleteMessage(id: string) {
 
 function onMyStatusUpdated(newStatus: any) {
   const uid = String(user?._id || user?.id);
-  setStatuses((s) => ({ ...s, [uid]: newStatus }));
+  console.log("App: onMyStatusUpdated called with:", newStatus, "for user:", uid);
+  setStatuses((s) => {
+    const updated = { ...s, [uid]: newStatus };
+    console.log("App: Updated statuses map:", updated);
+    return updated;
+  });
 }
 
   const myStatus =
@@ -743,6 +748,7 @@ function onMyStatusUpdated(newStatus: any) {
     fd.append("avatar", selectedAvatar);
 
     try {
+      console.log("App: Uploading avatar...");
       const res = await axios.post(API + "/api/users/avatar", fd, {
         headers: {
           Authorization: "Bearer " + token,
@@ -750,7 +756,9 @@ function onMyStatusUpdated(newStatus: any) {
         }
       });
 
+      console.log("App: Avatar upload response:", res.data);
       if (res.data?.user) {
+        console.log("App: Updating user state with:", res.data.user);
         setUser(res.data.user);
         localStorage.setItem("user", JSON.stringify(res.data.user));
       }
@@ -796,7 +804,7 @@ function onMyStatusUpdated(newStatus: any) {
       {/* Unified Sidebar */}
       {token && (
         <Sidebar
-          key={`${user?._id}-${user?.avatar}-${myStatus?.mood}`}
+          key={`${user?._id}-${user?.avatar}-${myStatus?.mood}-${myStatus?.emoji}-${JSON.stringify(user)}`}
           token={token}
           user={user}
           theme={theme}

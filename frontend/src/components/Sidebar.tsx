@@ -261,6 +261,33 @@ export default function Sidebar({
             currentStatus={myStatus}
             onUpdated={onStatusUpdated}
           />
+
+          {/* Avatar Upload - moved here from below */}
+          <div className="mt-4 pt-4 border-t border-slate-600">
+            <label className="block text-xs mb-2 text-slate-400">Change Profile Picture</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={onAvatarUpload}
+              className="text-xs w-full"
+            />
+            {selectedAvatar && (
+              <div className="flex gap-2 mt-2">
+                <button
+                  onClick={onAvatarSave}
+                  className="flex-1 px-3 py-1.5 bg-cyan-600 hover:bg-cyan-700 text-white text-xs rounded-lg transition-all"
+                >
+                  Save
+                </button>
+                <button
+                  onClick={onAvatarCancel}
+                  className="flex-1 px-3 py-1.5 border border-slate-600 hover:bg-slate-700 text-xs rounded-lg transition-all"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
@@ -332,35 +359,6 @@ export default function Sidebar({
             onShowProfile={onShowProfile}
             onOpenConversation={onOpenConversation}
           />
-        </div>
-      )}
-
-      {/* Avatar Upload */}
-      {!isCollapsed && (
-        <div className="px-4 py-2 border-t border-slate-700">
-          <label className="block text-xs mb-2 text-slate-400">Change Profile Picture</label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={onAvatarUpload}
-            className="text-xs w-full"
-          />
-          {selectedAvatar && (
-            <div className="flex gap-2 mt-2">
-              <button
-                onClick={onAvatarSave}
-                className="flex-1 px-3 py-1.5 bg-cyan-600 hover:bg-cyan-700 text-white text-xs rounded-lg transition-all"
-              >
-                Save
-              </button>
-              <button
-                onClick={onAvatarCancel}
-                className="flex-1 px-3 py-1.5 border border-slate-600 hover:bg-slate-700 text-xs rounded-lg transition-all"
-              >
-                Cancel
-              </button>
-            </div>
-          )}
         </div>
       )}
 
