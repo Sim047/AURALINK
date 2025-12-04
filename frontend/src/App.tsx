@@ -1064,7 +1064,7 @@ function onMyStatusUpdated(newStatus: any) {
       <main 
         className={clsx(
           "flex-1 flex flex-col",
-          view === "chat" ? "overflow-hidden" : "overflow-auto p-4 lg:p-6"
+          view === "chat" ? "overflow-hidden h-screen" : "overflow-auto p-4 lg:p-6"
         )} 
         style={{ color: 'var(--text)' }}
       >
@@ -1159,7 +1159,7 @@ function onMyStatusUpdated(newStatus: any) {
 
         {/* CHAT / DM PAGE */}
         {view === "chat" && (
-          <div className="absolute inset-0 grid grid-rows-[auto_1fr_auto] overflow-hidden">
+          <div className="h-full grid grid-rows-[auto_1fr_auto] overflow-hidden">
             <header className="flex items-center justify-between p-4 border-b" style={{ borderColor: 'var(--border)' }}>
               {inDM && activeConversation ? (
                 <div className="flex items-center gap-3">
