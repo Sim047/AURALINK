@@ -204,44 +204,29 @@ export default function Sidebar({
       {/* Header with Logo and Theme Toggle */}
       <div className="p-4 border-b border-slate-700">
         {!isCollapsed ? (
-          <div className="flex flex-col items-center gap-3">
-            <div className="flex items-center justify-between w-full">
-              <button
-                onClick={onThemeToggle}
-                className="group relative p-2 rounded-lg border border-slate-600 hover:border-cyan-500 hover:bg-slate-700/60 transition-all duration-300"
-                title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-              >
-                {theme === "dark" ? (
-                  <Sun className="w-4 h-4 text-yellow-400 group-hover:text-yellow-300 transition-colors" />
-                ) : (
-                  <Moon className="w-4 h-4 text-slate-700 group-hover:text-slate-600 transition-colors" />
-                )}
-              </button>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <img
+                src={logo}
+                className="w-16 h-16 rounded-xl object-cover shadow-lg"
+                alt="logo"
+              />
+              <h2 className="text-2xl font-extrabold tracking-wider bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">
+                AURALINK
+              </h2>
             </div>
-            <div className="flex items-center justify-between gap-3 w-full">
-              <div className="flex items-center gap-3">
-                <img
-                  src={logo}
-                  className="w-16 h-16 rounded-xl object-cover shadow-lg"
-                  alt="logo"
-                />
-                <h2 className="text-2xl font-extrabold tracking-wider bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">
-                  BANJA
-                </h2>
-              </div>
-              {/* Theme Toggle - visible when expanded (mobile and desktop) */}
-              <button
-                onClick={onThemeToggle}
-                className="p-2 rounded-lg border border-slate-600 hover:border-cyan-500 hover:bg-slate-700/60 transition-all duration-300 group"
-                title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-              >
-                {theme === "dark" ? (
-                  <Sun className="w-5 h-5 text-yellow-400 group-hover:text-yellow-300 transition-colors" />
-                ) : (
-                  <Moon className="w-5 h-5 text-slate-700 group-hover:text-slate-600 transition-colors" />
-                )}
-              </button>
-            </div>
+            {/* Theme Toggle */}
+            <button
+              onClick={onThemeToggle}
+              className="p-2 rounded-lg border border-slate-600 hover:border-cyan-500 hover:bg-slate-700/60 transition-all duration-300 group"
+              title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+            >
+              {theme === "dark" ? (
+                <Sun className="w-5 h-5 text-yellow-400 group-hover:text-yellow-300 transition-colors" />
+              ) : (
+                <Moon className="w-5 h-5 text-slate-700 group-hover:text-slate-600 transition-colors" />
+              )}
+            </button>
           </div>
         ) : (
           <div className="flex flex-col items-center gap-2">
