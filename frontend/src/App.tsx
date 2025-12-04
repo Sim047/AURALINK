@@ -1153,8 +1153,8 @@ function onMyStatusUpdated(newStatus: any) {
 
         {/* CHAT / DM PAGE */}
         {view === "chat" && (
-          <div className="flex flex-col h-full">
-            <header className="flex items-center justify-between p-4 flex-shrink-0 border-b" style={{ borderColor: 'var(--border)' }}>
+          <div className="grid grid-rows-[auto_1fr_auto] h-full overflow-hidden">
+            <header className="flex items-center justify-between p-4 border-b" style={{ borderColor: 'var(--border)' }}>
               {inDM && activeConversation ? (
                 <div className="flex items-center gap-3">
                   {(() => {
@@ -1356,7 +1356,7 @@ function onMyStatusUpdated(newStatus: any) {
             </header>
 
             {/* MESSAGE LIST */}
-            <section className="flex-1 overflow-y-auto p-4 min-h-0">
+            <section className="overflow-y-auto p-4">
               <div className="flex flex-col gap-4">
                 {renderMessages()}
                 <div ref={messagesEndRef} />
@@ -1365,7 +1365,7 @@ function onMyStatusUpdated(newStatus: any) {
 
             {/* MESSAGE COMPOSER */}
             <form
-              className="composer flex flex-col gap-2 flex-shrink-0 p-4 border-t"
+              className="composer flex flex-col gap-2 p-4 border-t"
               style={{ background: 'var(--bg)', borderColor: 'var(--border)' }}
               onSubmit={sendMessage}
             >
