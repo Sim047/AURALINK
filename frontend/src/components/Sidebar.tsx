@@ -18,11 +18,10 @@ import {
   Sun,
   Moon
 } from "lucide-react";
-import { AuralinkLogo } from "./AuralinkLogo";
 import Avatar from "./Avatar";
 import StatusPicker from "./StatusPicker";
 import SearchUsers from "./SearchUsers";
-import logo from "../assets/logo.png";
+import logo from "../assets/auralink-logo.png";
 
 const API = (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
 
@@ -207,7 +206,7 @@ export default function Sidebar({
         {!isCollapsed ? (
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <AuralinkLogo className="w-16 h-16" />
+              <img src={logo} alt="Auralink" className="w-16 h-16 object-contain" />
               <h2 className="text-2xl font-extrabold tracking-wider bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">
                 AURALINK
               </h2>
@@ -227,7 +226,7 @@ export default function Sidebar({
           </div>
         ) : (
           <div className="flex flex-col items-center gap-2">
-            <AuralinkLogo className="w-10 h-10" />
+            <img src={logo} alt="Auralink" className="w-10 h-10 object-contain" />
           </div>
         )}
       </div>
