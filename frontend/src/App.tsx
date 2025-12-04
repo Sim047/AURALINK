@@ -412,6 +412,40 @@ function onMyStatusUpdated(newStatus: any) {
       });
     });
 
+    // Join request notifications
+    socket.on("join_request_created", ({ eventTitle, organizerId }: any) => {
+      if (user?._id === organizerId) {
+        if ("Notification" in window && Notification.permission === "granted") {
+          new Notification("New Join Request", {
+            body: `Someone requested to join your event: ${eventTitle}`,
+            icon: "/logo.png",
+          });
+        }
+      }
+    });
+
+    socket.on("join_request_approved", ({ eventTitle, userId }: any) => {
+      if (user?._id === userId) {
+        if ("Notification" in window && Notification.permission === "granted") {
+          new Notification("Join Request Approved", {
+            body: `Your request to join "${eventTitle}" has been approved!`,
+            icon: "/logo.png",
+          });
+        }
+      }
+    });
+
+    socket.on("join_request_rejected", ({ eventTitle, userId }: any) => {
+      if (user?._id === userId) {
+        if ("Notification" in window && Notification.permission === "granted") {
+          new Notification("Join Request Rejected", {
+            body: `Your request to join "${eventTitle}" was not approved.`,
+            icon: "/logo.png",
+          });
+        }
+      }
+    });
+
     return () => {
       socket.removeAllListeners();
       socket.disconnect();

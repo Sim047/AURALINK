@@ -148,6 +148,9 @@ export default function Discover({ token, onViewProfile }: any) {
   const [loading, setLoading] = useState(true);
   const [showAllSports, setShowAllSports] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [joinModalOpen, setJoinModalOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [transactionCode, setTransactionCode] = useState("");
 
   useEffect(() => {
     loadEvents();
@@ -179,14 +182,35 @@ export default function Discover({ token, onViewProfile }: any) {
   }
 
   const handleJoinEvent = async (eventId: string) => {
+    const event = events.find(e => e._id === eventId);
+    if (!event) return;
+
+    // If paid event, show modal to enter transaction code
+    if (event.pricing?.type === "paid") {
+      setSelectedEvent(event);
+      setJoinModalOpen(true);
+    } else {
+      // For free events, submit join request without transaction code
+      submitJoinRequest(eventId, "");
+    }
+  };
+
+  const submitJoinRequest = async (eventId: string, txCode: string) => {
     try {
-      await axios.post(`${API}/api/events/${eventId}/join`, {}, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await axios.post(`${API}/api/events/${eventId}/join`, 
+        { transactionCode: txCode }, 
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      alert("Join request submitted successfully! The event organizer will review your request.");
+      setJoinModalOpen(false);
+      setTransactionCode("");
+      setSelectedEvent(null);
       loadEvents();
     } catch (err: any) {
       console.error("Join event error:", err);
-      alert(err.response?.data?.error || "Failed to join event");
+      alert(err.response?.data?.error || "Failed to submit join request");
     }
   };
 
@@ -489,6 +513,70 @@ export default function Discover({ token, onViewProfile }: any) {
               <p className="text-slate-500 text-sm mt-2">Check back soon for upcoming events</p>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Join Request Modal */}
+      {joinModalOpen && selectedEvent && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-800 rounded-2xl border border-slate-700 max-w-md w-full p-6">
+            <h3 className="text-xl font-bold mb-4 bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">
+              Join Event
+            </h3>
+            
+            <div className="mb-6">
+              <h4 className="font-semibold text-white mb-2">{selectedEvent.title}</h4>
+              <div className="flex items-center gap-2 text-sm text-slate-300 mb-3">
+                <DollarSign className="w-4 h-4" />
+                <span className="font-medium">
+                  {selectedEvent.pricing?.amount} {selectedEvent.pricing?.currency || 'USD'}
+                </span>
+              </div>
+              
+              {selectedEvent.pricing?.paymentInstructions && (
+                <div className="bg-slate-900/50 border border-slate-700 rounded-lg p-3 mb-4">
+                  <p className="text-sm text-slate-300 font-medium mb-1">Payment Instructions:</p>
+                  <p className="text-sm text-slate-400">{selectedEvent.pricing.paymentInstructions}</p>
+                </div>
+              )}
+              
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  Transaction Code / Reference Number *
+                </label>
+                <input
+                  type="text"
+                  value={transactionCode}
+                  onChange={(e) => setTransactionCode(e.target.value)}
+                  placeholder="Enter your payment transaction code"
+                  className="w-full px-4 py-3 bg-slate-900/50 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                />
+                <p className="text-xs text-slate-400 mt-1">
+                  This will be sent to the event organizer for verification
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setJoinModalOpen(false);
+                  setTransactionCode("");
+                  setSelectedEvent(null);
+                }}
+                className="flex-1 px-4 py-3 bg-slate-700 hover:bg-slate-600 rounded-lg font-medium transition-all border border-slate-600"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => submitJoinRequest(selectedEvent._id, transactionCode)}
+                disabled={!transactionCode.trim()}
+                className="flex-1 px-4 py-3 bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 rounded-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Submit Request
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

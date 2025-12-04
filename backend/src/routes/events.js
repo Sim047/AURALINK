@@ -185,9 +185,10 @@ router.get("/my/created", auth, async (req, res) => {
   }
 });
 
-// POST join event
+// POST join event (create join request with transaction code)
 router.post("/:id/join", auth, async (req, res) => {
   try {
+    const { transactionCode } = req.body;
     const event = await Event.findById(req.params.id);
 
     if (!event) {
@@ -199,27 +200,213 @@ router.post("/:id/join", auth, async (req, res) => {
       return res.status(400).json({ error: "Already joined this event" });
     }
 
-    // Check capacity
-    if (event.capacity.current >= event.capacity.max) {
-      // Add to waitlist
-      if (!event.waitlist.includes(req.user.id)) {
-        event.waitlist.push(req.user.id);
-        await event.save();
-        return res.json({ message: "Added to waitlist", event });
-      }
-      return res.status(400).json({ error: "Event is full and waitlist full" });
+    // Check if already has pending request
+    const existingRequest = event.joinRequests.find(
+      req => req.user.toString() === req.user.id && req.status === "pending"
+    );
+    if (existingRequest) {
+      return res.status(400).json({ error: "You already have a pending join request" });
     }
 
-    event.participants.push(req.user.id);
+    // For paid events, require transaction code
+    if (event.pricing?.type === "paid" && !transactionCode) {
+      return res.status(400).json({ error: "Transaction code is required for paid events" });
+    }
+
+    // Create join request
+    event.joinRequests.push({
+      user: req.user.id,
+      transactionCode: transactionCode || "N/A",
+      requestedAt: new Date(),
+      status: "pending",
+    });
+
+    await event.save();
+    await event.populate("joinRequests.user", "username avatar");
+
+    // Emit socket notification to event organizer
+    const io = req.app.get("io");
+    if (io) {
+      io.emit("join_request_created", {
+        eventId: event._id,
+        eventTitle: event.title,
+        organizerId: event.organizer.toString(),
+        requesterId: req.user.id,
+      });
+    }
+
+    res.json({ message: "Join request submitted", event });
+  } catch (err) {
+    console.error("Join event error:", err);
+    res.status(500).json({ error: "Failed to submit join request" });
+  }
+});
+
+// POST approve join request
+router.post("/:id/approve-request/:requestId", auth, async (req, res) => {
+  try {
+    const event = await Event.findById(req.params.id);
+
+    if (!event) {
+      return res.status(404).json({ error: "Event not found" });
+    }
+
+    // Only organizer can approve
+    if (event.organizer.toString() !== req.user.id) {
+      return res.status(403).json({ error: "Only event organizer can approve requests" });
+    }
+
+    const request = event.joinRequests.id(req.params.requestId);
+    if (!request) {
+      return res.status(404).json({ error: "Join request not found" });
+    }
+
+    if (request.status !== "pending") {
+      return res.status(400).json({ error: "Request already processed" });
+    }
+
+    // Check capacity
+    if (event.capacity.current >= event.capacity.max) {
+      return res.status(400).json({ error: "Event is at full capacity" });
+    }
+
+    // Approve request
+    request.status = "approved";
+    event.participants.push(request.user);
     event.capacity.current += 1;
     await event.save();
 
     await event.populate("participants", "username avatar");
+    await event.populate("joinRequests.user", "username avatar");
 
-    res.json(event);
+    // Emit socket notification to requester
+    const io = req.app.get("io");
+    if (io) {
+      io.emit("join_request_approved", {
+        eventId: event._id,
+        eventTitle: event.title,
+        userId: request.user.toString(),
+      });
+    }
+
+    res.json({ message: "Join request approved", event });
   } catch (err) {
-    console.error("Join event error:", err);
-    res.status(500).json({ error: "Failed to join event" });
+    console.error("Approve request error:", err);
+    res.status(500).json({ error: "Failed to approve request" });
+  }
+});
+
+// POST reject join request
+router.post("/:id/reject-request/:requestId", auth, async (req, res) => {
+  try {
+    const event = await Event.findById(req.params.id);
+
+    if (!event) {
+      return res.status(404).json({ error: "Event not found" });
+    }
+
+    // Only organizer can reject
+    if (event.organizer.toString() !== req.user.id) {
+      return res.status(403).json({ error: "Only event organizer can reject requests" });
+    }
+
+    const request = event.joinRequests.id(req.params.requestId);
+    if (!request) {
+      return res.status(404).json({ error: "Join request not found" });
+    }
+
+    if (request.status !== "pending") {
+      return res.status(400).json({ error: "Request already processed" });
+    }
+
+    // Reject request
+    request.status = "rejected";
+    await event.save();
+
+    await event.populate("joinRequests.user", "username avatar");
+
+    // Emit socket notification to requester
+    const io = req.app.get("io");
+    if (io) {
+      io.emit("join_request_rejected", {
+        eventId: event._id,
+        eventTitle: event.title,
+        userId: request.user.toString(),
+      });
+    }
+
+    res.json({ message: "Join request rejected", event });
+  } catch (err) {
+    console.error("Reject request error:", err);
+    res.status(500).json({ error: "Failed to reject request" });
+  }
+});
+
+// GET my join requests (events I've requested to join)
+router.get("/my-join-requests", auth, async (req, res) => {
+  try {
+    const events = await Event.find({
+      "joinRequests.user": req.user.id,
+    })
+      .populate("organizer", "username avatar")
+      .populate("joinRequests.user", "username avatar");
+
+    const myRequests = events.map(event => {
+      const request = event.joinRequests.find(
+        r => r.user._id.toString() === req.user.id
+      );
+      return {
+        event: {
+          _id: event._id,
+          title: event.title,
+          startDate: event.startDate,
+          location: event.location,
+          organizer: event.organizer,
+        },
+        request,
+      };
+    });
+
+    res.json(myRequests);
+  } catch (err) {
+    console.error("Get my join requests error:", err);
+    res.status(500).json({ error: "Failed to fetch join requests" });
+  }
+});
+
+// GET pending join requests for my events (as organizer)
+router.get("/my-events-requests", auth, async (req, res) => {
+  try {
+    const events = await Event.find({
+      organizer: req.user.id,
+      "joinRequests.status": "pending",
+    })
+      .populate("joinRequests.user", "username avatar email");
+
+    const pendingRequests = [];
+    events.forEach(event => {
+      event.joinRequests.forEach(request => {
+        if (request.status === "pending") {
+          pendingRequests.push({
+            requestId: request._id,
+            event: {
+              _id: event._id,
+              title: event.title,
+              startDate: event.startDate,
+              pricing: event.pricing,
+            },
+            user: request.user,
+            transactionCode: request.transactionCode,
+            requestedAt: request.requestedAt,
+          });
+        }
+      });
+    });
+
+    res.json(pendingRequests);
+  } catch (err) {
+    console.error("Get events requests error:", err);
+    res.status(500).json({ error: "Failed to fetch event requests" });
   }
 });
 

@@ -68,6 +68,28 @@ const eventSchema = new mongoose.Schema(
         ref: "User",
       },
     ],
+    joinRequests: [
+      {
+        user: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+          required: true,
+        },
+        transactionCode: {
+          type: String,
+          required: true,
+        },
+        requestedAt: {
+          type: Date,
+          default: Date.now,
+        },
+        status: {
+          type: String,
+          enum: ["pending", "approved", "rejected"],
+          default: "pending",
+        },
+      },
+    ],
     pricing: {
       type: {
         type: String,
