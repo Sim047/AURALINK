@@ -1061,7 +1061,13 @@ function onMyStatusUpdated(newStatus: any) {
       )}
 
       {/* ---------------- MAIN VIEW ---------------- */}
-      <main className={clsx("flex-1 flex flex-col p-4 lg:p-6", view === "chat" ? "overflow-hidden" : "overflow-auto")} style={{ color: 'var(--text)' }}>
+      <main 
+        className={clsx(
+          "flex-1 flex flex-col",
+          view === "chat" ? "overflow-hidden" : "overflow-auto p-4 lg:p-6"
+        )} 
+        style={{ color: 'var(--text)' }}
+      >
         {/* DASHBOARD PAGE */}
         {view === "dashboard" && (
           <Dashboard
@@ -1153,7 +1159,7 @@ function onMyStatusUpdated(newStatus: any) {
 
         {/* CHAT / DM PAGE */}
         {view === "chat" && (
-          <div className="grid grid-rows-[auto_1fr_auto] h-full overflow-hidden">
+          <div className="absolute inset-0 grid grid-rows-[auto_1fr_auto] overflow-hidden">
             <header className="flex items-center justify-between p-4 border-b" style={{ borderColor: 'var(--border)' }}>
               {inDM && activeConversation ? (
                 <div className="flex items-center gap-3">
