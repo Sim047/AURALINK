@@ -1169,8 +1169,8 @@ function onMyStatusUpdated(newStatus: any) {
 
         {/* CHAT / DM PAGE */}
         {view === "chat" && (
-          <div className="h-full grid grid-rows-[auto_1fr_auto] overflow-hidden">
-            <header className="flex items-center justify-between p-4 border-b" style={{ borderColor: 'var(--border)' }}>
+          <div className="h-full grid grid-rows-[auto_1fr_auto]">
+            <header className="flex items-center justify-between p-4 border-b relative z-10" style={{ borderColor: 'var(--border)', overflow: 'visible' }}>
               {inDM && activeConversation ? (
                 <div className="flex items-center gap-3">
                   {(() => {
