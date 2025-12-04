@@ -116,8 +116,10 @@ export default function App() {
 
   // UI refs
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const messagesSectionRef = useRef<HTMLDivElement | null>(null);
   const unreadRef = useRef<HTMLDivElement | null>(null);
   const [ready, setReady] = useState(false);
+  const [showScrollButton, setShowScrollButton] = useState(false);
 
   // DM & conversations
   const [conversations, setConversations] = useState<any[]>([]);
@@ -806,6 +808,17 @@ function onMyStatusUpdated(newStatus: any) {
     }
   }
 
+  // SCROLL TO BOTTOM ---------------------------------------------
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const element = e.currentTarget;
+    const isNearBottom = element.scrollHeight - element.scrollTop - element.clientHeight < 200;
+    setShowScrollButton(!isNearBottom);
+  };
+
   // MESSAGE RENDERER ---------------------------------------------
   function renderMessages() {
     return messages.map((m, index) => {
@@ -1363,11 +1376,38 @@ function onMyStatusUpdated(newStatus: any) {
             </header>
 
             {/* MESSAGE LIST */}
-            <section className="overflow-y-auto p-4">
+            <section 
+              ref={messagesSectionRef}
+              className="overflow-y-auto p-4 relative"
+              onScroll={handleScroll}
+            >
               <div className="flex flex-col gap-4">
                 {renderMessages()}
                 <div ref={messagesEndRef} />
               </div>
+
+              {/* Scroll to Bottom Button */}
+              {showScrollButton && (
+                <button
+                  onClick={scrollToBottom}
+                  className="fixed bottom-24 right-8 bg-gradient-to-r from-cyan-400 to-purple-500 text-white rounded-full p-3 shadow-lg hover:shadow-xl transition-all z-10"
+                  title="Scroll to bottom"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="6 9 12 15 18 9" />
+                  </svg>
+                </button>
+              )}
             </section>
 
             {/* MESSAGE COMPOSER */}
