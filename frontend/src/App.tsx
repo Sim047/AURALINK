@@ -1243,7 +1243,7 @@ function onMyStatusUpdated(newStatus: any) {
                     leaveFrom="transform opacity-100 scale-100"
                     leaveTo="transform opacity-0 scale-95"
                   >
-                    <Menu.Items className="absolute right-0 mt-2 w-56 origin-top-right rounded-lg shadow-xl focus:outline-none bg-slate-900 border border-slate-700 z-50">
+                    <Menu.Items className="absolute right-0 mt-2 w-56 origin-top-right rounded-lg shadow-2xl focus:outline-none bg-slate-900 border border-slate-700 z-50 text-white">
                       <div className="py-1">
                         {/* Enter Key Toggle */}
                         <Menu.Item>
@@ -1251,7 +1251,6 @@ function onMyStatusUpdated(newStatus: any) {
                             <button
                               onClick={toggleEnterToSend}
                               className="w-full text-left px-4 py-2.5 text-sm flex items-center gap-2 hover:opacity-80 transition-opacity"
-                              style={{ color: 'var(--text)' }}
                             >
                               <Zap className={clsx('w-4 h-4', enterToSend ? 'text-green-500' : 'text-gray-400')} />
                               <div className="flex-1">
@@ -1301,7 +1300,6 @@ function onMyStatusUpdated(newStatus: any) {
                                 }
                               }}
                               className="w-full text-left px-4 py-2.5 text-sm flex items-center gap-2 hover:opacity-80 transition-opacity"
-                              style={{ color: 'var(--text)' }}
                             >
                               <Trash2 className="w-4 h-4 text-orange-500" />
                               <div>
@@ -1343,7 +1341,6 @@ function onMyStatusUpdated(newStatus: any) {
                                     }
                                   }}
                                   className="w-full text-left px-4 py-2.5 text-sm flex items-center gap-2 hover:opacity-80 transition-opacity"
-                                  style={{ color: 'var(--text)' }}
                                 >
                                   <X className="w-4 h-4 text-red-500" />
                                   <div>
