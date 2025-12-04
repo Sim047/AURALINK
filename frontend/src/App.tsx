@@ -809,10 +809,6 @@ function onMyStatusUpdated(newStatus: any) {
   }
 
   // SCROLL TO BOTTOM ---------------------------------------------
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const element = e.currentTarget;
     const isNearBottom = element.scrollHeight - element.scrollTop - element.clientHeight < 200;
