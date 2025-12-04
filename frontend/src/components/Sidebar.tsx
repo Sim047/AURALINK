@@ -18,6 +18,7 @@ import {
   Sun,
   Moon
 } from "lucide-react";
+import { AuralinkLogo } from "./AuralinkLogo";
 import Avatar from "./Avatar";
 import StatusPicker from "./StatusPicker";
 import SearchUsers from "./SearchUsers";
@@ -206,11 +207,7 @@ export default function Sidebar({
         {!isCollapsed ? (
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <img
-                src={logo}
-                className="w-16 h-16 rounded-xl object-cover shadow-lg"
-                alt="logo"
-              />
+              <AuralinkLogo className="w-16 h-16" />
               <h2 className="text-2xl font-extrabold tracking-wider bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">
                 AURALINK
               </h2>
@@ -230,11 +227,7 @@ export default function Sidebar({
           </div>
         ) : (
           <div className="flex flex-col items-center gap-2">
-            <img
-              src={logo}
-              className="w-10 h-10 rounded-lg object-cover"
-              alt="logo"
-            />
+            <AuralinkLogo className="w-10 h-10" />
           </div>
         )}
       </div>
