@@ -120,12 +120,23 @@ MONGO_URI=your_mongodb_connection_string
 JWT_SECRET=your_jwt_secret_key
 FRONTEND_URL=http://localhost:5173
 PORT=5000
+
+# Cloudinary (for persistent image storage)
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
 ```
 
 Create `.env` file in the `frontend` directory:
 ```env
 VITE_API_URL=http://localhost:5000
 ```
+
+**Setting up Cloudinary (Required for image uploads):**
+1. Sign up for free at [https://cloudinary.com](https://cloudinary.com)
+2. Go to Dashboard → Account Details
+3. Copy your Cloud Name, API Key, and API Secret
+4. Add them to your backend `.env` file
 
 5. **Run the application**
 

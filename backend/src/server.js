@@ -310,12 +310,15 @@ io.on("connection", (socket) => {
 
 // DB + START SERVER
 const PORT = process.env.PORT || 5000;
+const HOST = '0.0.0.0'; // Listen on all network interfaces (required for Railway/Render)
 
 mongoose
   .connect(process.env.MONGO_URI, { autoIndex: true })
   .then(() => {
     console.log("MongoDB connected");
-    server.listen(PORT, () => console.log("Server running on", PORT));
+    server.listen(PORT, HOST, () => {
+      console.log(`Server running on ${HOST}:${PORT}`);
+    });
   })
   .catch((err) => {
     console.error("Mongo error:", err);
