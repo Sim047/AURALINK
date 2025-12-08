@@ -1,5 +1,5 @@
 <!-- .github/copilot-instructions.md - guidance for AI coding agents working in this repo -->
-# Banja — AI agent quick instructions
+# Auralink — AI agent quick instructions
 
 These are short, actionable notes to help an AI agent be productive when editing or extending this codebase.
 
@@ -10,7 +10,7 @@ These are short, actionable notes to help an AI agent be productive when editing
 - Run / dev commands:
   - Backend: cd `backend` → `npm install` → `npm run dev` (nodemon watching `src/server.js`) or `npm start` for production.
   - Frontend: cd `frontend` → `npm install` → `npm run dev` (Vite). Build: `npm run build`.
-    - Tip for deployment: set `VITE_API_URL` in Vercel project environment variables to your backend URL (example: `https://banja-backend.onrender.com`).
+    - Tip for deployment: set `VITE_API_URL` in Vercel project environment variables to your backend URL (example: `https://auralink-backend.onrender.com`).
 
 - Important environment vars (backend):
   - `MONGO_URI` — MongoDB connection string (required)
@@ -25,7 +25,7 @@ These are short, actionable notes to help an AI agent be productive when editing
   - Messages are persisted in Mongo (`backend/src/models/Message.js`) and per-user hiding is implemented (`hiddenFor` array) — deleting vs hiding are distinct behaviors.
   - Auth is JWT-based (see `backend/src/routes/auth.js`) and client stores `token` + `user` in localStorage.
   - Frontend uses env var `VITE_API_URL` for axios / socket base URLs (look at `frontend/src/App.tsx` and `frontend/src/utils/api.ts`). Some files include legacy patterns (e.g., `process.env.REACT_APP_API_URL` in `frontend/src/socket.tsx`) — prefer `import.meta.env.VITE_API_URL` in Vite context.
-  - `FRONTEND_URL` on the backend accepts comma-separated domains (e.g., `https://banja-app.vercel.app,https://your-preview.vercel.app`). This allows preview/deployment domains while keeping CORS tight.
+  - `FRONTEND_URL` on the backend accepts comma-separated domains (e.g., `https://auralink-app.vercel.app,https://your-preview.vercel.app`). This allows preview/deployment domains while keeping CORS tight.
 
 - File upload handling:
   - Uploads are accepted at `POST /api/files/upload` (route in `backend/src/routes/files.js`) and served at `/uploads/*` from the `uploads/` directory.

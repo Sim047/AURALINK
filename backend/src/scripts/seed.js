@@ -18,49 +18,49 @@ const MONGO_URI = process.env.MONGO_URI;
 const usersData = [
   {
     username: "Sarah Johnson",
-    email: "sarah@banja.com",
+    email: "sarah@auralink.com",
     password: "$2a$10$XQxQ9h9h9h9h9h9h9h9h9uO", // "password123"
     avatar: "https://randomuser.me/api/portraits/women/1.jpg",
   },
   {
     username: "Mike Chen",
-    email: "mike@banja.com",
+    email: "mike@auralink.com",
     password: "$2a$10$XQxQ9h9h9h9h9h9h9h9h9uO",
     avatar: "https://randomuser.me/api/portraits/men/1.jpg",
   },
   {
     username: "Emma Davis",
-    email: "emma@banja.com",
+    email: "emma@auralink.com",
     password: "$2a$10$XQxQ9h9h9h9h9h9h9h9h9uO",
     avatar: "https://randomuser.me/api/portraits/women/2.jpg",
   },
   {
     username: "James Wilson",
-    email: "james@banja.com",
+    email: "james@auralink.com",
     password: "$2a$10$XQxQ9h9h9h9h9h9h9h9h9uO",
     avatar: "https://randomuser.me/api/portraits/men/2.jpg",
   },
   {
     username: "Lisa Anderson",
-    email: "lisa@banja.com",
+    email: "lisa@auralink.com",
     password: "$2a$10$XQxQ9h9h9h9h9h9h9h9h9uO",
     avatar: "https://randomuser.me/api/portraits/women/3.jpg",
   },
   {
     username: "David Martinez",
-    email: "david@banja.com",
+    email: "david@auralink.com",
     password: "$2a$10$XQxQ9h9h9h9h9h9h9h9h9uO",
     avatar: "https://randomuser.me/api/portraits/men/3.jpg",
   },
   {
     username: "Jessica Lee",
-    email: "jessica@banja.com",
+    email: "jessica@auralink.com",
     password: "$2a$10$XQxQ9h9h9h9h9h9h9h9h9uO",
     avatar: "https://randomuser.me/api/portraits/women/4.jpg",
   },
   {
     username: "Chris Brown",
-    email: "chris@banja.com",
+    email: "chris@auralink.com",
     password: "$2a$10$XQxQ9h9h9h9h9h9h9h9h9uO",
     avatar: "https://randomuser.me/api/portraits/men/4.jpg",
   },

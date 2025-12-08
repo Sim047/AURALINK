@@ -6,7 +6,7 @@ A modern, feature-rich real-time chat and events application built with the MERN
 
 ## 🌐 Live Demo
 
-**Access the app here:** [https://banja-app.vercel.app](https://banja-app.vercel.app)
+**Access the app here:** [https://auralink-app.vercel.app](https://auralink-app.vercel.app)
 
 ## ✨ Features
 
@@ -96,8 +96,8 @@ A modern, feature-rich real-time chat and events application built with the MERN
 
 1. **Clone the repository**
 ```bash
-git clone https://github.com/Sim047/BANJA-APP.git
-cd BANJA-APP
+git clone https://github.com/Sim047/AURALINK.git
+cd AURALINK
 ```
 
 2. **Install backend dependencies**
@@ -232,5 +232,4 @@ If you find a bug or have a feature request, please open an issue on GitHub.
 
 ---
 
-**Enjoy chatting with BANJA! 💬✨**
-# BANJA-SPORTS
+**Enjoy chatting with AURALINK! 💬✨**

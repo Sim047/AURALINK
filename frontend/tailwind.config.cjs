@@ -9,7 +9,7 @@ module.exports = {
     extend: {
       colors: {
         // keep tailwind palette available; we'll also use CSS variables for light theme
-        banja: {
+        auralink: {
           50: '#f7fbff',
           100: '#eef7ff',
           200: '#d6efff',
