@@ -55,7 +55,7 @@ app.use('/api/status', statusRoutes);     // <-- REQUIRED FOR STATUS FEATURE
 
 // small health check — useful for Load Balancers / probes
 app.get('/', (req, res) => {
-  res.json({ ok: true, service: 'banja-backend' });
+  res.json({ ok: true, service: 'auralink-backend' });
 });
 
 

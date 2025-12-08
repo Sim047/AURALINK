@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: banja-backend
+    name: auralink-backend
     env: node
     rootDir: backend
     buildCommand: "npm install"

@@ -1,8 +1,8 @@
-# 🎉 BANJA - Real-Time Chat Application
+# ✨ AURALINK - Real-Time Chat & Events Platform
 
-A modern, feature-rich real-time chat application built with the MERN stack (MongoDB, Express, React, Node.js) and Socket.IO. BANJA provides seamless communication through public chat rooms and private direct messaging.
+A modern, feature-rich real-time chat and events application built with the MERN stack (MongoDB, Express, React, Node.js) and Socket.IO. Auralink provides seamless communication through public chat rooms, private direct messaging, and event management with booking capabilities.
 
-![BANJA Logo](frontend/src/assets/logo.png)
+![AURALINK Logo](frontend/src/assets/auralink-logo.png)
 
 ## 🌐 Live Demo
 

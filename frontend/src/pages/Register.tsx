@@ -39,7 +39,7 @@ export default function Register({ onSuccess, switchToLogin }) {
 
         {/* LOGO */}
         <div className="flex justify-center mb-6">
-          <img src={Logo} alt="BANJA Logo" className="w-24 drop-shadow-lg" />
+          <img src={Logo} alt="Auralink Logo" className="w-24 drop-shadow-lg" />
         </div>
 
         {/* Title */}

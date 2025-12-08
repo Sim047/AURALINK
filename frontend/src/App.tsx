@@ -35,7 +35,7 @@ const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 const SAMPLE_AVATAR =
   "https://ui-avatars.com/api/?name=User&background=0D8ABC&color=fff";
 
-const THEME_KEY = "banja-theme";
+const THEME_KEY = "auralink-theme";
 
 function getInitialTheme() {
   if (typeof window === "undefined") return "dark";
@@ -95,13 +95,13 @@ export default function App() {
 
   // ROOMS + DM --------------------------------
   const [room, setRoom] = useState<string>(() => {
-    const saved = localStorage.getItem("banja-current-room");
+    const saved = localStorage.getItem("auralink-current-room");
     return saved || "general";
   });
   
   // Persist room changes
   useEffect(() => {
-    localStorage.setItem("banja-current-room", room);
+    localStorage.setItem("auralink-current-room", room);
   }, [room]);
   const [rooms] = useState<string[]>(["general", "random", "dev"]);
   const [messages, setMessages] = useState<any[]>([]);
@@ -127,24 +127,24 @@ export default function App() {
   // DM & conversations
   const [conversations, setConversations] = useState<any[]>([]);
   const [inDM, setInDM] = useState(() => {
-    const saved = localStorage.getItem("banja-in-dm");
+    const saved = localStorage.getItem("auralink-in-dm");
     return saved ? JSON.parse(saved) : false;
   });
   const [activeConversation, setActiveConversation] = useState<any | null>(() => {
-    const saved = localStorage.getItem("banja-active-conversation");
+    const saved = localStorage.getItem("auralink-active-conversation");
     return saved ? JSON.parse(saved) : null;
   });
   
   // Persist DM state
   useEffect(() => {
-    localStorage.setItem("banja-in-dm", JSON.stringify(inDM));
+    localStorage.setItem("auralink-in-dm", JSON.stringify(inDM));
   }, [inDM]);
   
   useEffect(() => {
     if (activeConversation) {
-      localStorage.setItem("banja-active-conversation", JSON.stringify(activeConversation));
+      localStorage.setItem("auralink-active-conversation", JSON.stringify(activeConversation));
     } else {
-      localStorage.removeItem("banja-active-conversation");
+      localStorage.removeItem("auralink-active-conversation");
     }
   }, [activeConversation]);
 
@@ -153,13 +153,13 @@ export default function App() {
     "dashboard" | "discover" | "chat" | "all-users" | "followers" | "following" | "rooms" | "direct-messages"
   >(() => {
     // Restore previous view from localStorage
-    const saved = localStorage.getItem("banja-current-view");
+    const saved = localStorage.getItem("auralink-current-view");
     return (saved as any) || "dashboard";
   });
   
   // Persist view changes to localStorage
   useEffect(() => {
-    localStorage.setItem("banja-current-view", view);
+    localStorage.setItem("auralink-current-view", view);
   }, [view]);
 
   // editing messages

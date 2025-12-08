@@ -156,7 +156,7 @@ app.use("/api/services", servicesRoutes);
 app.use("/api/bookings", bookingsRoutes);
 
 // lightweight health check (useful for probes / verify deployment)
-app.get('/', (req, res) => res.json({ ok: true, service: 'banja-backend' }));
+app.get('/', (req, res) => res.json({ ok: true, service: 'auralink-backend' }));
 
 // SOCKET.IO LOGIC
 io.on("connection", (socket) => {
