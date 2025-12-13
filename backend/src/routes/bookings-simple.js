@@ -105,11 +105,18 @@ router.post("/:id/decide", auth, async (req, res) => {
     if (approved) {
       booking.status = "approved";
       
-      // Add user to event participants
+      // Add user to event participants AND update count
       const event = await Event.findById(booking.event._id);
       if (!event.participants.includes(booking.user)) {
         event.participants.push(booking.user);
+        
+        // Update capacity count
+        if (event.capacity) {
+          event.capacity.current = event.participants.length;
+        }
+        
         await event.save();
+        console.log("✅ Booking approved, user added to event. New participant count:", event.participants.length);
       }
       
       console.log("✅ Booking approved:", booking._id);

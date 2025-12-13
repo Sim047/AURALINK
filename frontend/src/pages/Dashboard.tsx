@@ -490,14 +490,12 @@ export default function Dashboard({ token, onNavigate }: any) {
                         </span>
                       </div>
                     )}
-                    {event.capacity && (
-                      <div className="flex items-center gap-2">
-                        <Users className="w-4 h-4 shrink-0 text-slate-500" />
-                        <span className="truncate">
-                          {event.capacity.current || 0} / {event.capacity.max} participants
-                        </span>
-                      </div>
-                    )}
+                    <div className="flex items-center gap-2">
+                      <Users className="w-4 h-4 shrink-0 text-slate-500" />
+                      <span className="truncate">
+                        {event.participants?.length || 0} / {event.maxParticipants} participants
+                      </span>
+                    </div>
                   </div>
 
                   <div className="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
