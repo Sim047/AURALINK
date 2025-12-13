@@ -28,6 +28,7 @@ import SimpleMyRequests from "../components/SimpleMyRequests";
 import SimpleApproveRequests from "../components/SimpleApproveRequests";
 import MyJoinRequestsPage from "./MyJoinRequests";
 import PendingApprovalsPage from "./PendingApprovals";
+import AllEvents from "./AllEvents";
 import SportEvents from "./SportEvents";
 
 dayjs.extend(relativeTime);
@@ -198,7 +199,7 @@ export default function Dashboard({ token, onNavigate }: any) {
   const [notifications, setNotifications] = useState<any[]>([]);
   const [createEventModalOpen, setCreateEventModalOpen] = useState(false);
   const [selectedSport, setSelectedSport] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<'dashboard' | 'myRequests' | 'approvals'>('dashboard');
+  const [viewMode, setViewMode] = useState<'dashboard' | 'myRequests' | 'approvals' | 'allEvents'>('dashboard');
   const [myRequestsCount, setMyRequestsCount] = useState(0);
   const [approvalsCount, setApprovalsCount] = useState(0);
 
@@ -327,6 +328,10 @@ export default function Dashboard({ token, onNavigate }: any) {
     return <PendingApprovalsPage token={token} onBack={() => setViewMode('dashboard')} onNavigate={onNavigate} />;
   }
 
+  if (viewMode === 'allEvents') {
+    return <AllEvents token={token} onBack={() => setViewMode('dashboard')} onNavigate={onNavigate} onViewEvent={(id: string) => console.log('View event:', id)} />;
+  }
+
   // If viewing a specific sport's events, show that component
   if (selectedSport) {
     return (
@@ -408,22 +413,28 @@ export default function Dashboard({ token, onNavigate }: any) {
             </div>
           </button>
 
-          <div className="bg-white dark:bg-[#0f172a] rounded-2xl p-6 border border-gray-200 dark:border-gray-800 hover:shadow-xl transition-all duration-300">
-            <div className="flex items-center justify-between">
+          {/* All Events - Clickable */}
+          <button
+            onClick={() => setViewMode('allEvents')}
+            className="bg-white dark:bg-[#0f172a] rounded-2xl p-6 border-2 border-purple-200 dark:border-purple-800 hover:shadow-xl hover:scale-105 transition-all duration-300 text-left group relative overflow-hidden"
+          >
+            <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500"></div>
+            <div className="relative flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Upcoming Events</p>
+                <p className="text-sm text-purple-600 dark:text-purple-400 mb-1 font-medium">All Events</p>
                 <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.upcomingEvents}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">View & manage all</p>
               </div>
-              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/30">
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/30 group-hover:rotate-12 transition-transform">
                 <Calendar className="w-6 h-6 text-white" />
               </div>
             </div>
-          </div>
+          </button>
 
           <div className="bg-white dark:bg-[#0f172a] rounded-2xl p-6 border border-gray-200 dark:border-gray-800 hover:shadow-xl transition-all duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Total Bookings</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Notifications</p>
                 <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.notifications}</p>
               </div>
               <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/30">
