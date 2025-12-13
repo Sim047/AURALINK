@@ -197,28 +197,26 @@ export default function Discover({ token, onViewProfile }: any) {
 
   const submitJoinRequest = async (eventId: string, txCode: string) => {
     try {
-      console.log("Submitting join request for event:", eventId, "with txCode:", txCode);
-      const response = await axios.post(`${API}/api/events/${eventId}/join`, 
-        { transactionCode: txCode, transactionDetails: "" }, 
+      console.log("📝 SIMPLE: Submitting booking for event:", eventId);
+      
+      // Use NEW simple booking system
+      const response = await axios.post(`${API}/api/bookings-simple/create`, 
+        { eventId, transactionCode: txCode }, 
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      console.log("✅ Join request response:", response.data);
       
-      // Better success message
-      const message = response.data.booking 
-        ? "✅ Join request submitted! Check 'My Pending Requests' in your dashboard."
-        : "✅ Join request submitted! The event organizer will review your request.";
+      console.log("✅ SIMPLE: Booking created:", response.data);
+      alert("✅ Join request submitted! Check 'My Join Requests' in your dashboard.");
       
-      alert(message);
       setJoinModalOpen(false);
       setTransactionCode("");
       setSelectedEvent(null);
       loadEvents();
     } catch (err: any) {
-      console.error("❌ Join event error:", err);
-      const errorMsg = err.response?.data?.error || "Failed to submit join request. Please try again.";
+      console.error("❌ SIMPLE: Booking error:", err);
+      const errorMsg = err.response?.data?.error || "Failed to submit request";
       alert("❌ " + errorMsg);
     }
   };

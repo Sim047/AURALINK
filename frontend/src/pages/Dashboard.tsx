@@ -24,6 +24,8 @@ import PendingApprovals from "../components/PendingApprovals";
 import JoinRequestsManager from "../components/JoinRequestsManager";
 import MyJoinRequests from "../components/MyJoinRequests";
 import MyPendingRequests from "../components/MyPendingRequests";
+import SimpleMyRequests from "../components/SimpleMyRequests";
+import SimpleApproveRequests from "../components/SimpleApproveRequests";
 import SportEvents from "./SportEvents";
 
 dayjs.extend(relativeTime);
@@ -416,17 +418,17 @@ export default function Dashboard({ token, onNavigate }: any) {
           </div>
         )}
 
-        {/* Pending Approvals */}
-        <PendingApprovals token={token} />
-
-        {/* My Join Requests (Events I've requested to join) */}
-        <MyJoinRequests token={token} />
-
-        {/* Join Requests Manager (Requests for events I organize) */}
-        <JoinRequestsManager token={token} />
-
-        {/* My Pending Requests (bookings I created) */}
-        <MyPendingRequests />
+        {/* ========== NEW SIMPLE BOOKING SYSTEM ========== */}
+        <SimpleApproveRequests token={token} />
+        <SimpleMyRequests />
+        
+        {/* ========== OLD SYSTEM (hidden for now) ========== */}
+        <div className="hidden">
+          <PendingApprovals token={token} />
+          <MyJoinRequests token={token} />
+          <JoinRequestsManager token={token} />
+          <MyPendingRequests />
+        </div>
 
         {/* Upcoming Events Section */}
         {upcomingEvents.length > 0 && (
