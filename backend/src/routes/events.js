@@ -269,11 +269,16 @@ router.post("/:id/join", auth, async (req, res) => {
         eventTitle: event.title,
         organizerId: event.organizer.toString(),
         requesterId: req.user.id,
-        bookingId: booking._id,
+        bookingId: booking?._id || null,
       });
     }
 
-    res.json({ message: "Join request submitted", event, booking });
+    res.json({ 
+      message: "Join request submitted", 
+      event, 
+      booking: booking || null,
+      success: true 
+    });
   } catch (err) {
     console.error("Join event error:", err);
     res.status(500).json({ error: "Failed to submit join request" });

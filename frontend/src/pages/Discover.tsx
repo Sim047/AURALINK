@@ -199,20 +199,27 @@ export default function Discover({ token, onViewProfile }: any) {
     try {
       console.log("Submitting join request for event:", eventId, "with txCode:", txCode);
       const response = await axios.post(`${API}/api/events/${eventId}/join`, 
-        { transactionCode: txCode }, 
+        { transactionCode: txCode, transactionDetails: "" }, 
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      console.log("Join request response:", response.data);
-      alert("Join request submitted successfully! The event organizer will review your request.");
+      console.log("✅ Join request response:", response.data);
+      
+      // Better success message
+      const message = response.data.booking 
+        ? "✅ Join request submitted! Check 'My Pending Requests' in your dashboard."
+        : "✅ Join request submitted! The event organizer will review your request.";
+      
+      alert(message);
       setJoinModalOpen(false);
       setTransactionCode("");
       setSelectedEvent(null);
       loadEvents();
     } catch (err: any) {
-      console.error("Join event error:", err);
-      alert(err.response?.data?.error || "Failed to submit join request");
+      console.error("❌ Join event error:", err);
+      const errorMsg = err.response?.data?.error || "Failed to submit join request. Please try again.";
+      alert("❌ " + errorMsg);
     }
   };
 
