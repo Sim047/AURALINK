@@ -147,9 +147,11 @@ export default function Sidebar({
   ];
 
   // Calculate total unread messages from conversations (only if conversations array exists and has items)
-  const totalUnreadMessages = Array.isArray(conversations) 
+  const totalUnreadMessages = Array.isArray(conversations) && conversations.length > 0
     ? conversations.reduce((sum, conv) => sum + (conv.unreadCount || 0), 0) 
     : 0;
+  
+  console.log('[Sidebar] Conversations:', conversations?.length, 'Total unread:', totalUnreadMessages);
 
   // Helper component for navigation buttons
   const NavButton = ({ icon: Icon, label, badge, isCollapsed, onClick }: any) => (

@@ -188,7 +188,7 @@ router.get("/my/created", auth, async (req, res) => {
 // POST join event (create join request with transaction code)
 router.post("/:id/join", auth, async (req, res) => {
   try {
-    const { transactionCode } = req.body;
+    const { transactionCode, transactionDetails } = req.body;
     console.log("Join request received:", { eventId: req.params.id, userId: req.user.id, transactionCode });
     const event = await Event.findById(req.params.id);
 
@@ -227,6 +227,31 @@ router.post("/:id/join", auth, async (req, res) => {
     console.log("Join request created, total requests:", event.joinRequests.length);
     await event.populate("joinRequests.user", "username avatar");
 
+    // Create a booking for this join request
+    const Booking = (await import("../models/Booking.js")).default;
+    const booking = await Booking.create({
+      client: req.user.id,
+      provider: event.organizer,
+      bookingType: "event",
+      event: event._id,
+      scheduledDate: event.startDate,
+      scheduledTime: event.time || "TBD",
+      location: event.location?.name || "TBD",
+      locationDetails: event.location?.address || "",
+      pricing: {
+        amount: event.pricing.amount || 0,
+        currency: event.pricing.currency || "USD",
+        transactionCode: transactionCode || "FREE_EVENT",
+        transactionDetails: transactionDetails || "",
+        paymentInstructions: event.pricing.paymentInstructions || "",
+      },
+      status: "pending-approval",
+      approvalStatus: "pending",
+      paymentVerified: false,
+    });
+
+    console.log("Booking created for event join request:", booking._id);
+
     // Emit socket notification to event organizer
     const io = req.app.get("io");
     if (io) {
@@ -235,10 +260,11 @@ router.post("/:id/join", auth, async (req, res) => {
         eventTitle: event.title,
         organizerId: event.organizer.toString(),
         requesterId: req.user.id,
+        bookingId: booking._id,
       });
     }
 
-    res.json({ message: "Join request submitted", event });
+    res.json({ message: "Join request submitted", event, booking });
   } catch (err) {
     console.error("Join event error:", err);
     res.status(500).json({ error: "Failed to submit join request" });

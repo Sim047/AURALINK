@@ -51,6 +51,9 @@ router.get('/', auth, async (req, res) => {
     // Filter out conversations with no visible messages (user cleared/deleted everything)
     const activeConvs = convsWithUnread.filter(c => c.totalVisibleMessages > 0);
 
+    console.log(`[conversations/get] User ${userId}: ${convs.length} total, ${activeConvs.length} with messages`);
+    console.log(`[conversations/get] Total unread: ${activeConvs.reduce((sum, c) => sum + c.unreadCount, 0)}`);
+    
     res.json(activeConvs);
   } catch (err) {
     console.error('[conversations/get]', err);

@@ -86,11 +86,47 @@ export default function PendingApprovals({ token }: { token: string }) {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      // Remove from list
+      // Remove from list and reload
       setBookings((prev) => prev.filter((b) => b._id !== bookingId));
+      
+      // Show success message
+      if (approved) {
+        alert("Booking approved! It's now pending payment verification.");
+      } else {
+        alert("Booking rejected.");
+      }
     } catch (err: any) {
       console.error("Approval error:", err);
       alert(err.response?.data?.error || "Failed to process approval");
+    } finally {
+      setProcessing(null);
+    }
+  }
+
+  async function handlePaymentVerification(bookingId: string, verified: boolean) {
+    try {
+      setProcessing(bookingId);
+      const notes = verified
+        ? prompt("Add notes about payment verification (optional):")
+        : prompt("Why is the payment invalid? (optional):");
+
+      await axios.post(
+        `${API}/api/bookings/${bookingId}/verify-payment`,
+        { verified, notes },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      // Reload pending approvals
+      loadPendingApprovals();
+      
+      if (verified) {
+        alert("Payment verified! Booking is now confirmed.");
+      } else {
+        alert("Payment marked as unverified.");
+      }
+    } catch (err: any) {
+      console.error("Payment verification error:", err);
+      alert(err.response?.data?.error || "Failed to verify payment");
     } finally {
       setProcessing(null);
     }
@@ -231,29 +267,78 @@ export default function PendingApprovals({ token }: { token: string }) {
                       "{booking.clientNotes}"
                     </p>
                   )}
+                  
+                  {/* Show transaction code if provided */}
+                  {booking.pricing.transactionCode && booking.pricing.transactionCode !== "FREE_EVENT" && (
+                    <div className="mt-2 p-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                      <p className="text-xs font-medium text-gray-700 dark:text-gray-300">Transaction Code:</p>
+                      <p className="text-sm font-mono text-teal-600 dark:text-teal-400">{booking.pricing.transactionCode}</p>
+                      {booking.pricing.transactionDetails && (
+                        <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{booking.pricing.transactionDetails}</p>
+                      )}
+                    </div>
+                  )}
+                  
                   <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
                     Requested {dayjs(booking.createdAt).fromNow()}
                   </p>
                 </div>
               </div>
 
-              <div className="flex gap-2">
-                <button
-                  onClick={() => handleApproval(booking._id, true)}
-                  disabled={processing === booking._id}
-                  className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-all duration-300 shadow-lg shadow-green-500/30 flex items-center gap-2"
-                >
-                  <CheckCircle className="w-4 h-4" />
-                  Approve
-                </button>
-                <button
-                  onClick={() => handleApproval(booking._id, false)}
-                  disabled={processing === booking._id}
-                  className="px-4 py-2 bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-all duration-300 shadow-lg shadow-red-500/30 flex items-center gap-2"
-                >
-                  <XCircle className="w-4 h-4" />
-                  Reject
-                </button>
+              <div className="flex flex-col gap-2">
+                {/* Approval/Rejection buttons for pending-approval status */}
+                {booking.approvalStatus === "pending" && (
+                  <>
+                    <button
+                      onClick={() => handleApproval(booking._id, true)}
+                      disabled={processing === booking._id}
+                      className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-all duration-300 shadow-lg shadow-green-500/30 flex items-center gap-2"
+                    >
+                      <CheckCircle className="w-4 h-4" />
+                      Approve
+                    </button>
+                    <button
+                      onClick={() => handleApproval(booking._id, false)}
+                      disabled={processing === booking._id}
+                      className="px-4 py-2 bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-all duration-300 shadow-lg shadow-red-500/30 flex items-center gap-2"
+                    >
+                      <XCircle className="w-4 h-4" />
+                      Reject
+                    </button>
+                  </>
+                )}
+                
+                {/* Payment verification buttons for approved bookings */}
+                {booking.approvalStatus === "approved" && !booking.paymentVerified && booking.pricing.amount > 0 && (
+                  <>
+                    <div className="text-xs text-yellow-600 dark:text-yellow-400 font-medium mb-1">
+                      Awaiting Payment Verification
+                    </div>
+                    <button
+                      onClick={() => handlePaymentVerification(booking._id, true)}
+                      disabled={processing === booking._id}
+                      className="px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-all duration-300 shadow-lg shadow-blue-500/30 flex items-center gap-2"
+                    >
+                      <CheckCircle className="w-4 h-4" />
+                      Verify Payment
+                    </button>
+                    <button
+                      onClick={() => handlePaymentVerification(booking._id, false)}
+                      disabled={processing === booking._id}
+                      className="px-4 py-2 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-all duration-300 shadow-lg shadow-gray-500/30 flex items-center gap-2"
+                    >
+                      <XCircle className="w-4 h-4" />
+                      Invalid
+                    </button>
+                  </>
+                )}
+                
+                {/* Show status for free events */}
+                {booking.approvalStatus === "approved" && booking.pricing.amount === 0 && (
+                  <div className="px-4 py-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-medium rounded-lg text-center">
+                    ✓ Confirmed (Free)
+                  </div>
+                )}
               </div>
             </div>
           </div>

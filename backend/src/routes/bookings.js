@@ -109,10 +109,14 @@ router.get("/:id", auth, async (req, res) => {
 // GET pending approval requests (for coaches/providers)
 router.get("/pending-approvals/list", auth, async (req, res) => {
   try {
+    console.log("[pending-approvals] Query for provider:", req.user.id);
+    
     const pendingBookings = await Booking.find({
       provider: req.user.id,
-      status: "pending-approval",
-      approvalStatus: "pending",
+      $or: [
+        { status: "pending-approval", approvalStatus: "pending" },
+        { status: "payment-pending", approvalStatus: "approved", paymentVerified: false }
+      ]
     })
       .populate("client", "username email avatar")
       .populate("provider", "username email avatar")
@@ -120,6 +124,7 @@ router.get("/pending-approvals/list", auth, async (req, res) => {
       .populate("event")
       .sort({ createdAt: -1 });
 
+    console.log("[pending-approvals] Found", pendingBookings.length, "bookings");
     res.json({ bookings: pendingBookings, count: pendingBookings.length });
   } catch (err) {
     console.error("Get pending approvals error:", err);
@@ -271,23 +276,136 @@ router.post("/:id/approve", auth, async (req, res) => {
       booking.approvalStatus = "approved";
       booking.approvedAt = new Date();
       booking.approvedBy = req.user.id;
-      booking.status = "payment-pending"; // Move to payment verification
+      
+      // If there's a payment amount, mark as payment-pending, otherwise confirmed
+      if (booking.pricing && booking.pricing.amount > 0) {
+        booking.status = "payment-pending";
+      } else {
+        booking.status = "confirmed";
+        booking.paymentVerified = true;
+      }
+
+      // If this is an event booking, add user to event participants
+      if (booking.bookingType === "event" && booking.event) {
+        const Event = (await import("../models/Event.js")).default;
+        const event = await Event.findById(booking.event);
+        
+        if (event && !event.participants.includes(booking.client)) {
+          event.participants.push(booking.client);
+          event.capacity.current = event.participants.length;
+          
+          // Update or remove the join request status
+          const requestIndex = event.joinRequests.findIndex(
+            (r) => r.user.toString() === booking.client.toString()
+          );
+          if (requestIndex > -1) {
+            event.joinRequests[requestIndex].status = "approved";
+          }
+          
+          await event.save();
+        }
+      }
     } else {
       booking.approvalStatus = "rejected";
       booking.status = "rejected";
       booking.rejectionReason = rejectionReason || "No reason provided";
+
+      // If this is an event booking, update join request status
+      if (booking.bookingType === "event" && booking.event) {
+        const Event = (await import("../models/Event.js")).default;
+        const event = await Event.findById(booking.event);
+        
+        if (event) {
+          const requestIndex = event.joinRequests.findIndex(
+            (r) => r.user.toString() === booking.client.toString()
+          );
+          if (requestIndex > -1) {
+            event.joinRequests[requestIndex].status = "rejected";
+          }
+          await event.save();
+        }
+      }
     }
 
     await booking.save();
     await booking.populate("client provider service event");
 
-    // TODO: Send notification to client about approval/rejection
-    // Could emit socket event or send email here
+    // Emit socket event to client about approval/rejection
+    const io = req.app.get("io");
+    if (io) {
+      io.to(booking.client._id.toString()).emit("booking_status_update", {
+        bookingId: booking._id,
+        status: booking.status,
+        approvalStatus: booking.approvalStatus,
+        approved,
+        rejectionReason: booking.rejectionReason,
+        message: approved 
+          ? `Your booking for "${booking.event?.title || booking.service?.name || 'this service'}" has been approved!`
+          : `Your booking for "${booking.event?.title || booking.service?.name || 'this service'}" was rejected.`,
+      });
+    }
 
     res.json(booking);
   } catch (err) {
     console.error("Approve/reject booking error:", err);
     res.status(500).json({ error: "Failed to process approval" });
+  }
+});
+
+// POST verify payment (for coaches/providers)
+router.post("/:id/verify-payment", auth, async (req, res) => {
+  try {
+    const { verified, notes } = req.body;
+
+    const booking = await Booking.findById(req.params.id);
+
+    if (!booking) {
+      return res.status(404).json({ error: "Booking not found" });
+    }
+
+    // Check if user is the provider
+    if (booking.provider.toString() !== req.user.id) {
+      return res.status(403).json({ error: "Only the provider can verify payment" });
+    }
+
+    booking.paymentVerified = verified;
+    booking.verifiedAt = new Date();
+    booking.verifiedBy = req.user.id;
+
+    if (verified) {
+      booking.status = "confirmed";
+      booking.pricing.paid = true;
+      
+      if (notes) {
+        booking.notes = notes;
+      }
+    } else {
+      booking.status = "payment-pending";
+      if (notes) {
+        booking.notes = `Payment verification failed: ${notes}`;
+      }
+    }
+
+    await booking.save();
+    await booking.populate("client provider service event");
+
+    // Emit socket event to client about payment verification
+    const io = req.app.get("io");
+    if (io) {
+      io.to(booking.client._id.toString()).emit("booking_status_update", {
+        bookingId: booking._id,
+        status: booking.status,
+        paymentVerified: booking.paymentVerified,
+        message: verified 
+          ? `Payment verified! Your booking for "${booking.event?.title || booking.service?.name || 'this service'}" is confirmed.`
+          : `Payment verification failed for "${booking.event?.title || booking.service?.name || 'this service'}". Please contact the provider.`,
+      });
+    }
+
+    res.json(booking);
+  } catch (err) {
+    console.error("Verify payment error:", err);
+    res.status(500).json({ error: "Failed to verify payment" });
   }
 });
 

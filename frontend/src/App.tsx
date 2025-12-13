@@ -463,6 +463,22 @@ function onMyStatusUpdated(newStatus: any) {
       }
     });
 
+    // Booking status update notifications
+    socket.on("booking_status_update", ({ bookingId, status, approvalStatus, message, paymentVerified }: any) => {
+      console.log("[Socket] Booking status update:", { bookingId, status, message });
+      
+      // Show browser notification
+      if ("Notification" in window && Notification.permission === "granted") {
+        new Notification("Booking Update", {
+          body: message,
+          icon: "/logo.png",
+        });
+      }
+      
+      // Show in-app alert (optional - could be a toast notification instead)
+      alert(message);
+    });
+
     return () => {
       socket.removeAllListeners();
       socket.disconnect();
