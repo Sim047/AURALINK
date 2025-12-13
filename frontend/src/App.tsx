@@ -450,7 +450,7 @@ function onMyStatusUpdated(newStatus: any) {
       socket.removeAllListeners();
       socket.disconnect();
     };
-  }, [token, user, view]);
+  }, [token, user]);
   
   // Rejoin socket room when room or conversation changes
   useEffect(() => {
