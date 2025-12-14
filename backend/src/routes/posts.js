@@ -112,7 +112,11 @@ router.put("/:id", auth, async (req, res) => {
 
     const { caption, tags, location } = req.body;
     
-    if (caption !== undefined) post.caption = caption;
+    // Track if caption was actually changed
+    if (caption !== undefined && caption !== post.caption) {
+      post.caption = caption;
+      post.captionEditedAt = new Date();
+    }
     if (tags !== undefined) post.tags = tags;
     if (location !== undefined) post.location = location;
 

@@ -46,6 +46,7 @@ interface Post {
   location: string;
   createdAt: string;
   updatedAt: string;
+  captionEditedAt?: string;
 }
 
 export default function Posts({ token, currentUserId, onShowProfile }: any) {
@@ -527,7 +528,7 @@ export default function Posts({ token, currentUserId, onShowProfile }: any) {
                       {/* Timestamp */}
                       <div className="text-xs text-gray-500 dark:text-gray-400">
                         {formatTimestamp(post.createdAt)}
-                        {post.updatedAt !== post.createdAt && (
+                        {post.captionEditedAt && (
                           <span className="ml-2 italic">(edited)</span>
                         )}
                       </div>

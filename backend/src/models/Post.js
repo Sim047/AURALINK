@@ -25,6 +25,7 @@ const PostSchema = new mongoose.Schema(
     comments: [CommentSchema],
     tags: [{ type: String }],
     location: { type: String, default: "" },
+    captionEditedAt: { type: Date },
   },
   { timestamps: true }
 );
