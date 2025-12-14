@@ -1,0 +1,463 @@
+// frontend/src/pages/Posts.tsx
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { Heart, MessageCircle, Send, MoreVertical, Trash2, Edit, X, Image as ImageIcon } from "lucide-react";
+import { Menu } from "@headlessui/react";
+import Avatar from "../components/Avatar";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+
+dayjs.extend(relativeTime);
+
+const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+interface Post {
+  _id: string;
+  author: {
+    _id: string;
+    username: string;
+    avatar?: string;
+    email: string;
+  };
+  caption: string;
+  imageUrl: string;
+  likes: string[];
+  comments: Array<{
+    _id: string;
+    user: {
+      _id: string;
+      username: string;
+      avatar?: string;
+    };
+    text: string;
+    createdAt: string;
+  }>;
+  tags: string[];
+  location: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export default function Posts({ token, currentUserId, onShowProfile }: any) {
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [newPost, setNewPost] = useState({ caption: "", imageUrl: "", location: "", tags: "" });
+  const [commentTexts, setCommentTexts] = useState<Record<string, string>>({});
+  const [uploadingImage, setUploadingImage] = useState(false);
+
+  useEffect(() => {
+    if (token) loadPosts();
+  }, [token]);
+
+  async function loadPosts() {
+    try {
+      setLoading(true);
+      const res = await axios.get(`${API}/api/posts`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setPosts(res.data.posts || []);
+    } catch (err) {
+      console.error("Failed to load posts:", err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function makeAvatarUrl(avatar?: string) {
+    if (!avatar) return "https://ui-avatars.com/api/?name=User&background=0D8ABC&color=fff";
+    if (avatar.startsWith("http")) return avatar;
+    if (avatar.startsWith("/")) return API + avatar;
+    return API + "/uploads/" + avatar;
+  }
+
+  async function handleCreatePost() {
+    if (!newPost.caption.trim() && !newPost.imageUrl) {
+      alert("Please add a caption or image");
+      return;
+    }
+
+    try {
+      const tags = newPost.tags
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean);
+
+      const res = await axios.post(
+        `${API}/api/posts`,
+        {
+          caption: newPost.caption,
+          imageUrl: newPost.imageUrl,
+          tags,
+          location: newPost.location,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setPosts([res.data, ...posts]);
+      setNewPost({ caption: "", imageUrl: "", location: "", tags: "" });
+      setCreateModalOpen(false);
+    } catch (err) {
+      console.error("Failed to create post:", err);
+      alert("Failed to create post");
+    }
+  }
+
+  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      alert("Image must be under 10MB");
+      return;
+    }
+
+    try {
+      setUploadingImage(true);
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await axios.post(`${API}/api/files/upload`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      setNewPost({ ...newPost, imageUrl: res.data.url });
+    } catch (err) {
+      console.error("Upload failed:", err);
+      alert("Failed to upload image");
+    } finally {
+      setUploadingImage(false);
+    }
+  }
+
+  async function handleLike(postId: string) {
+    try {
+      const res = await axios.post(
+        `${API}/api/posts/${postId}/like`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setPosts(posts.map((p) => (p._id === postId ? res.data : p)));
+    } catch (err) {
+      console.error("Failed to like post:", err);
+    }
+  }
+
+  async function handleComment(postId: string) {
+    const text = commentTexts[postId]?.trim();
+    if (!text) return;
+
+    try {
+      const res = await axios.post(
+        `${API}/api/posts/${postId}/comment`,
+        { text },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setPosts(posts.map((p) => (p._id === postId ? res.data : p)));
+      setCommentTexts({ ...commentTexts, [postId]: "" });
+    } catch (err) {
+      console.error("Failed to add comment:", err);
+    }
+  }
+
+  async function handleDeletePost(postId: string) {
+    if (!confirm("Delete this post?")) return;
+
+    try {
+      await axios.delete(`${API}/api/posts/${postId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setPosts(posts.filter((p) => p._id !== postId));
+    } catch (err) {
+      console.error("Failed to delete post:", err);
+      alert("Failed to delete post");
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-[#071029] dark:via-[#0a1435] dark:to-[#071029] p-4 sm:p-6">
+      <div className="max-w-2xl mx-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">
+            Feed
+          </h1>
+          <button
+            onClick={() => setCreateModalOpen(true)}
+            className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-purple-500 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
+          >
+            Create Post
+          </button>
+        </div>
+
+        {/* Posts */}
+        {loading ? (
+          <div className="space-y-6">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-white dark:bg-slate-800 rounded-2xl p-6 animate-pulse">
+                <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
+              </div>
+            ))}
+          </div>
+        ) : posts.length === 0 ? (
+          <div className="text-center py-20">
+            <ImageIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-600 dark:text-gray-400 text-lg">No posts yet</p>
+            <p className="text-gray-500 dark:text-gray-500 text-sm mt-2">Be the first to share something!</p>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {posts.map((post) => (
+              <div
+                key={post._id}
+                className="bg-white dark:bg-slate-800 rounded-2xl shadow-md overflow-hidden border border-gray-200 dark:border-gray-700"
+              >
+                {/* Post Header */}
+                <div className="flex items-center justify-between p-4">
+                  <div className="flex items-center gap-3">
+                    <Avatar
+                      src={makeAvatarUrl(post.author.avatar)}
+                      className="w-10 h-10 rounded-full object-cover cursor-pointer"
+                      alt={post.author.username}
+                      onClick={() => onShowProfile(post.author)}
+                    />
+                    <div>
+                      <div
+                        className="font-semibold text-gray-900 dark:text-white cursor-pointer hover:text-cyan-500"
+                        onClick={() => onShowProfile(post.author)}
+                      >
+                        {post.author.username}
+                      </div>
+                      {post.location && (
+                        <div className="text-xs text-gray-500 dark:text-gray-400">{post.location}</div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Options Menu */}
+                  {post.author._id === currentUserId && (
+                    <Menu as="div" className="relative">
+                      <Menu.Button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full">
+                        <MoreVertical className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                      </Menu.Button>
+                      <Menu.Items className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-10">
+                        <Menu.Item>
+                          {({ active }) => (
+                            <button
+                              onClick={() => handleDeletePost(post._id)}
+                              className={`${
+                                active ? "bg-red-50 dark:bg-red-900/20" : ""
+                              } flex items-center gap-2 w-full px-4 py-2 text-sm text-red-600 dark:text-red-400`}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                              Delete Post
+                            </button>
+                          )}
+                        </Menu.Item>
+                      </Menu.Items>
+                    </Menu>
+                  )}
+                </div>
+
+                {/* Post Image */}
+                {post.imageUrl && (
+                  <img
+                    src={post.imageUrl}
+                    alt="Post"
+                    className="w-full max-h-[600px] object-cover"
+                  />
+                )}
+
+                {/* Actions */}
+                <div className="p-4 space-y-3">
+                  <div className="flex items-center gap-4">
+                    <button
+                      onClick={() => handleLike(post._id)}
+                      className="flex items-center gap-1.5 group"
+                    >
+                      <Heart
+                        className={`w-6 h-6 transition-all ${
+                          post.likes.includes(currentUserId)
+                            ? "fill-red-500 text-red-500"
+                            : "text-gray-700 dark:text-gray-300 group-hover:text-red-500"
+                        }`}
+                      />
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {post.likes.length}
+                      </span>
+                    </button>
+                    <button className="flex items-center gap-1.5 text-gray-700 dark:text-gray-300 hover:text-cyan-500">
+                      <MessageCircle className="w-6 h-6" />
+                      <span className="text-sm font-medium">{post.comments.length}</span>
+                    </button>
+                  </div>
+
+                  {/* Caption */}
+                  {post.caption && (
+                    <p className="text-gray-900 dark:text-white">
+                      <span className="font-semibold mr-2">{post.author.username}</span>
+                      {post.caption}
+                    </p>
+                  )}
+
+                  {/* Tags */}
+                  {post.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {post.tags.map((tag, idx) => (
+                        <span
+                          key={idx}
+                          className="text-xs text-cyan-500 hover:underline cursor-pointer"
+                        >
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Timestamp */}
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    {dayjs(post.createdAt).fromNow()}
+                  </div>
+
+                  {/* Comments */}
+                  {post.comments.length > 0 && (
+                    <div className="space-y-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                      {post.comments.map((comment) => (
+                        <div key={comment._id} className="flex gap-2">
+                          <Avatar
+                            src={makeAvatarUrl(comment.user.avatar)}
+                            className="w-6 h-6 rounded-full object-cover"
+                            alt={comment.user.username}
+                          />
+                          <div className="flex-1">
+                            <span className="font-semibold text-sm text-gray-900 dark:text-white mr-2">
+                              {comment.user.username}
+                            </span>
+                            <span className="text-sm text-gray-700 dark:text-gray-300">
+                              {comment.text}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Add Comment */}
+                  <div className="flex gap-2 pt-2">
+                    <input
+                      type="text"
+                      placeholder="Add a comment..."
+                      className="flex-1 px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                      value={commentTexts[post._id] || ""}
+                      onChange={(e) =>
+                        setCommentTexts({ ...commentTexts, [post._id]: e.target.value })
+                      }
+                      onKeyPress={(e) => {
+                        if (e.key === "Enter") handleComment(post._id);
+                      }}
+                    />
+                    <button
+                      onClick={() => handleComment(post._id)}
+                      className="p-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 transition-colors"
+                    >
+                      <Send className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Create Post Modal */}
+      {createModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-lg">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Create Post</h2>
+              <button
+                onClick={() => setCreateModalOpen(false)}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <textarea
+                placeholder="What's on your mind?"
+                className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 resize-none"
+                rows={4}
+                value={newPost.caption}
+                onChange={(e) => setNewPost({ ...newPost, caption: e.target.value })}
+              />
+
+              <input
+                type="text"
+                placeholder="Location (optional)"
+                className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                value={newPost.location}
+                onChange={(e) => setNewPost({ ...newPost, location: e.target.value })}
+              />
+
+              <input
+                type="text"
+                placeholder="Tags (comma-separated)"
+                className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                value={newPost.tags}
+                onChange={(e) => setNewPost({ ...newPost, tags: e.target.value })}
+              />
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Image
+                </label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                  id="post-image-upload"
+                />
+                <label
+                  htmlFor="post-image-upload"
+                  className="flex items-center justify-center gap-2 w-full px-4 py-8 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl cursor-pointer hover:border-cyan-400 transition-colors"
+                >
+                  {uploadingImage ? (
+                    <span className="text-gray-500">Uploading...</span>
+                  ) : newPost.imageUrl ? (
+                    <img
+                      src={newPost.imageUrl}
+                      alt="Preview"
+                      className="max-h-40 rounded-lg"
+                    />
+                  ) : (
+                    <>
+                      <ImageIcon className="w-6 h-6 text-gray-400" />
+                      <span className="text-gray-500">Click to upload image</span>
+                    </>
+                  )}
+                </label>
+              </div>
+
+              <button
+                onClick={handleCreatePost}
+                disabled={uploadingImage}
+                className="w-full py-3 bg-gradient-to-r from-cyan-500 to-purple-500 text-white rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {uploadingImage ? "Uploading..." : "Post"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

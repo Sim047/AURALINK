@@ -370,11 +370,11 @@ export default function Sidebar({
           }}
         />
         <NavButton
-          icon={MessageCircle}
-          label="Rooms"
+          icon={TrendingUp}
+          label="Posts"
           isCollapsed={isCollapsed}
           onClick={() => {
-            onNavigate?.('rooms');
+            onNavigate?.('posts');
             setIsMobileOpen(false);
           }}
         />

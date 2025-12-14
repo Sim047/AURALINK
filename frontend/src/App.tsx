@@ -93,17 +93,8 @@ export default function App() {
   });
   const [authPage, setAuthPage] = useState<"login" | "register">("login");
 
-  // ROOMS + DM --------------------------------
-  const [room, setRoom] = useState<string>(() => {
-    const saved = localStorage.getItem("auralink-current-room");
-    return saved || "general";
-  });
-  
-  // Persist room changes
-  useEffect(() => {
-    localStorage.setItem("auralink-current-room", room);
-  }, [room]);
-  const [rooms] = useState<string[]>(["general", "random", "dev"]);
+  // DM --------------------------------
+  const [room, setRoom] = useState<string>("general");
   const [messages, setMessages] = useState<any[]>([]);
   const [text, setText] = useState<string>("");
   const [file, setFile] = useState<File | null>(null);
@@ -150,7 +141,7 @@ export default function App() {
 
   // dynamic pages
   const [view, setView] = useState<
-    "dashboard" | "discover" | "chat" | "all-users" | "followers" | "following" | "rooms" | "direct-messages"
+    "dashboard" | "discover" | "chat" | "all-users" | "followers" | "following" | "posts" | "direct-messages"
   >(() => {
     // Restore previous view from localStorage
     const saved = localStorage.getItem("auralink-current-view");
@@ -1253,28 +1244,12 @@ function onMyStatusUpdated(newStatus: any) {
         )}
 
         {/* ROOMS PAGE */}
-        {view === "rooms" && (
-          <div className="p-6">
-            <h2 className="text-2xl font-bold mb-6 text-slate-900 dark:text-slate-100">🏠 Rooms</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {rooms.map((r) => (
-                <button
-                  key={r}
-                  className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6 hover:shadow-lg hover:border-cyan-400 dark:hover:border-cyan-500 transition-all text-left group"
-                  onClick={() => {
-                    setRoom(r);
-                    setInDM(false);
-                    setView("chat");
-                  }}
-                >
-                  <div className="text-xl font-bold mb-2 text-slate-900 dark:text-slate-100 group-hover:text-cyan-500 transition-colors">#{r}</div>
-                  <div className="text-sm text-slate-600 dark:text-slate-400">
-                    Click to join room
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
+        {view === "posts" && (
+          <Posts
+            token={token}
+            currentUserId={user?._id}
+            onShowProfile={(u: any) => showProfile(u)}
+          />
         )}
 
         {/* DIRECT MESSAGES PAGE */}
