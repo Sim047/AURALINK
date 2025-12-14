@@ -171,10 +171,18 @@ io.on("connection", (socket) => {
     if (uid) {
       onlineUsers.set(uid, socket.id);
       io.emit("presence_update", { userId: uid, status: "online" });
+      
+      // Send current online users list to the newly connected user
+      const onlineUserIds = Array.from(onlineUsers.keys());
+      socket.emit("online_users_list", { userIds: onlineUserIds });
+      console.log("[socket] sent online users list:", onlineUserIds);
     }
   }
 
-  socket.on("join_room", (room) => socket.join(room));
+  socket.on("join_room", (room) => {
+    socket.join(room);
+    console.log("[socket] user joined room:", room);
+  });
 
   // SEND MESSAGE
   socket.on("send_message", async ({ room, message }) => {

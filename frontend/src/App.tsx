@@ -373,8 +373,13 @@ function onMyStatusUpdated(newStatus: any) {
     });
 
     socket.on("typing", ({ userId, typing, user: typingUser }: any) => {
+      console.log("[Socket] Typing event:", { userId, typing, user: typingUser });
       if (typing) {
-        setTypingUsers((t) => ({ ...t, [userId]: typingUser || { username: 'Someone' } }));
+        setTypingUsers((t) => {
+          const updated = { ...t, [userId]: typingUser || { username: 'Someone' } };
+          console.log("[Socket] Typing users updated:", updated);
+          return updated;
+        });
         
         // Clear typing indicator after 3 seconds of inactivity
         setTimeout(() => {
@@ -418,6 +423,7 @@ function onMyStatusUpdated(newStatus: any) {
     });
     
     socket.on("presence_update", ({ userId, status }: { userId: string; status: "online" | "offline" }) => {
+      console.log("[Socket] Presence update:", userId, status);
       setOnlineUsers((prev) => {
         const updated = new Set(prev);
         if (status === "online") {
@@ -425,8 +431,15 @@ function onMyStatusUpdated(newStatus: any) {
         } else {
           updated.delete(userId);
         }
+        console.log("[Socket] Online users:", Array.from(updated));
         return updated;
       });
+    });
+
+    // Receive initial online users list when connecting
+    socket.on("online_users_list", ({ userIds }: { userIds: string[] }) => {
+      console.log("[Socket] Received online users list:", userIds);
+      setOnlineUsers(new Set(userIds));
     });
 
     // Join request notifications
@@ -690,12 +703,14 @@ function onMyStatusUpdated(newStatus: any) {
   function onComposerChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
     setText(e.target.value);
 
-    socket.emit("typing", {
+    const typingData = {
       room: inDM && activeConversation ? activeConversation._id : room,
       userId: user?._id,
       user: { _id: user?._id, username: user?.username, avatar: user?.avatar },
       typing: !!e.target.value
-    });
+    };
+    console.log("[Socket] Emitting typing:", typingData);
+    socket.emit("typing", typingData);
   }
 
   // Handle Enter key press
