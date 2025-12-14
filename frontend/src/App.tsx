@@ -21,6 +21,7 @@ import FollowingList from "./pages/FollowingList";
 import Discover from "./pages/Discover";
 import Dashboard from "./pages/Dashboard";
 import MyEvents from "./pages/MyEvents";
+import Posts from "./pages/Posts";
 import Avatar from "./components/Avatar";
 import Sidebar from "./components/Sidebar";
 import logo from "./assets/logo.png";
