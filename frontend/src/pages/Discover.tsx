@@ -24,6 +24,7 @@ import {
   Tag,
   Search,
   ChevronLeft,
+  Image as ImageIcon,
 } from "lucide-react";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
