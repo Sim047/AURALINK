@@ -220,9 +220,32 @@ export default function Discover() {
     }
   };
 
-  const handleMessageUser = (userId: string) => {
-    // Navigate to conversations with the user
-    window.location.href = `/#/conversations?userId=${userId}`;
+  const handleMessageUser = async (userId: string) => {
+    try {
+      if (!token) {
+        alert("Please log in to send messages");
+        return;
+      }
+      
+      // Create or get conversation with this user
+      const response = await axios.post(`${API_URL}/conversations`, 
+        { partnerId: userId },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      const conversation = response.data;
+      
+      // Store the active conversation and DM state
+      localStorage.setItem("auralink-active-conversation", JSON.stringify(conversation));
+      localStorage.setItem("auralink-in-dm", "true");
+      
+      // Reload the page to navigate to main view with conversation active
+      window.location.href = "/";
+    } catch (error: any) {
+      console.error("Error creating conversation:", error);
+      const message = error.response?.data?.message || "Failed to start conversation. Please try again.";
+      alert(message);
+    }
   };
 
   // Hub Landing Page
