@@ -485,7 +485,7 @@ export default function Discover() {
                   <div className="space-y-2 text-sm mb-4">
                     <div className="flex items-center text-gray-300">
                       <MapPin className="w-4 h-4 mr-2 text-pink-400" />
-                      {service.location.city || service.location.type}
+                      {service.location?.city || service.location?.type || "Location not specified"}
                     </div>
                     {service.experience && (
                       <div className="flex items-center text-gray-300">
