@@ -110,7 +110,13 @@ interface MarketplaceItem {
   createdAt: string;
 }
 
-export default function Discover() {
+interface DiscoverProps {
+  token: string | null;
+  onViewProfile?: (user: any) => void;
+  onStartConversation: (userId: string) => void;
+}
+
+export default function Discover({ token, onViewProfile, onStartConversation }: DiscoverProps) {
   const [activeCategory, setActiveCategory] = useState<CategoryType>(null);
   const [events, setEvents] = useState<Event[]>([]);
   const [services, setServices] = useState<Service[]>([]);
@@ -124,7 +130,6 @@ export default function Discover() {
   const [selectedProduct, setSelectedProduct] = useState<MarketplaceItem | null>(null);
   
   const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
-  const token = localStorage.getItem("token");
 
   useEffect(() => {
     if (activeCategory === "sports") {
@@ -220,32 +225,8 @@ export default function Discover() {
     }
   };
 
-  const handleMessageUser = async (userId: string) => {
-    try {
-      if (!token) {
-        alert("Please log in to send messages");
-        return;
-      }
-      
-      // Create or get conversation with this user
-      const response = await axios.post(`${API_URL}/conversations`, 
-        { partnerId: userId },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      
-      const conversation = response.data;
-      
-      // Store the active conversation and DM state
-      localStorage.setItem("auralink-active-conversation", JSON.stringify(conversation));
-      localStorage.setItem("auralink-in-dm", "true");
-      
-      // Reload the page to navigate to main view with conversation active
-      window.location.href = "/";
-    } catch (error: any) {
-      console.error("Error creating conversation:", error);
-      const message = error.response?.data?.message || "Failed to start conversation. Please try again.";
-      alert(message);
-    }
+  const handleMessageUser = (userId: string) => {
+    onStartConversation(userId);
   };
 
   // Hub Landing Page

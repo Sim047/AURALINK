@@ -922,6 +922,27 @@ function onMyStatusUpdated(newStatus: any) {
     }
   }
 
+  // START DM WITH USER ID ----------------------------------------
+  async function startConversationWithUser(userId: string) {
+    if (!userId || !token) {
+      alert("Please log in to send messages");
+      return;
+    }
+
+    try {
+      const res = await axios.post(
+        API + "/api/conversations",
+        { partnerId: userId },
+        { headers: { Authorization: "Bearer " + token } }
+      );
+
+      openConversation(res.data);
+    } catch (e) {
+      console.error("Could not start conversation", e);
+      alert("Unable to start conversation");
+    }
+  }
+
   // SCROLL TO BOTTOM ---------------------------------------------
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const element = e.currentTarget;
@@ -1211,6 +1232,7 @@ function onMyStatusUpdated(newStatus: any) {
           <Discover
             token={token}
             onViewProfile={showProfile}
+            onStartConversation={startConversationWithUser}
           />
         )}
 
