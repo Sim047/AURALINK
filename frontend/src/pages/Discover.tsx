@@ -128,7 +128,7 @@ export default function Discover() {
     try {
       const sport = selectedSport === "All Sports" ? "" : selectedSport;
       const response = await axios.get(`${API_URL}/events?sport=${sport}`);
-      setEvents(response.data);
+      setEvents(response.data.events || response.data);
     } catch (error) {
       console.error("Error fetching events:", error);
     } finally {
