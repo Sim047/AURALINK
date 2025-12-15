@@ -6,7 +6,7 @@ A modern, feature-rich social networking and communication platform built with t
 
 ## 🌐 Live Demo
 
-- **Frontend:** [https://auralink-app.vercel.app](https://auralink-app.vercel.app)
+- **Frontend:** [https://auralink-app-2u3p.vercel.app](https://auralink-app-2u3p.vercel.app)
 - **Backend API:** [https://auralink-app-production.up.railway.app](https://auralink-app-production.up.railway.app)
 
 ## ✨ Features

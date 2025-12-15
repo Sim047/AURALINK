@@ -371,7 +371,7 @@ export default function Discover() {
                     </div>
                     <div className="flex items-center">
                       <MapPin className="w-4 h-4 mr-2 text-pink-400" />
-                      {event.location}
+                      {event.location?.city || event.location?.name || event.location?.address || "Location TBA"}
                     </div>
                     <div className="flex items-center">
                       <Users className="w-4 h-4 mr-2 text-cyan-400" />
