@@ -1120,19 +1120,19 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
             <ProductDetailModal
               product={selectedProduct}
               onClose={() => setSelectedProduct(null)}
-           showPaymentModal && paymentModalEvent && (
+              onLike={handleLikeItem}
+              onMessage={handleMessageUser}
+              currentUserId={currentUser._id}
+            />
+          )}
+
+          {/* Payment Transaction Modal */}
+          {showPaymentModal && paymentModalEvent && (
             <PaymentTransactionModal
               event={paymentModalEvent}
               onSubmit={handlePaymentSubmit}
               onCancel={handlePaymentCancel}
-            >
-              {console.log("[Discover] Rendering PaymentTransactionModal with event:", paymentModalEvent)}
-              <PaymentTransactionModal
-                event={paymentModalEvent}
-                onSubmit={handlePaymentSubmit}
-                onCancel={() => setPaymentModalEvent(null)}
-              />
-            </>
+            />
           )}
 
           {/* Notification Toast */}
