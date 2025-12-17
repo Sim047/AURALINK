@@ -198,13 +198,22 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
         { headers: { Authorization: `Bearer ${token}` } }
       );
       console.log("[Discover] Join event response:", response.data);
-      alert(response.data.message || "Successfully joined event!");
+      
+      // Show success message
+      const message = response.data.message || "Successfully joined event!";
+      alert(message);
+      
+      // Refresh events list
       await fetchEvents();
       
       // Update selected event if modal is open
       if (selectedEvent && selectedEvent._id === eventId) {
-        const updatedEvent = await axios.get(`${API_URL}/events/${eventId}`);
-        setSelectedEvent(updatedEvent.data);
+        try {
+          const updatedEvent = await axios.get(`${API_URL}/events/${eventId}`);
+          setSelectedEvent(updatedEvent.data);
+        } catch (err) {
+          console.error("Failed to refresh event details:", err);
+        }
       }
     } catch (error: any) {
       console.error("[Discover] Join event error:", error);
