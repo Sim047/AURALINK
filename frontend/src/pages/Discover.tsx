@@ -594,7 +594,6 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
               currentUserId={currentUser._id}
             />
           )}
-          )}
         </div>
       </div>
     );
