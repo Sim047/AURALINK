@@ -31,6 +31,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import { API_URL } from "../config/api";
 import ServiceDetailModal from "../components/ServiceDetailModal";
 import ProductDetailModal from "../components/ProductDetailModal";
+import EventDetailModal from "../components/EventDetailModal";
 
 dayjs.extend(relativeTime);
 
@@ -128,6 +129,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<MarketplaceItem | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   
   const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
 
@@ -197,7 +199,13 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
       );
       console.log("[Discover] Join event response:", response.data);
       alert(response.data.message || "Successfully joined event!");
-      fetchEvents();
+      await fetchEvents();
+      
+      // Update selected event if modal is open
+      if (selectedEvent && selectedEvent._id === eventId) {
+        const updatedEvent = await axios.get(`${API_URL}/events/${eventId}`);
+        setSelectedEvent(updatedEvent.data);
+      }
     } catch (error: any) {
       console.error("[Discover] Join event error:", error);
       const message = error.response?.data?.message || error.response?.data?.error || "Failed to join event";
@@ -463,7 +471,8 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
               {events.map((event) => (
                 <div
                   key={event._id}
-                  className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20 hover:border-cyan-400/50 transition-all hover:scale-105"
+                  onClick={() => setSelectedEvent(event)}
+                  className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20 hover:border-cyan-400/50 transition-all hover:scale-105 cursor-pointer"
                 >
                   <div className="flex items-start justify-between mb-4">
                     <div>
@@ -486,28 +495,53 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
                     </div>
                     <div className="flex items-center">
                       <MapPin className="w-4 h-4 mr-2 text-pink-400" />
-                      {event.location?.city || event.location?.name || event.location?.address || "Location TBA"}
+                      {event.location?.city || event.location?.name || event.location?.address || event.location || "Location TBA"}
                     </div>
                     <div className="flex items-center">
                       <Users className="w-4 h-4 mr-2 text-cyan-400" />
                       {event.participants.length}/{event.maxParticipants} participants
                     </div>
+                    {event.organizer && (
+                      <div className="flex items-center">
+                        <img
+                          src={event.organizer.avatar || `https://ui-avatars.com/api/?name=${event.organizer.username}`}
+                          alt={event.organizer.username}
+                          className="w-5 h-5 rounded-full mr-2 border border-cyan-400"
+                        />
+                        <span className="text-gray-400 text-xs">by {event.organizer.username}</span>
+                      </div>
+                    )}
                   </div>
 
                   <button
-                    onClick={() => handleJoinEvent(event._id)}
-                    disabled={event.participants.some((p: any) => p._id === currentUser._id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleJoinEvent(event._id);
+                    }}
+                    disabled={event.participants.some((p: any) => p._id === currentUser._id || p === currentUser._id)}
                     className={`w-full py-2 rounded-lg font-semibold transition-all ${
-                      event.participants.some((p: any) => p._id === currentUser._id)
+                      event.participants.some((p: any) => p._id === currentUser._id || p === currentUser._id)
                         ? "bg-gray-600 text-gray-400 cursor-not-allowed"
                         : "bg-gradient-to-r from-cyan-500 to-purple-600 text-white hover:from-cyan-600 hover:to-purple-700"
                     }`}
                   >
-                    {event.participants.some((p: any) => p._id === currentUser._id) ? "Joined" : "Join Event"}
+                    {event.participants.some((p: any) => p._id === currentUser._id || p === currentUser._id) ? "Joined" : "Join Event"}
                   </button>
                 </div>
               ))}
             </div>
+          )}
+
+          {/* Event Detail Modal */}
+          {selectedEvent && (
+            <EventDetailModal
+              event={selectedEvent}
+              onClose={() => setSelectedEvent(null)}
+              onJoin={handleJoinEvent}
+              onMessage={handleMessageUser}
+              currentUserId={currentUser._id}
+            />
+          )}
           )}
         </div>
       </div>

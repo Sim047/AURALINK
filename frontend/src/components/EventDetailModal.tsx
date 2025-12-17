@@ -1,0 +1,265 @@
+// frontend/src/components/EventDetailModal.tsx
+import React from "react";
+import { X, MapPin, Calendar, Users, Trophy, Clock, DollarSign, Award, MessageCircle, User as UserIcon } from "lucide-react";
+import dayjs from "dayjs";
+
+interface Event {
+  _id: string;
+  title: string;
+  sport: string;
+  description: string;
+  date: string;
+  time: string;
+  location: any;
+  maxParticipants: number;
+  participants: any[];
+  organizer: {
+    _id: string;
+    username: string;
+    avatar?: string;
+  };
+  requiresApproval: boolean;
+  cost?: number;
+  skillLevel?: string;
+  image?: string;
+}
+
+interface EventDetailModalProps {
+  event: Event | null;
+  onClose: () => void;
+  onJoin: (eventId: string) => void;
+  onMessage: (organizerId: string) => void;
+  currentUserId?: string;
+}
+
+export default function EventDetailModal({ 
+  event, 
+  onClose, 
+  onJoin, 
+  onMessage,
+  currentUserId 
+}: EventDetailModalProps) {
+  if (!event) return null;
+
+  const isParticipant = currentUserId && event.participants.some((p: any) => p._id === currentUserId || p === currentUserId);
+  const isOrganizer = currentUserId && event.organizer._id === currentUserId;
+  const isFull = event.participants.length >= event.maxParticipants;
+
+  return (
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-cyan-500/30 shadow-2xl">
+        {/* Header */}
+        <div className="sticky top-0 bg-gradient-to-r from-cyan-600 to-purple-600 p-6 flex items-start justify-between z-10">
+          <div className="flex-1">
+            <h2 className="text-3xl font-bold text-white mb-2">{event.title}</h2>
+            <div className="flex items-center gap-3 text-cyan-100">
+              <span className="bg-white/20 px-3 py-1 rounded-full text-sm flex items-center gap-1">
+                <Trophy className="w-4 h-4" />
+                {event.sport}
+              </span>
+              {event.skillLevel && (
+                <span className="bg-white/20 px-3 py-1 rounded-full text-sm flex items-center gap-1">
+                  <Award className="w-4 h-4" />
+                  {event.skillLevel}
+                </span>
+              )}
+              {event.cost && (
+                <span className="bg-green-500/30 px-3 py-1 rounded-full text-sm font-semibold">
+                  ${event.cost}
+                </span>
+              )}
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-white hover:bg-white/20 rounded-full p-2 transition-colors"
+          >
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        <div className="p-6 space-y-6">
+          {/* Event Image */}
+          {event.image && (
+            <div className="rounded-xl overflow-hidden">
+              <img
+                src={event.image}
+                alt={event.title}
+                className="w-full h-64 object-cover"
+              />
+            </div>
+          )}
+
+          {/* Organizer Info */}
+          <div className="bg-white/5 backdrop-blur rounded-xl p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <img
+                  src={event.organizer.avatar || `https://ui-avatars.com/api/?name=${event.organizer.username}`}
+                  alt={event.organizer.username}
+                  className="w-12 h-12 rounded-full border-2 border-cyan-400"
+                />
+                <div>
+                  <p className="text-white font-semibold">{event.organizer.username}</p>
+                  <p className="text-gray-400 text-sm">Event Organizer</p>
+                </div>
+              </div>
+              {!isOrganizer && (
+                <button
+                  onClick={() => onMessage(event.organizer._id)}
+                  className="flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white px-4 py-2 rounded-lg font-semibold transition-all shadow-lg"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  Message Organizer
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Event Details */}
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-xl font-bold text-white mb-2">About This Event</h3>
+              <p className="text-gray-300 leading-relaxed">{event.description}</p>
+            </div>
+
+            {/* Info Grid */}
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="bg-white/5 backdrop-blur rounded-lg p-4">
+                <div className="flex items-center gap-3 text-gray-300">
+                  <div className="bg-purple-500/20 p-2 rounded-lg">
+                    <Calendar className="w-5 h-5 text-purple-400" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400">Date</p>
+                    <p className="text-white font-semibold">{dayjs(event.date).format("MMM D, YYYY")}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white/5 backdrop-blur rounded-lg p-4">
+                <div className="flex items-center gap-3 text-gray-300">
+                  <div className="bg-cyan-500/20 p-2 rounded-lg">
+                    <Clock className="w-5 h-5 text-cyan-400" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400">Time</p>
+                    <p className="text-white font-semibold">{event.time}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white/5 backdrop-blur rounded-lg p-4">
+                <div className="flex items-center gap-3 text-gray-300">
+                  <div className="bg-pink-500/20 p-2 rounded-lg">
+                    <MapPin className="w-5 h-5 text-pink-400" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400">Location</p>
+                    <p className="text-white font-semibold">
+                      {event.location?.city || event.location?.name || event.location?.address || event.location || "Location TBA"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white/5 backdrop-blur rounded-lg p-4">
+                <div className="flex items-center gap-3 text-gray-300">
+                  <div className="bg-green-500/20 p-2 rounded-lg">
+                    <Users className="w-5 h-5 text-green-400" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400">Participants</p>
+                    <p className="text-white font-semibold">
+                      {event.participants.length} / {event.maxParticipants}
+                      {isFull && <span className="text-red-400 text-xs ml-2">(Full)</span>}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {event.requiresApproval && (
+              <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
+                <p className="text-yellow-400 text-sm flex items-center gap-2">
+                  <Award className="w-4 h-4" />
+                  This event requires approval from the organizer
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Participants List */}
+          {event.participants.length > 0 && (
+            <div>
+              <h3 className="text-xl font-bold text-white mb-3">
+                Participants ({event.participants.length})
+              </h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {event.participants.slice(0, 8).map((participant: any, idx: number) => (
+                  <div 
+                    key={idx} 
+                    className="bg-white/5 backdrop-blur rounded-lg p-3 flex items-center gap-2"
+                  >
+                    <img
+                      src={participant.avatar || `https://ui-avatars.com/api/?name=${participant.username || 'User'}`}
+                      alt={participant.username || 'User'}
+                      className="w-8 h-8 rounded-full"
+                    />
+                    <span className="text-white text-sm truncate">
+                      {participant.username || 'User'}
+                    </span>
+                  </div>
+                ))}
+                {event.participants.length > 8 && (
+                  <div className="bg-white/5 backdrop-blur rounded-lg p-3 flex items-center justify-center">
+                    <span className="text-gray-400 text-sm">
+                      +{event.participants.length - 8} more
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          {!isOrganizer && (
+            <div className="flex gap-3">
+              <button
+                onClick={() => onJoin(event._id)}
+                disabled={isParticipant || isFull}
+                className={`flex-1 py-3 rounded-lg font-semibold transition-all ${
+                  isParticipant
+                    ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                    : isFull
+                    ? "bg-red-600/50 text-red-300 cursor-not-allowed"
+                    : "bg-gradient-to-r from-cyan-500 to-purple-600 text-white hover:from-cyan-600 hover:to-purple-700 shadow-lg"
+                }`}
+              >
+                {isParticipant 
+                  ? event.requiresApproval 
+                    ? "Request Pending / Joined"
+                    : "Already Joined"
+                  : isFull 
+                  ? "Event Full" 
+                  : event.requiresApproval
+                  ? "Request to Join"
+                  : "Join Event"
+                }
+              </button>
+            </div>
+          )}
+
+          {isOrganizer && (
+            <div className="bg-cyan-500/10 border border-cyan-500/30 rounded-lg p-4">
+              <p className="text-cyan-400 text-sm flex items-center gap-2">
+                <UserIcon className="w-4 h-4" />
+                You are the organizer of this event
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
