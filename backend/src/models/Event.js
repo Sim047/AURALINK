@@ -137,9 +137,30 @@ const eventSchema = new mongoose.Schema(
       enum: ["public", "private", "invite-only"],
       default: "public",
     },
+    requiresApproval: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );
+
+// Virtual fields for backward compatibility
+eventSchema.virtual("date").get(function() {
+  return this.startDate;
+});
+
+eventSchema.virtual("maxParticipants").get(function() {
+  return this.capacity?.max || 0;
+});
+
+eventSchema.virtual("cost").get(function() {
+  return this.pricing?.amount || 0;
+});
+
+// Ensure virtuals are included in JSON
+eventSchema.set("toJSON", { virtuals: true });
+eventSchema.set("toObject", { virtuals: true });
 
 // Indexes
 eventSchema.index({ sport: 1, startDate: 1 });

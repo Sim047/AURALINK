@@ -590,6 +590,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
               onClose={() => setSelectedEvent(null)}
               onJoin={handleJoinEvent}
               onMessage={handleMessageUser}
+              onViewProfile={onViewProfile}
               currentUserId={currentUser._id}
             />
           )}

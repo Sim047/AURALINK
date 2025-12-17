@@ -29,6 +29,7 @@ interface EventDetailModalProps {
   onClose: () => void;
   onJoin: (eventId: string) => void;
   onMessage: (organizerId: string) => void;
+  onViewProfile?: (userId: string) => void;
   currentUserId?: string;
 }
 
@@ -37,6 +38,7 @@ export default function EventDetailModal({
   onClose, 
   onJoin, 
   onMessage,
+  onViewProfile,
   currentUserId 
 }: EventDetailModalProps) {
   if (!event) return null;
@@ -93,15 +95,20 @@ export default function EventDetailModal({
           {/* Organizer Info */}
           <div className="bg-white/5 backdrop-blur rounded-xl p-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
+              <div 
+                className="flex items-center gap-3 cursor-pointer hover:bg-white/5 rounded-lg p-2 -m-2 transition-colors"
+                onClick={() => onViewProfile && onViewProfile(event.organizer._id)}
+              >
                 <img
                   src={event.organizer.avatar || `https://ui-avatars.com/api/?name=${event.organizer.username}`}
                   alt={event.organizer.username}
                   className="w-12 h-12 rounded-full border-2 border-cyan-400"
                 />
                 <div>
-                  <p className="text-white font-semibold">{event.organizer.username}</p>
-                  <p className="text-gray-400 text-sm">Event Organizer</p>
+                  <p className="text-white font-semibold hover:text-cyan-400 transition-colors">
+                    {event.organizer.username}
+                  </p>
+                  <p className="text-gray-400 text-sm">Event Organizer · Click to view profile</p>
                 </div>
               </div>
               {!isOrganizer && (

@@ -185,129 +185,154 @@ router.get("/my/created", auth, async (req, res) => {
   }
 });
 
-// POST join event (create join request with transaction code)
+// POST join event - SIMPLIFIED AND REBUILT
 router.post("/:id/join", auth, async (req, res) => {
   try {
     const { transactionCode, transactionDetails } = req.body;
-    console.log("Join request received:", { eventId: req.params.id, userId: req.user.id, transactionCode });
-    const event = await Event.findById(req.params.id).populate("organizer", "username email avatar");
+    const userId = req.user.id;
+    const eventId = req.params.id;
 
+    console.log("=== JOIN EVENT REQUEST ===");
+    console.log("Event ID:", eventId);
+    console.log("User ID:", userId);
+    console.log("Transaction Code:", transactionCode);
+    console.log("Request Body:", req.body);
+
+    // Find event
+    const event = await Event.findById(eventId).populate("organizer", "username email avatar");
+    
     if (!event) {
+      console.log("❌ Event not found");
       return res.status(404).json({ error: "Event not found" });
     }
 
-    // Check if already joined
-    if (event.participants.includes(req.user.id)) {
-      return res.status(400).json({ error: "Already joined this event" });
+    console.log("Event found:", event.title);
+    console.log("Pricing:", event.pricing);
+    console.log("Requires Approval:", event.requiresApproval);
+    console.log("Current participants:", event.participants.length);
+    console.log("Max capacity:", event.capacity?.max);
+
+    // Check if already a participant
+    const isAlreadyParticipant = event.participants.some(
+      p => p.toString() === userId
+    );
+    
+    if (isAlreadyParticipant) {
+      console.log("❌ User already joined");
+      return res.status(400).json({ error: "You have already joined this event" });
     }
 
     // Check capacity
-    if (event.participants.length >= event.capacity?.max) {
+    const maxCapacity = event.capacity?.max || 1000;
+    if (event.participants.length >= maxCapacity) {
+      console.log("❌ Event full");
       return res.status(400).json({ error: "Event is at full capacity" });
     }
 
-    // Initialize joinRequests array if it doesn't exist
-    if (!event.joinRequests) {
+    // Check if paid event requires transaction code
+    const isPaid = event.pricing && event.pricing.type === "paid";
+    if (isPaid && !transactionCode) {
+      console.log("❌ Missing transaction code for paid event");
+      return res.status(400).json({ 
+        error: "Transaction code is required for paid events",
+        amount: event.pricing.amount,
+        currency: event.pricing.currency 
+      });
+    }
+
+    // Initialize joinRequests if needed
+    if (!Array.isArray(event.joinRequests)) {
       event.joinRequests = [];
     }
 
-    // Check if already has pending request (only if requiresApproval is true)
+    // Check for existing pending request (only if approval required)
     if (event.requiresApproval) {
-      const existingRequest = event.joinRequests.find(
-        request => request.user.toString() === req.user.id && request.status === "pending"
+      const hasPendingRequest = event.joinRequests.some(
+        req => req.user.toString() === userId && req.status === "pending"
       );
-      if (existingRequest) {
-        console.log("User already has pending request");
+      
+      if (hasPendingRequest) {
+        console.log("❌ Already has pending request");
         return res.status(400).json({ error: "You already have a pending join request" });
       }
     }
 
-    // For paid events, require transaction code
-    if (event.pricing?.type === "paid" && !transactionCode) {
-      return res.status(400).json({ error: "Transaction code is required for paid events" });
-    }
+    // DECISION: Approve immediately or create request?
+    const needsApproval = event.requiresApproval === true;
 
-    // If event requires approval, create join request
-    if (event.requiresApproval) {
+    if (needsApproval) {
+      // CREATE JOIN REQUEST
+      console.log("Creating join request...");
       event.joinRequests.push({
-        user: req.user.id,
-        transactionCode: transactionCode || "N/A",
+        user: userId,
+        transactionCode: transactionCode || "FREE",
         requestedAt: new Date(),
         status: "pending",
       });
-
+      
       await event.save();
-      console.log("Join request created, total requests:", event.joinRequests.length);
       await event.populate("joinRequests.user", "username avatar");
+      
+      console.log("✅ Join request created");
+      
+      // Emit socket notification
+      const io = req.app.get("io");
+      if (io) {
+        io.emit("join_request_created", {
+          eventId: event._id,
+          eventTitle: event.title,
+          organizerId: event.organizer._id.toString(),
+          requesterId: userId,
+        });
+      }
+
+      return res.json({
+        success: true,
+        message: "Join request submitted! Awaiting organizer approval.",
+        event,
+        requiresApproval: true
+      });
+      
     } else {
-      // Directly add to participants for events that don't require approval
-      event.participants.push(req.user.id);
+      // JOIN IMMEDIATELY
+      console.log("Adding to participants immediately...");
+      event.participants.push(userId);
+      
       if (event.capacity) {
         event.capacity.current = event.participants.length;
       }
-      await event.save();
-      console.log("User directly added to participants");
-      await event.populate("participants", "username avatar");
-    }
-
-    // Create a booking for this join request (only if pricing exists and is paid)
-    let booking = null;
-    if (event.pricing && event.pricing.type === "paid") {
-      console.log("📝 Creating booking for event join...");
-      const Booking = (await import("../models/Booking.js")).default;
       
-      try {
-        booking = await Booking.create({
-          client: req.user.id,
-          provider: event.organizer._id,
-          bookingType: "event",
-          event: event._id,
-          scheduledDate: event.startDate,
-          scheduledTime: event.time || "TBD",
-          location: event.location?.name || event.location?.city || "TBD",
-          locationDetails: event.location?.address || "",
-          pricing: {
-            amount: event.pricing.amount || 0,
-            currency: event.pricing.currency || "USD",
-            transactionCode: transactionCode || "FREE_EVENT",
-            transactionDetails: transactionDetails || "",
-            paymentInstructions: event.pricing.paymentInstructions || "",
-          },
-          status: event.requiresApproval ? "pending-approval" : "confirmed",
-          approvalStatus: event.requiresApproval ? "pending" : "approved",
-          paymentVerified: false,
+      await event.save();
+      await event.populate("participants", "username avatar");
+      
+      console.log("✅ User added to participants");
+
+      // Emit socket notification
+      const io = req.app.get("io");
+      if (io) {
+        io.emit("participant_joined", {
+          eventId: event._id,
+          eventTitle: event.title,
+          organizerId: event.organizer._id.toString(),
+          participantId: userId,
         });
-
-        console.log("✅ Booking created successfully:", booking._id);
-      } catch (bookingErr) {
-        console.error("❌ Failed to create booking:", bookingErr);
-        // Continue anyway - join was successful
-        booking = null;
       }
-    }
 
-    // Emit socket notification to event organizer
-    const io = req.app.get("io");
-    if (io) {
-      const eventType = event.requiresApproval ? "join_request_created" : "participant_joined";
-      io.emit(eventType, {
-        eventId: event._id,
-        eventTitle: event.title,
-        organizerId: event.organizer._id.toString(),
-        requesterId: req.user.id,
-        bookingId: booking?._id || null,
+      return res.json({
+        success: true,
+        message: "Successfully joined event!",
+        event,
+        requiresApproval: false
       });
     }
 
-    res.json({ 
-      message: event.requiresApproval ? "Join request submitted and awaiting approval" : "Successfully joined event!", 
-      event, 
-      booking: booking || null,
-      success: true 
-    });
   } catch (err) {
-    console.error("Join event error:", err);
-    res.status(500).json({ error: "Failed to submit join request" });
+    console.error("❌ JOIN EVENT ERROR:", err);
+    console.error("Error stack:", err.stack);
+    return res.status(500).json({ 
+      error: "Failed to join event",
+      details: err.message 
+    });
   }
 });
 
