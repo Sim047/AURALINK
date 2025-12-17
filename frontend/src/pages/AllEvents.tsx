@@ -292,7 +292,7 @@ export default function AllEvents({ token, onBack, onNavigate, onViewEvent }: an
                       <div className="flex items-center gap-2">
                         <Users className="w-4 h-4 text-purple-500" />
                         <span>
-                          {event.participants?.length || 0} / {event.maxParticipants || 0} participants
+                          {event.participants?.length || 0} / {event.capacity?.max || 0} participants
                         </span>
                       </div>
 

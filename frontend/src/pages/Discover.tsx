@@ -716,10 +716,10 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
                       <h3 className="text-lg font-bold text-white mb-1">{event.title}</h3>
                       <p className="text-sm text-cyan-400">{event.sport}</p>
                     </div>
-                    {(event.cost || event.pricing?.amount) && (
+                    {(event.pricing?.amount && event.pricing.amount > 0) && (
                       <div className="bg-green-500/20 px-3 py-1 rounded-full">
                         <span className="text-green-400 font-semibold text-sm">
-                          {event.pricing?.currency || "$"}{event.pricing?.amount || event.cost}
+                          {event.pricing?.currency || "$"}{event.pricing?.amount}
                         </span>
                       </div>
                     )}
@@ -730,7 +730,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
                   <div className="space-y-2 text-sm text-gray-300 mb-4">
                     <div className="flex items-center">
                       <Calendar className="w-4 h-4 mr-2 text-purple-400" />
-                      {dayjs(event.date).format("MMM D, YYYY")} at {event.time}
+                      {dayjs(event.startDate || event.date).format("MMM D, YYYY")} at {event.time}
                     </div>
                     <div className="flex items-center">
                       <MapPin className="w-4 h-4 mr-2 text-pink-400" />
@@ -738,7 +738,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
                     </div>
                     <div className="flex items-center">
                       <Users className="w-4 h-4 mr-2 text-cyan-400" />
-                      {event.participants.length}/{event.maxParticipants} participants
+                      {event.participants?.length || 0}/{event.capacity?.max || 0} participants
                     </div>
                     {event.organizer && (
                       <div className="flex items-center">

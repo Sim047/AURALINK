@@ -8,10 +8,13 @@ interface Event {
   title: string;
   sport: string;
   description: string;
-  date: string;
+  startDate: string;
   time: string;
   location: any;
-  maxParticipants: number;
+  capacity?: {
+    max?: number;
+    current?: number;
+  };
   participants: any[];
   organizer: {
     _id: string;
@@ -57,9 +60,9 @@ export default function EventDetailModal({
 
   const [participantsCollapsed, setParticipantsCollapsed] = useState(true);
 
-  const isParticipant = currentUserId && event.participants.some((p: any) => p._id === currentUserId || p === currentUserId);
+  const isParticipant = currentUserId && event.participants?.some((p: any) => p._id === currentUserId || p === currentUserId);
   const isOrganizer = currentUserId && event.organizer._id === currentUserId;
-  const isFull = event.participants.length >= event.maxParticipants;
+  const isFull = (event.participants?.length || 0) >= (event.capacity?.max || 0);
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -79,9 +82,9 @@ export default function EventDetailModal({
                   {event.skillLevel}
                 </span>
               )}
-              {(event.cost || event.pricing?.amount) && (
+              {(event.pricing?.amount && event.pricing.amount > 0) && (
                 <span className="bg-green-500/30 px-3 py-1 rounded-full text-sm font-semibold">
-                  {event.pricing?.currency || "$"} {event.pricing?.amount || event.cost}
+                  {event.pricing?.currency || "$"} {event.pricing?.amount}
                 </span>
               )}
             </div>
@@ -157,7 +160,7 @@ export default function EventDetailModal({
                   </div>
                   <div>
                     <p className="text-xs text-gray-400">Date</p>
-                    <p className="text-white font-semibold">{dayjs(event.date).format("MMM D, YYYY")}</p>
+                      <p className="text-white font-semibold">{dayjs(event.startDate || event.date).format("MMM D, YYYY")}</p>
                   </div>
                 </div>
               </div>
@@ -196,7 +199,7 @@ export default function EventDetailModal({
                   <div>
                     <p className="text-xs text-gray-400">Participants</p>
                     <p className="text-white font-semibold">
-                      {event.participants.length} / {event.maxParticipants}
+                      {event.participants?.length || 0} / {event.capacity?.max || 0}
                       {isFull && <span className="text-red-400 text-xs ml-2">(Full)</span>}
                     </p>
                   </div>
@@ -240,7 +243,7 @@ export default function EventDetailModal({
                     Participants
                   </h3>
                   <p className="text-gray-400 text-xs">
-                    {event.participants.length} / {event.maxParticipants} joined
+                    {event.participants?.length || 0} / {event.capacity?.max || 0} joined
                   </p>
                 </div>
               </div>
@@ -260,7 +263,7 @@ export default function EventDetailModal({
             {!participantsCollapsed && (
               <div className="p-6 pt-0 space-y-4">
                 {/* Preview of Participants */}
-                {event.participants.length > 0 && (
+                {event.participants?.length > 0 && (
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {event.participants.slice(0, 8).map((participant: any, idx: number) => (
                       <div 
@@ -277,7 +280,7 @@ export default function EventDetailModal({
                         </span>
                       </div>
                     ))}
-                    {event.participants.length > 8 && (
+                    {event.participants?.length > 8 && (
                       <div className="bg-white/5 backdrop-blur rounded-lg p-3 flex items-center justify-center">
                         <span className="text-cyan-400 text-sm font-semibold">
                           +{event.participants.length - 8} more
@@ -287,14 +290,14 @@ export default function EventDetailModal({
                   </div>
                 )}
 
-                {event.participants.length === 0 && !isOrganizer && (
+                {event.participants?.length === 0 && !isOrganizer && (
                   <div className="text-center py-6 text-gray-400">
                     <Users className="w-10 h-10 mx-auto mb-2 opacity-50" />
                     <p className="text-sm">No participants yet. Be the first!</p>
                   </div>
                 )}
 
-                {event.participants.length === 0 && isOrganizer && (
+                {event.participants?.length === 0 && isOrganizer && (
                   <div className="text-center py-6 text-gray-400">
                     <Users className="w-10 h-10 mx-auto mb-2 opacity-50" />
                     <p className="text-sm">No participants yet. Share your event!</p>
