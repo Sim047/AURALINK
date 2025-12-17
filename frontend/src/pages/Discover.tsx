@@ -152,6 +152,14 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
   const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
 
   useEffect(() => {
+    console.log("[Discover] Payment modal state changed:", {
+      showPaymentModal,
+      hasEvent: !!paymentModalEvent,
+      shouldRender: showPaymentModal && paymentModalEvent
+    });
+  }, [showPaymentModal, paymentModalEvent]);
+
+  useEffect(() => {
     if (activeCategory === "sports") {
       fetchEvents();
     } else if (activeCategory === "services") {
@@ -1127,13 +1135,20 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
           )}
 
           {/* Payment Transaction Modal */}
-          {showPaymentModal && paymentModalEvent && (
-            <PaymentTransactionModal
-              event={paymentModalEvent}
-              onSubmit={handlePaymentSubmit}
-              onCancel={handlePaymentCancel}
-            />
-          )}
+          {(() => {
+            console.log("[Discover] Checking modal render condition:", {
+              showPaymentModal,
+              hasPaymentModalEvent: !!paymentModalEvent,
+              willRender: showPaymentModal && paymentModalEvent
+            });
+            return showPaymentModal && paymentModalEvent ? (
+              <PaymentTransactionModal
+                event={paymentModalEvent}
+                onSubmit={handlePaymentSubmit}
+                onCancel={handlePaymentCancel}
+              />
+            ) : null;
+          })()}
 
           {/* Notification Toast */}
           {notification && (
