@@ -341,43 +341,82 @@ router.post("/:id/join", auth, async (req, res) => {
 // POST approve join request
 router.post("/:id/approve-request/:requestId", auth, async (req, res) => {
   try {
-    const event = await Event.findById(req.params.id);
+    console.log("=== APPROVE REQUEST ===");
+    console.log("Event ID:", req.params.id);
+    console.log("Request ID:", req.params.requestId);
+    console.log("Approver User ID:", req.user.id);
+
+    const event = await Event.findById(req.params.id).populate("organizer", "username avatar");
 
     if (!event) {
+      console.log("❌ Event not found");
       return res.status(404).json({ error: "Event not found" });
     }
 
     // Only organizer can approve
-    if (event.organizer.toString() !== req.user.id) {
+    if (event.organizer._id.toString() !== req.user.id) {
+      console.log("❌ Not authorized - organizer:", event.organizer._id.toString(), "user:", req.user.id);
       return res.status(403).json({ error: "Only event organizer can approve requests" });
     }
 
     const request = event.joinRequests.id(req.params.requestId);
     if (!request) {
+      console.log("❌ Join request not found");
       return res.status(404).json({ error: "Join request not found" });
     }
 
+    console.log("Request status:", request.status);
+    console.log("Request user:", request.user);
+
     if (request.status !== "pending") {
+      console.log("❌ Request already processed");
       return res.status(400).json({ error: "Request already processed" });
     }
 
     // Check capacity
-    if (event.capacity.current >= event.capacity.max) {
+    const currentCount = event.participants.length;
+    const maxCapacity = event.capacity?.max || 1000;
+    console.log("Current participants:", currentCount, "/ Max:", maxCapacity);
+
+    if (currentCount >= maxCapacity) {
+      console.log("❌ Event at full capacity");
       return res.status(400).json({ error: "Event is at full capacity" });
     }
 
-    // Approve request
-    request.status = "approved";
-    event.participants.push(request.user);
-    event.capacity.current += 1;
-    await event.save();
+    // Check if user already in participants (edge case)
+    const isAlreadyParticipant = event.participants.some(
+      p => p.toString() === request.user.toString()
+    );
 
-    await event.populate("participants", "username avatar");
-    await event.populate("joinRequests.user", "username avatar");
+    if (isAlreadyParticipant) {
+      console.log("⚠️ User already in participants, just updating request status");
+      request.status = "approved";
+      await event.save();
+    } else {
+      // Approve request and add to participants
+      request.status = "approved";
+      event.participants.push(request.user);
+      
+      if (event.capacity) {
+        event.capacity.current = event.participants.length;
+      }
+      
+      await event.save();
+      console.log("✅ Request approved, user added to participants");
+    }
+
+    // Populate all necessary fields
+    await event.populate("participants", "username avatar email");
+    await event.populate("joinRequests.user", "username avatar email");
+    await event.populate("organizer", "username avatar");
+
+    console.log("Final participants count:", event.participants.length);
+    console.log("Pending requests count:", event.joinRequests.filter(r => r.status === "pending").length);
 
     // Emit socket notification to requester
     const io = req.app.get("io");
     if (io) {
+      console.log("Emitting socket notification to:", request.user.toString());
       io.emit("join_request_approved", {
         eventId: event._id,
         eventTitle: event.title,
@@ -385,45 +424,69 @@ router.post("/:id/approve-request/:requestId", auth, async (req, res) => {
       });
     }
 
-    res.json({ message: "Join request approved", event });
+    res.json({ 
+      success: true,
+      message: "✅ Join request approved successfully!", 
+      event 
+    });
   } catch (err) {
-    console.error("Approve request error:", err);
-    res.status(500).json({ error: "Failed to approve request" });
+    console.error("❌ Approve request error:", err);
+    console.error("Error stack:", err.stack);
+    res.status(500).json({ error: "Failed to approve request", details: err.message });
   }
 });
 
 // POST reject join request
 router.post("/:id/reject-request/:requestId", auth, async (req, res) => {
   try {
-    const event = await Event.findById(req.params.id);
+    console.log("=== REJECT REQUEST ===");
+    console.log("Event ID:", req.params.id);
+    console.log("Request ID:", req.params.requestId);
+    console.log("Rejector User ID:", req.user.id);
+
+    const event = await Event.findById(req.params.id).populate("organizer", "username avatar");
 
     if (!event) {
+      console.log("❌ Event not found");
       return res.status(404).json({ error: "Event not found" });
     }
 
     // Only organizer can reject
-    if (event.organizer.toString() !== req.user.id) {
+    if (event.organizer._id.toString() !== req.user.id) {
+      console.log("❌ Not authorized");
       return res.status(403).json({ error: "Only event organizer can reject requests" });
     }
 
     const request = event.joinRequests.id(req.params.requestId);
     if (!request) {
+      console.log("❌ Join request not found");
       return res.status(404).json({ error: "Join request not found" });
     }
 
+    console.log("Request status:", request.status);
+    console.log("Request user:", request.user);
+
     if (request.status !== "pending") {
+      console.log("❌ Request already processed");
       return res.status(400).json({ error: "Request already processed" });
     }
 
     // Reject request
     request.status = "rejected";
     await event.save();
+    console.log("✅ Request rejected");
 
-    await event.populate("joinRequests.user", "username avatar");
+    // Populate all necessary fields
+    await event.populate("participants", "username avatar email");
+    await event.populate("joinRequests.user", "username avatar email");
+    await event.populate("organizer", "username avatar");
+
+    console.log("Pending requests count:", event.joinRequests.filter(r => r.status === "pending").length);
 
     // Emit socket notification to requester
     const io = req.app.get("io");
     if (io) {
+      console.log("Emitting socket notification to:", request.user.toString());
       io.emit("join_request_rejected", {
         eventId: event._id,
         eventTitle: event.title,
@@ -431,10 +494,15 @@ router.post("/:id/reject-request/:requestId", auth, async (req, res) => {
       });
     }
 
-    res.json({ message: "Join request rejected", event });
+    res.json({ 
+      success: true,
+      message: "Join request rejected", 
+      event 
+    });
   } catch (err) {
-    console.error("Reject request error:", err);
-    res.status(500).json({ error: "Failed to reject request" });
+    console.error("❌ Reject request error:", err);
+    console.error("Error stack:", err.stack);
+    res.status(500).json({ error: "Failed to reject request", details: err.message });
   }
 });
 

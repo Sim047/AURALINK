@@ -33,6 +33,8 @@ import ServiceDetailModal from "../components/ServiceDetailModal";
 import ProductDetailModal from "../components/ProductDetailModal";
 import EventDetailModal from "../components/EventDetailModal";
 import EventParticipantsModal from "../components/EventParticipantsModal";
+import NotificationToast from "../components/NotificationToast";
+import PaymentTransactionModal from "../components/PaymentTransactionModal";
 
 dayjs.extend(relativeTime);
 
@@ -143,6 +145,8 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
   const [selectedProduct, setSelectedProduct] = useState<MarketplaceItem | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [participantsModalEvent, setParticipantsModalEvent] = useState<Event | null>(null);
+  const [notification, setNotification] = useState<{ message: string; type: "success" | "error" | "info" | "warning" } | null>(null);
+  const [paymentModalEvent, setPaymentModalEvent] = useState<Event | null>(null);
   
   const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
 
@@ -199,7 +203,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
 
   const handleJoinEvent = async (eventId: string) => {
     if (!token) {
-      alert("Please log in to join events");
+      setNotification({ message: "Please log in to join events", type: "warning" });
       return;
     }
     
@@ -208,42 +212,31 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
       
       // Find the event to check if it's paid
       const event = events.find(e => e._id === eventId) || selectedEvent;
-      let requestBody: any = {};
       
-      // If event has pricing and is paid, ask for transaction code
+      // If event has pricing and is paid, show payment modal
       if (event && (event as any).pricing?.type === "paid") {
-        const transactionCode = prompt(
-          `This is a paid event (${(event as any).pricing.currency} ${(event as any).pricing.amount}).\n\n` +
-          `Please enter your payment transaction code/reference:`,
-          ""
-        );
-        
-        if (!transactionCode) {
-          alert("Transaction code is required for paid events");
-          return;
-        }
-        
-        const transactionDetails = prompt(
-          "Optional: Add any payment details or notes:",
-          ""
-        );
-        
-        requestBody = {
-          transactionCode: transactionCode.trim(),
-          transactionDetails: transactionDetails?.trim() || ""
-        };
+        setPaymentModalEvent(event);
+        return; // Wait for modal submission
       }
       
+      // Free event - proceed directly
       const response = await axios.post(
         `${API_URL}/events/${eventId}/join`, 
-        requestBody, 
+        {}, 
         { headers: { Authorization: `Bearer ${token}` } }
       );
       console.log("[Discover] Join event response:", response.data);
       
-      // Show success message
+      // Show success message with proper notification
       const message = response.data.message || "Successfully joined event!";
-      alert(message);
+      const requiresApproval = response.data.requiresApproval;
+      
+      setNotification({ 
+        message: requiresApproval 
+          ? "✅ Join request submitted! The organizer will review your request."
+          : message,
+        type: "success" 
+      });
       
       // Refresh events list
       await fetchEvents();
@@ -260,13 +253,62 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
     } catch (error: any) {
       console.error("[Discover] Join event error:", error);
       const message = error.response?.data?.message || error.response?.data?.error || "Failed to join event";
-      alert(message);
+      setNotification({ message, type: "error" });
+    }
+  };
+
+  const handlePaymentSubmit = async (transactionCode: string, transactionDetails: string) => {
+    if (!paymentModalEvent) return;
+    
+    try {
+      const response = await axios.post(
+        `${API_URL}/events/${paymentModalEvent._id}/join`,
+        {
+          transactionCode,
+          transactionDetails
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      console.log("[Discover] Join paid event response:", response.data);
+      
+      // Close payment modal
+      setPaymentModalEvent(null);
+      
+      // Show success notification
+      const requiresApproval = response.data.requiresApproval;
+      setNotification({
+        message: requiresApproval
+          ? "✅ Join request submitted! The organizer will verify your payment and approve your request."
+          : "✅ Successfully joined event!",
+        type: "success"
+      });
+      
+      // Refresh events list
+      await fetchEvents();
+      
+      // Update selected event if modal is open
+      if (selectedEvent && selectedEvent._id === paymentModalEvent._id) {
+        try {
+          const updatedEvent = await axios.get(`${API_URL}/events/${paymentModalEvent._id}`);
+          setSelectedEvent(updatedEvent.data);
+        } catch (err) {
+          console.error("Failed to refresh event details:", err);
+        }
+      }
+    } catch (error: any) {
+      console.error("[Discover] Join paid event error:", error);
+      setPaymentModalEvent(null);
+      setNotification({
+        message: error.response?.data?.message || error.response?.data?.error || "Failed to submit join request",
+        type: "error"
+      });
     }
   };
 
   const handleApproveRequest = async (eventId: string, requestId: string) => {
     if (!token) {
-      alert("Please log in to manage requests");
+      setNotification({ message: "Please log in to manage requests", type: "warning" });
       return;
     }
     
@@ -278,23 +320,50 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
         { headers: { Authorization: `Bearer ${token}` } }
       );
       console.log("[Discover] Approve response:", response.data);
-      alert(response.data.message || "Request approved successfully!");
+      setNotification({ 
+        message: response.data.message || "✅ Request approved! Participant added to event.", 
+        type: "success" 
+      });
       
       // Refresh event data
       await fetchEvents();
+      
+      // Update participants modal with fresh data
       if (participantsModalEvent && participantsModalEvent._id === eventId) {
-        const updatedEvent = await axios.get(`${API_URL}/events/${eventId}`);
-        setParticipantsModalEvent(updatedEvent.data);
+        try {
+          const updatedEventResponse = await axios.get(`${API_URL}/events/${eventId}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          console.log("[Discover] Updated event data:", updatedEventResponse.data);
+          setParticipantsModalEvent(updatedEventResponse.data);
+        } catch (err) {
+          console.error("[Discover] Failed to fetch updated event:", err);
+        }
+      }
+      
+      // Update selected event if detail modal is open
+      if (selectedEvent && selectedEvent._id === eventId) {
+        try {
+          const updatedEventResponse = await axios.get(`${API_URL}/events/${eventId}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          setSelectedEvent(updatedEventResponse.data);
+        } catch (err) {
+          console.error("[Discover] Failed to update selected event:", err);
+        }
       }
     } catch (error: any) {
       console.error("[Discover] Approve request error:", error);
-      alert(error.response?.data?.message || "Failed to approve request");
+      setNotification({ 
+        message: error.response?.data?.error || error.response?.data?.message || "Failed to approve request", 
+        type: "error" 
+      });
     }
   };
 
   const handleRejectRequest = async (eventId: string, requestId: string) => {
     if (!token) {
-      alert("Please log in to manage requests");
+      setNotification({ message: "Please log in to manage requests", type: "warning" });
       return;
     }
     
@@ -306,23 +375,50 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
         { headers: { Authorization: `Bearer ${token}` } }
       );
       console.log("[Discover] Reject response:", response.data);
-      alert(response.data.message || "Request rejected successfully!");
+      setNotification({ 
+        message: response.data.message || "Request rejected", 
+        type: "info" 
+      });
       
       // Refresh event data
       await fetchEvents();
+      
+      // Update participants modal with fresh data
       if (participantsModalEvent && participantsModalEvent._id === eventId) {
-        const updatedEvent = await axios.get(`${API_URL}/events/${eventId}`);
-        setParticipantsModalEvent(updatedEvent.data);
+        try {
+          const updatedEventResponse = await axios.get(`${API_URL}/events/${eventId}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          console.log("[Discover] Updated event data after rejection:", updatedEventResponse.data);
+          setParticipantsModalEvent(updatedEventResponse.data);
+        } catch (err) {
+          console.error("[Discover] Failed to fetch updated event:", err);
+        }
+      }
+      
+      // Update selected event if detail modal is open
+      if (selectedEvent && selectedEvent._id === eventId) {
+        try {
+          const updatedEventResponse = await axios.get(`${API_URL}/events/${eventId}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          setSelectedEvent(updatedEventResponse.data);
+        } catch (err) {
+          console.error("[Discover] Failed to update selected event:", err);
+        }
       }
     } catch (error: any) {
       console.error("[Discover] Reject request error:", error);
-      alert(error.response?.data?.message || "Failed to reject request");
+      setNotification({ 
+        message: error.response?.data?.error || error.response?.data?.message || "Failed to reject request", 
+        type: "error" 
+      });
     }
   };
 
   const handleLikeItem = async (itemId: string) => {
     if (!token) {
-      alert("Please log in to like items");
+      setNotification({ message: "Please log in to like items", type: "warning" });
       return;
     }
     
@@ -344,13 +440,16 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
       }
     } catch (error: any) {
       console.error("[Discover] Error liking item:", error);
-      alert(error.response?.data?.message || "Failed to like item");
+      setNotification({ 
+        message: error.response?.data?.message || "Failed to like item", 
+        type: "error" 
+      });
     }
   };
 
   const handleLikeService = async (serviceId: string) => {
     if (!token) {
-      alert("Please log in to like services");
+      setNotification({ message: "Please log in to like services", type: "warning" });
       return;
     }
     
@@ -372,7 +471,10 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
       }
     } catch (error: any) {
       console.error("[Discover] Error liking service:", error);
-      alert(error.response?.data?.message || "Failed to like service");
+      setNotification({ 
+        message: error.response?.data?.message || "Failed to like service", 
+        type: "error" 
+      });
     }
   };
 
@@ -380,7 +482,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
     console.log("[Discover] handleMessageUser called with userId:", userId);
     
     if (!token) {
-      alert("Please log in to send messages");
+      setNotification({ message: "Please log in to send messages", type: "warning" });
       return;
     }
     
@@ -408,11 +510,16 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
       localStorage.setItem("auralink-in-dm", "true");
       
       // Navigate to main view
-      alert("Opening conversation...");
-      window.location.href = "/";
+      setNotification({ message: "Opening conversation...", type: "info" });
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 1000);
     } catch (error: any) {
       console.error("[Discover] Error creating conversation:", error);
-      alert(error.response?.data?.message || "Failed to start conversation");
+      setNotification({ 
+        message: error.response?.data?.message || "Failed to start conversation", 
+        type: "error" 
+      });
     }
   };
 
@@ -998,6 +1105,24 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
               onLike={handleLikeItem}
               onMessage={handleMessageUser}
               currentUserId={currentUser._id}
+            />
+          )}
+
+          {/* Payment Transaction Modal */}
+          {paymentModalEvent && (
+            <PaymentTransactionModal
+              event={paymentModalEvent as any}
+              onSubmit={handlePaymentSubmit}
+              onCancel={() => setPaymentModalEvent(null)}
+            />
+          )}
+
+          {/* Notification Toast */}
+          {notification && (
+            <NotificationToast
+              message={notification.message}
+              type={notification.type}
+              onClose={() => setNotification(null)}
             />
           )}
         </div>

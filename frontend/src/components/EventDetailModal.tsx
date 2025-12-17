@@ -1,6 +1,6 @@
 // frontend/src/components/EventDetailModal.tsx
-import React from "react";
-import { X, MapPin, Calendar, Users, Trophy, Clock, DollarSign, Award, MessageCircle, User as UserIcon } from "lucide-react";
+import React, { useState } from "react";
+import { X, MapPin, Calendar, Users, Trophy, Clock, DollarSign, Award, MessageCircle, User as UserIcon, ChevronDown, ChevronUp } from "lucide-react";
 import dayjs from "dayjs";
 
 interface Event {
@@ -54,6 +54,8 @@ export default function EventDetailModal({
   currentUserId 
 }: EventDetailModalProps) {
   if (!event) return null;
+
+  const [participantsCollapsed, setParticipantsCollapsed] = useState(true);
 
   const isParticipant = currentUserId && event.participants.some((p: any) => p._id === currentUserId || p === currentUserId);
   const isOrganizer = currentUserId && event.organizer._id === currentUserId;
@@ -224,76 +226,96 @@ export default function EventDetailModal({
             )}
           </div>
 
-          {/* Participants Section - ALWAYS SHOW */}
-          <div className="bg-gradient-to-br from-purple-900/30 to-cyan-900/30 border border-cyan-400/30 rounded-xl p-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-2xl font-bold text-white flex items-center gap-2">
-                  <Users className="w-6 h-6 text-cyan-400" />
-                  Participants
-                </h3>
-                <p className="text-gray-300 text-sm mt-1">
-                  {event.participants.length} / {event.maxParticipants} joined
-                  {isOrganizer && " · Manage your attendees"}
-                </p>
+          {/* Participants Section - COLLAPSIBLE */}
+          <div className="bg-gradient-to-br from-purple-900/30 to-cyan-900/30 border border-cyan-400/30 rounded-xl overflow-hidden">
+            {/* Header - Always Visible */}
+            <button
+              onClick={() => setParticipantsCollapsed(!participantsCollapsed)}
+              className="w-full p-4 flex items-center justify-between hover:bg-white/5 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <Users className="w-5 h-5 text-cyan-400" />
+                <div className="text-left">
+                  <h3 className="text-lg font-bold text-white">
+                    Participants
+                  </h3>
+                  <p className="text-gray-400 text-xs">
+                    {event.participants.length} / {event.maxParticipants} joined
+                  </p>
+                </div>
               </div>
-            </div>
-            
-            {/* Preview of Participants */}
-            {event.participants.length > 0 && (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {event.participants.slice(0, 8).map((participant: any, idx: number) => (
-                  <div 
-                    key={idx} 
-                    className="bg-white/5 backdrop-blur rounded-lg p-3 flex items-center gap-2 hover:bg-white/10 transition-colors"
-                  >
-                    <img
-                      src={participant.avatar || `https://ui-avatars.com/api/?name=${participant.username || 'User'}`}
-                      alt={participant.username || 'User'}
-                      className="w-8 h-8 rounded-full border-2 border-cyan-400/50"
-                    />
-                    <span className="text-white text-sm truncate">
-                      {participant.username || 'User'}
-                    </span>
-                  </div>
-                ))}
-                {event.participants.length > 8 && (
-                  <div className="bg-white/5 backdrop-blur rounded-lg p-3 flex items-center justify-center">
-                    <span className="text-cyan-400 text-sm font-semibold">
-                      +{event.participants.length - 8} more
-                    </span>
-                  </div>
+              <div className="flex items-center gap-2">
+                <span className="text-cyan-400 text-sm font-semibold">
+                  {participantsCollapsed ? "Show" : "Hide"}
+                </span>
+                {participantsCollapsed ? (
+                  <ChevronDown className="w-5 h-5 text-cyan-400" />
+                ) : (
+                  <ChevronUp className="w-5 h-5 text-cyan-400" />
                 )}
               </div>
-            )}
-
-            {event.participants.length === 0 && !isOrganizer && (
-              <div className="text-center py-8 text-gray-400">
-                <Users className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                <p>No participants yet. Be the first to join!</p>
-              </div>
-            )}
-
-            {event.participants.length === 0 && isOrganizer && (
-              <div className="text-center py-8 text-gray-400">
-                <Users className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                <p>No participants yet. Share your event to get attendees!</p>
-              </div>
-            )}
-
-            {/* PROMINENT VIEW PARTICIPANTS BUTTON */}
-            <button
-              onClick={() => onViewParticipants && onViewParticipants(event)}
-              className="w-full py-4 bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700 text-white font-bold rounded-xl transition-all shadow-lg flex items-center justify-center gap-3 text-lg"
-            >
-              <Users className="w-6 h-6" />
-              {isOrganizer 
-                ? "Manage Participants & Requests" 
-                : event.participants.length > 0
-                ? "View All Participants"
-                : "View Participant List"
-              }
             </button>
+
+            {/* Expanded Content */}
+            {!participantsCollapsed && (
+              <div className="p-6 pt-0 space-y-4">
+                {/* Preview of Participants */}
+                {event.participants.length > 0 && (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {event.participants.slice(0, 8).map((participant: any, idx: number) => (
+                      <div 
+                        key={idx} 
+                        className="bg-white/5 backdrop-blur rounded-lg p-3 flex items-center gap-2 hover:bg-white/10 transition-colors"
+                      >
+                        <img
+                          src={participant.avatar || `https://ui-avatars.com/api/?name=${participant.username || 'User'}`}
+                          alt={participant.username || 'User'}
+                          className="w-8 h-8 rounded-full border-2 border-cyan-400/50"
+                        />
+                        <span className="text-white text-sm truncate">
+                          {participant.username || 'User'}
+                        </span>
+                      </div>
+                    ))}
+                    {event.participants.length > 8 && (
+                      <div className="bg-white/5 backdrop-blur rounded-lg p-3 flex items-center justify-center">
+                        <span className="text-cyan-400 text-sm font-semibold">
+                          +{event.participants.length - 8} more
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {event.participants.length === 0 && !isOrganizer && (
+                  <div className="text-center py-6 text-gray-400">
+                    <Users className="w-10 h-10 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">No participants yet. Be the first!</p>
+                  </div>
+                )}
+
+                {event.participants.length === 0 && isOrganizer && (
+                  <div className="text-center py-6 text-gray-400">
+                    <Users className="w-10 h-10 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">No participants yet. Share your event!</p>
+                  </div>
+                )}
+
+                {/* PROMINENT VIEW PARTICIPANTS BUTTON */}
+                <button
+                  onClick={() => onViewParticipants && onViewParticipants(event)}
+                  className="w-full py-3 bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700 text-white font-semibold rounded-xl transition-all shadow-lg flex items-center justify-center gap-2"
+                >
+                  <Users className="w-5 h-5" />
+                  {isOrganizer 
+                    ? "Manage Participants & Requests" 
+                    : event.participants.length > 0
+                    ? "View All Participants"
+                    : "View Participant List"
+                  }
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Action Buttons */}
