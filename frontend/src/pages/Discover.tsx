@@ -321,8 +321,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
   const handlePaymentCancel = () => {
     console.log("[Discover] Payment modal cancelled");
     setShowPaymentModal(false);
-    setPaymentModalEvent(null); });
-    }
+    setPaymentModalEvent(null);
   };
 
   const handleApproveRequest = async (eventId: string, requestId: string) => {
