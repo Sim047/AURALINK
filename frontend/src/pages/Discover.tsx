@@ -266,57 +266,56 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
 
   const handlePaymentSubmit = async (transactionCode: string, transactionDetails: string) => {
     if (!paymentModalData.event) return;
-    
+
     try {
       const response = await axios.post(
         `${API_URL}/events/${paymentModalData.event._id}/join`,
         {
           transactionCode,
-          transactionDetails
+          transactionDetails,
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      
+
       console.log("[Discover] Join paid event response:", response.data);
-      
+
       // Close payment modal
       setPaymentModalData({ show: false, event: null });
-      
+
       // Show success notification
       const requiresApproval = response.data.requiresApproval;
       setNotification({
         message: requiresApproval
-          ? "Γ£à Join request submitted! The organizer will verify your payment and approve your request."
-          : "Γ£à Successfully joined event!",
-        type: "success"
+          ? "Join request submitted! The organizer will verify your payment and approve your request."
+          : "Successfully joined event!",
+        type: "success",
       });
-      
+
       // Refresh events list
       await fetchEvents();
-      
+
       // Update selected event if modal is open
-      if (selectedEvent && selectedEvent._id === paymentModalEvent._id) {
+      if (selectedEvent && paymentModalData.event && selectedEvent._id === paymentModalData.event._id) {
         try {
-          const updatedEvent = await axios.get(`${API_URL}/events/${paymentModalEvent._id}`);
+          const updatedEvent = await axios.get(`${API_URL}/events/${paymentModalData.event._id}`);
           setSelectedEvent(updatedEvent.data);
         } catch (err) {
           console.error("Failed to refresh event details:", err);
         }
       }
     } catch (error: any) {
-      conShowPaymentModal(false);
-      setPaymentModalEvent(null);
+      // Close modal and show error
+      setPaymentModalData({ show: false, event: null });
       setNotification({
         message: error.response?.data?.message || error.response?.data?.error || "Failed to submit join request",
-        type: "error"
+        type: "error",
       });
     }
   };
 
   const handlePaymentCancel = () => {
     console.log("[Discover] Payment modal cancelled");
-    setShowPaymentModal(false);
-    setPaymentModalEvent(null);
+    setPaymentModalData({ show: false, event: null });
   };
 
   const handleApproveRequest = async (eventId: string, requestId: string) => {

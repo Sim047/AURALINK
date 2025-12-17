@@ -19,6 +19,7 @@ import AllUsers from "./pages/AllUsersModern";
 import FollowersList from "./pages/FollowersList";
 import FollowingList from "./pages/FollowingList";
 import Discover from "./pages/Discover";
+import SportsEvents from "./pages/SportsEvents";
 import Dashboard from "./pages/Dashboard";
 import MyEvents from "./pages/MyEvents";
 import Posts from "./pages/Posts";
@@ -1239,6 +1240,11 @@ function onMyStatusUpdated(newStatus: any) {
             onViewProfile={showProfile}
             onStartConversation={startConversationWithUser}
           />
+        )}
+
+        {/* SPORTS EVENTS PAGE (simplified booking flow) */}
+        {view === "sports" && (
+          <SportsEvents token={token} onViewProfile={showProfile} onStartConversation={startConversationWithUser} />
         )}
 
         {/* FOLLOWERS PAGE */}

@@ -135,7 +135,7 @@ export default function Sidebar({
       label: "Events",
       value: "—",
       color: "from-green-500 to-emerald-500",
-      onClick: () => onNavigate?.('discover')
+      onClick: () => onNavigate?.('sports')
     },
     {
       icon: TrendingUp,
