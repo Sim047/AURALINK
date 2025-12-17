@@ -24,6 +24,10 @@ const PaymentTransactionModal: React.FC<PaymentTransactionModalProps> = ({
   const [transactionDetails, setTransactionDetails] = useState("");
   const [error, setError] = useState("");
 
+  console.log("[PaymentTransactionModal] Rendering modal");
+  console.log("[PaymentTransactionModal] Event:", event);
+  console.log("[PaymentTransactionModal] Pricing:", event?.pricing);
+
   const handleSubmit = () => {
     if (!transactionCode.trim()) {
       setError("Transaction code is required for paid events");

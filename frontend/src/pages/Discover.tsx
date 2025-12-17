@@ -208,16 +208,23 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
     }
     
     try {
-      console.log("[Discover] Joining event:", eventId);
+      console.log("[Discover] === JOIN EVENT START ===");
+      console.log("[Discover] Event ID:", eventId);
       
       // Find the event to check if it's paid
       const event = events.find(e => e._id === eventId) || selectedEvent;
+      console.log("[Discover] Event found:", event);
+      console.log("[Discover] Event pricing:", event?.pricing);
+      console.log("[Discover] Is paid event?", event?.pricing?.type === "paid");
       
       // If event has pricing and is paid, show payment modal
-      if (event && (event as any).pricing?.type === "paid") {
+      if (event && event.pricing?.type === "paid") {
+        console.log("[Discover] Opening payment modal for paid event");
         setPaymentModalEvent(event);
         return; // Wait for modal submission
       }
+      
+      console.log("[Discover] Proceeding with free event join");
       
       // Free event - proceed directly
       const response = await axios.post(
