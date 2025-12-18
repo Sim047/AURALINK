@@ -105,16 +105,44 @@ router.post("/:id/approve-request/:requestId", auth, async (req, res) => {
     const reqObj = event.joinRequests.id(req.params.requestId);
     if (!reqObj) return res.status(404).json({ error: "Request not found" });
     if (reqObj.status !== "pending") return res.status(400).json({ error: "Request already processed" });
+    // Capacity guard
+    const currentCount = (event.participants || []).length;
+    const max = Number(event.capacity?.max || 1000);
+    if (currentCount >= max) {
+      // mark request rejected due to full capacity and notify
+      reqObj.status = "rejected";
+      reqObj.rejectionReason = "Event full";
+      await event.save();
+      const ioFull = req.app.get("io");
+      if (ioFull) ioFull.emit("join_request_rejected", { eventId: event._id, userId: String(reqObj.user), reason: "Event is full" });
+      return res.status(400).json({ error: "Event is at full capacity" });
+    }
 
-    // Add participant
+    // Prevent double adding
+    if ((event.participants || []).some(p => String(p) === String(reqObj.user))) {
+      reqObj.status = "approved";
+      await event.save();
+      return res.json({ success: true, message: "Request approved (user already a participant)" });
+    }
+
+    // Approve and add participant
+    event.participants = event.participants || [];
     event.participants.push(reqObj.user);
     reqObj.status = "approved";
+    if (event.capacity) event.capacity.current = event.participants.length;
     await event.save();
 
-    const io = req.app.get("io");
-    if (io) io.emit("join_request_approved", { eventId: event._id, userId: String(reqObj.user) });
+    // Populate for richer emit
+    await event.populate("participants", "username avatar email");
+    await event.populate("joinRequests.user", "username avatar email");
 
-    res.json({ success: true, message: "Request approved" });
+    const io = req.app.get("io");
+    if (io) {
+      io.emit("join_request_approved", { eventId: event._id, userId: String(reqObj.user) });
+      io.emit("participant_joined", { eventId: event._id, participantId: String(reqObj.user) });
+    }
+
+    res.json({ success: true, message: "Request approved", event });
   } catch (err) {
     console.error("Approve request error:", err);
     res.status(500).json({ error: "Failed to approve request" });
@@ -131,14 +159,15 @@ router.post("/:id/reject-request/:requestId", auth, async (req, res) => {
     const reqObj = event.joinRequests.id(req.params.requestId);
     if (!reqObj) return res.status(404).json({ error: "Request not found" });
     if (reqObj.status !== "pending") return res.status(400).json({ error: "Request already processed" });
-
+    const { reason } = req.body || {};
     reqObj.status = "rejected";
+    if (reason) reqObj.rejectionReason = String(reason).slice(0, 500);
     await event.save();
 
     const io = req.app.get("io");
-    if (io) io.emit("join_request_rejected", { eventId: event._id, userId: String(reqObj.user) });
+    if (io) io.emit("join_request_rejected", { eventId: event._id, userId: String(reqObj.user), reason: reqObj.rejectionReason || null });
 
-    res.json({ success: true, message: "Request rejected" });
+    res.json({ success: true, message: "Request rejected", requestId: reqObj._id });
   } catch (err) {
     console.error("Reject request error:", err);
     res.status(500).json({ error: "Failed to reject request" });
