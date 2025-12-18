@@ -70,8 +70,14 @@ router.post("/:id/join", auth, async (req, res) => {
 
     if (event.requiresApproval) {
       event.joinRequests = event.joinRequests || [];
+      console.log("Creating join request for event", event._id, "user", userId);
       event.joinRequests.push({ user: userId, transactionCode: transactionCode || "", transactionDetails: transactionDetails || "", requestedAt: new Date(), status: "pending" });
-      await event.save();
+      try {
+        await event.save();
+      } catch (saveErr) {
+        console.error("Failed saving join request for event", event._id, "err:", saveErr);
+        return res.status(500).json({ error: "Failed to save join request", details: saveErr.message });
+      }
 
       const io = req.app.get("io");
       if (io) io.emit("join_request_created", { eventId: event._id, organizerId: String(event.organizer._id), requesterId: userId });
@@ -81,9 +87,15 @@ router.post("/:id/join", auth, async (req, res) => {
 
     // Immediate join
     event.participants = event.participants || [];
+    console.log("Adding participant", userId, "to event", event._id, "currentParticipants", event.participants.length);
     event.participants.push(userId);
     if (event.capacity) event.capacity.current = event.participants.length;
-    await event.save();
+    try {
+      await event.save();
+    } catch (saveErr) {
+      console.error("Failed saving event when adding participant", event._id, "err:", saveErr);
+      return res.status(500).json({ error: "Failed to join event", details: saveErr.message });
+    }
 
     const io = req.app.get("io");
     if (io) io.emit("participant_joined", { eventId: event._id, participantId: userId });
@@ -91,7 +103,7 @@ router.post("/:id/join", auth, async (req, res) => {
     return res.json({ success: true, message: "Successfully joined event", requiresApproval: false });
   } catch (err) {
     console.error("Join event error:", err);
-    res.status(500).json({ error: "Failed to join event" });
+    res.status(500).json({ error: "Failed to join event", details: err.message });
   }
 });
 
