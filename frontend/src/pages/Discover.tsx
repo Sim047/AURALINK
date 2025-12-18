@@ -38,6 +38,51 @@ import PaymentTransactionModal from "../components/PaymentTransactionModal";
 
 dayjs.extend(relativeTime);
 
+// Helpers for logging, errors, and in-flight guards
+export type InFlightMap = Record<string, boolean>;
+
+const safeLog = (...args: any[]) => {
+  if (process.env.NODE_ENV !== "production") {
+    // eslint-disable-next-line no-console
+    console.log(...args);
+  }
+};
+
+const getApiErrorMessage = (error: unknown): string => {
+  if (axios.isAxiosError(error)) {
+    return (
+      (error.response?.data as any)?.message ||
+      (error.response?.data as any)?.error ||
+      error.message ||
+      "An unexpected error occurred"
+    );
+  }
+  if (error instanceof Error) return error.message;
+  return "An unexpected error occurred";
+};
+
+const startAction = (
+  map: InFlightMap,
+  setMap: React.Dispatch<React.SetStateAction<InFlightMap>>,
+  id: string
+): boolean => {
+  if (map[id]) return false;
+  setMap((prev) => ({ ...prev, [id]: true }));
+  return true;
+};
+
+const finishAction = (
+  setMap: React.Dispatch<React.SetStateAction<InFlightMap>>,
+  id: string
+) => {
+  setMap((prev) => {
+    const next = { ...prev };
+    delete next[id];
+    return next;
+  });
+};
+
+
 type CategoryType = "sports" | "services" | "marketplace" | null;
 
 interface Event {
@@ -150,7 +195,12 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
     show: boolean;
     event: Event | null;
   }>({ show: false, event: null });
-  
+
+  // In-flight guards to prevent duplicate clicks
+  const [joiningEvent, setJoiningEvent] = useState<InFlightMap>({});
+  const [likingItem, setLikingItem] = useState<InFlightMap>({});
+  const [likingService, setLikingService] = useState<InFlightMap>({});
+
   const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
 
   useEffect(() => {
@@ -209,19 +259,21 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
       setNotification({ message: "Please log in to join events", type: "warning" });
       return;
     }
-    
+
+    if (!startAction(joiningEvent, setJoiningEvent, eventId)) return;
+
     try {
-      console.log('[Discover] API_URL:', API_URL);
-      console.log('[Discover] Auth token present (first 8 chars):', token ? token.slice(0,8) : 'no-token');
-      console.log("[Discover] === JOIN EVENT START ===");
-      console.log("[Discover] Event ID:", eventId);
-      
+      safeLog('[Discover] API_URL:', API_URL);
+      safeLog('[Discover] Auth token present (first 8 chars):', token ? token.slice(0,8) : 'no-token');
+      safeLog("[Discover] === JOIN EVENT START ===");
+      safeLog("[Discover] Event ID:", eventId);
+
       // Find the event to check if it's paid
       const event = events.find(e => e._id === eventId) || selectedEvent;
-      console.log("[Discover] Event found:", event);
-      console.log("[Discover] Event pricing:", event?.pricing);
-      console.log("[Discover] Is paid event?", event?.pricing?.type === "paid");
-      
+      safeLog("[Discover] Event found:", event);
+      safeLog("[Discover] Event pricing:", event?.pricing);
+      safeLog("[Discover] Is paid event?", event?.pricing?.type === "paid");
+
       // If event has pricing and is paid, or has a positive amount, show payment modal
       const isPaidEvent =
         !!event && (
@@ -233,29 +285,29 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
         setPaymentModalData({ show: true, event });
         return; // Wait for modal submission
       }
-      
+
       // Free event - proceed directly
       const response = await axios.post(
-        `${API_URL}/events/${eventId}/join`, 
-        {}, 
+        `${API_URL}/events/${eventId}/join`,
+        {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      console.log("[Discover] Join event response:", response.data);
-      
+      safeLog("[Discover] Join event response:", response.data);
+
       // Show success message with proper notification
       const message = response.data.message || "Successfully joined event!";
       const requiresApproval = response.data.requiresApproval;
-      
-      setNotification({ 
-        message: requiresApproval 
+
+      setNotification({
+        message: requiresApproval
           ? "Join request submitted! The organizer will review your request."
           : message,
-        type: "success" 
+        type: "success"
       });
-      
+
       // Refresh events list
       await fetchEvents();
-      
+
       // Update selected event if modal is open
       if (selectedEvent && selectedEvent._id === eventId) {
         try {
@@ -266,10 +318,11 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
         }
       }
     } catch (error: any) {
-      console.error("[Discover] Join event error:", error);
-      console.error('[Discover] Join error response:', error.response && { status: error.response.status, data: error.response.data });
-      const message = error.response?.data?.message || error.response?.data?.error || error.message || "Failed to join event";
-      setNotification({ message, type: "error" });
+      safeLog("[Discover] Join event error:", error);
+      safeLog('[Discover] Join error response:', error.response && { status: error.response.status, data: error.response.data });
+      setNotification({ message: getApiErrorMessage(error), type: "error" });
+    } finally {
+      finishAction(setJoiningEvent, eventId);
     }
   };
 
@@ -277,8 +330,8 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
     if (!paymentModalData.event) return;
 
     try {
-      console.log('[Discover] API_URL:', API_URL);
-      console.log('[Discover] Auth token present (first 8 chars):', token ? token.slice(0,8) : 'no-token');
+      safeLog('[Discover] API_URL:', API_URL);
+      safeLog('[Discover] Auth token present (first 8 chars):', token ? token.slice(0,8) : 'no-token');
       const response = await axios.post(
         `${API_URL}/events/${paymentModalData.event._id}/join`,
         {
@@ -288,7 +341,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      console.log("[Discover] Join paid event response:", response.data);
+      safeLog("[Discover] Join paid event response:", response.data);
 
       // Close payment modal
       setPaymentModalData({ show: false, event: null });
@@ -318,14 +371,14 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
       // Close modal and show error
       setPaymentModalData({ show: false, event: null });
       setNotification({
-        message: error.response?.data?.message || error.response?.data?.error || "Failed to submit join request",
+        message: getApiErrorMessage(error),
         type: "error",
       });
     }
   };
 
   const handlePaymentCancel = () => {
-    console.log("[Discover] Payment modal cancelled");
+    safeLog("[Discover] Payment modal cancelled");
     setPaymentModalData({ show: false, event: null });
   };
 
@@ -334,36 +387,36 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
       setNotification({ message: "Please log in to manage requests", type: "warning" });
       return;
     }
-    
+
     try {
-      console.log("[Discover] Approving request:", { eventId, requestId });
+      safeLog("[Discover] Approving request:", { eventId, requestId });
       const response = await axios.post(
         `${API_URL}/events/${eventId}/approve-request/${requestId}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      console.log("[Discover] Approve response:", response.data);
-      setNotification({ 
-        message: response.data.message || "Request approved! Participant added to event.", 
-        type: "success" 
+      safeLog("[Discover] Approve response:", response.data);
+      setNotification({
+        message: response.data.message || "Request approved! Participant added to event.",
+        type: "success"
       });
-      
+
       // Refresh event data
       await fetchEvents();
-      
+
       // Update participants modal with fresh data
       if (participantsModalEvent && participantsModalEvent._id === eventId) {
         try {
           const updatedEventResponse = await axios.get(`${API_URL}/events/${eventId}`, {
             headers: { Authorization: `Bearer ${token}` }
           });
-          console.log("[Discover] Updated event data:", updatedEventResponse.data);
+          safeLog("[Discover] Updated event data:", updatedEventResponse.data);
           setParticipantsModalEvent(updatedEventResponse.data);
         } catch (err) {
           console.error("[Discover] Failed to fetch updated event:", err);
         }
       }
-      
+
       // Update selected event if detail modal is open
       if (selectedEvent && selectedEvent._id === eventId) {
         try {
@@ -377,9 +430,9 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
       }
     } catch (error: any) {
       console.error("[Discover] Approve request error:", error);
-      setNotification({ 
-        message: error.response?.data?.error || error.response?.data?.message || "Failed to approve request", 
-        type: "error" 
+      setNotification({
+        message: getApiErrorMessage(error),
+        type: "error"
       });
     }
   };
@@ -389,36 +442,36 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
       setNotification({ message: "Please log in to manage requests", type: "warning" });
       return;
     }
-    
+
     try {
-      console.log("[Discover] Rejecting request:", { eventId, requestId });
+      safeLog("[Discover] Rejecting request:", { eventId, requestId });
       const response = await axios.post(
         `${API_URL}/events/${eventId}/reject-request/${requestId}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      console.log("[Discover] Reject response:", response.data);
-      setNotification({ 
-        message: response.data.message || "Request rejected", 
-        type: "info" 
+      safeLog("[Discover] Reject response:", response.data);
+      setNotification({
+        message: response.data.message || "Request rejected",
+        type: "info"
       });
-      
+
       // Refresh event data
       await fetchEvents();
-      
+
       // Update participants modal with fresh data
       if (participantsModalEvent && participantsModalEvent._id === eventId) {
         try {
           const updatedEventResponse = await axios.get(`${API_URL}/events/${eventId}`, {
             headers: { Authorization: `Bearer ${token}` }
           });
-          console.log("[Discover] Updated event data after rejection:", updatedEventResponse.data);
+          safeLog("[Discover] Updated event data after rejection:", updatedEventResponse.data);
           setParticipantsModalEvent(updatedEventResponse.data);
         } catch (err) {
           console.error("[Discover] Failed to fetch updated event:", err);
         }
       }
-      
+
       // Update selected event if detail modal is open
       if (selectedEvent && selectedEvent._id === eventId) {
         try {
@@ -432,9 +485,9 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
       }
     } catch (error: any) {
       console.error("[Discover] Reject request error:", error);
-      setNotification({ 
-        message: error.response?.data?.error || error.response?.data?.message || "Failed to reject request", 
-        type: "error" 
+      setNotification({
+        message: getApiErrorMessage(error),
+        type: "error"
       });
     }
   };
@@ -444,29 +497,33 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
       setNotification({ message: "Please log in to like items", type: "warning" });
       return;
     }
-    
+
+    if (!startAction(likingItem, setLikingItem, itemId)) return;
+
     try {
-      console.log("[Discover] Liking item:", itemId);
+      safeLog("[Discover] Liking item:", itemId);
       const response = await axios.post(
-        `${API_URL}/marketplace/${itemId}/like`, 
-        {}, 
+        `${API_URL}/marketplace/${itemId}/like`,
+        {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      console.log("[Discover] Like response:", response.data);
-      
-      fetchMarketplaceItems();
-      
+      safeLog("[Discover] Like response:", response.data);
+
+      await fetchMarketplaceItems();
+
       // Update the selected product if modal is open
       if (selectedProduct && selectedProduct._id === itemId) {
         const productResponse = await axios.get(`${API_URL}/marketplace/${itemId}`);
         setSelectedProduct(productResponse.data);
       }
     } catch (error: any) {
-      console.error("[Discover] Error liking item:", error);
-      setNotification({ 
-        message: error.response?.data?.message || "Failed to like item", 
-        type: "error" 
+      safeLog("[Discover] Error liking item:", error);
+      setNotification({
+        message: getApiErrorMessage(error),
+        type: "error"
       });
+    } finally {
+      finishAction(setLikingItem, itemId);
     }
   };
 
@@ -475,73 +532,77 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
       setNotification({ message: "Please log in to like services", type: "warning" });
       return;
     }
-    
+
+    if (!startAction(likingService, setLikingService, serviceId)) return;
+
     try {
-      console.log("[Discover] Liking service:", serviceId);
+      safeLog("[Discover] Liking service:", serviceId);
       const response = await axios.post(
-        `${API_URL}/services/${serviceId}/like`, 
-        {}, 
+        `${API_URL}/services/${serviceId}/like`,
+        {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      console.log("[Discover] Like service response:", response.data);
-      
-      fetchServices();
-      
+      safeLog("[Discover] Like service response:", response.data);
+
+      await fetchServices();
+
       // Update the selected service if modal is open
       if (selectedService && selectedService._id === serviceId) {
         const serviceResponse = await axios.get(`${API_URL}/services/${serviceId}`);
         setSelectedService(serviceResponse.data);
       }
     } catch (error: any) {
-      console.error("[Discover] Error liking service:", error);
-      setNotification({ 
-        message: error.response?.data?.message || "Failed to like service", 
-        type: "error" 
+      safeLog("[Discover] Error liking service:", error);
+      setNotification({
+        message: getApiErrorMessage(error),
+        type: "error"
       });
+    } finally {
+      finishAction(setLikingService, serviceId);
     }
   };
 
   const handleMessageUser = async (userId: string) => {
-    console.log("[Discover] handleMessageUser called with userId:", userId);
-    
+    safeLog("[Discover] handleMessageUser called with userId:", userId);
+
     if (!token) {
       setNotification({ message: "Please log in to send messages", type: "warning" });
       return;
     }
-    
+
     // Use the callback if available
     if (onStartConversation) {
-      console.log("[Discover] Using onStartConversation callback");
+      safeLog("[Discover] Using onStartConversation callback");
       onStartConversation(userId);
       return;
     }
-    
+
     // Fallback: create conversation directly
-    console.log("[Discover] Fallback: creating conversation directly");
+    safeLog("[Discover] Fallback: creating conversation directly");
     try {
       const response = await axios.post(
         `${API_URL}/conversations`,
         { partnerId: userId },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      
+
       const conversation = response.data;
-      console.log("[Discover] Conversation created:", conversation);
-      
+      safeLog("[Discover] Conversation created:", conversation);
+
       // Store in localStorage
       localStorage.setItem("auralink-active-conversation", JSON.stringify(conversation));
       localStorage.setItem("auralink-in-dm", "true");
-      
+
       // Navigate to main view
       setNotification({ message: "Opening conversation...", type: "info" });
       setTimeout(() => {
         window.location.href = "/";
       }, 1000);
     } catch (error: any) {
-      console.error("[Discover] Error creating conversation:", error);
-      setNotification({ 
-        message: error.response?.data?.message || "Failed to start conversation", 
-        type: "error" 
+      safeLog("[Discover] Error creating conversation:", error);
+      setNotification({
+        message: getApiErrorMessage(error),
+        type: "error"
       });
     }
   };
@@ -566,7 +627,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
             {/* Sports Events Card */}
             <div
               onClick={() => setActiveCategory("sports")}
-              className="group cursor-pointer bg-gradient-to-br from-cyan-500/10 to-blue-600/10 backdrop-blur-lg rounded-2xl p-8 border border-cyan-500/20 hover:border-cyan-400/50 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-cyan-500/20"
+              className="group cursor-pointer bg-gradient-to-br from-cyan-500/10 to-blue-600/10 backdrop-blur-lg rounded-2xl p-8 border border-cyan-500/20 hover:border-cyan-400/50 transition-all ..."
             >
               <div className="flex justify-center mb-6">
                 <div className="bg-gradient-to-br from-cyan-500 to-blue-600 p-6 rounded-2xl group-hover:scale-110 transition-transform duration-300">
@@ -588,7 +649,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
             {/* Medical Services Card */}
             <div
               onClick={() => setActiveCategory("services")}
-              className="group cursor-pointer bg-gradient-to-br from-purple-500/10 to-pink-600/10 backdrop-blur-lg rounded-2xl p-8 border border-purple-500/20 hover:border-purple-400/50 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/20"
+              className="group cursor-pointer bg-gradient-to-br from-purple-500/10 to-pink-600/10 backdrop-blur-lg rounded-2xl p-8 border border-purple-500/20 hover:border-purple-400/50 transitio..."
             >
               <div className="flex justify-center mb-6">
                 <div className="bg-gradient-to-br from-purple-500 to-pink-600 p-6 rounded-2xl group-hover:scale-110 transition-transform duration-300">
@@ -610,7 +671,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
             {/* Marketplace Card */}
             <div
               onClick={() => setActiveCategory("marketplace")}
-              className="group cursor-pointer bg-gradient-to-br from-green-500/10 to-emerald-600/10 backdrop-blur-lg rounded-2xl p-8 border border-green-500/20 hover:border-green-400/50 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-green-500/20"
+              className="group cursor-pointer bg-gradient-to-br from-green-500/10 to-emerald-600/10 backdrop-blur-lg rounded-2xl p-8 border border-green-500/20 hover:border-green-400/50 transitio..."
             >
               <div className="flex justify-center mb-6">
                 <div className="bg-gradient-to-br from-green-500 to-emerald-600 p-6 rounded-2xl group-hover:scale-110 transition-transform duration-300">
@@ -659,7 +720,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
   // Sports Events View
   if (activeCategory === "sports") {
     const sportsList = ["All Sports", "Football", "Basketball", "Tennis", "Running", "Swimming", "Cycling", "Gym", "Volleyball", "Baseball"];
-    
+
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
         <div className="max-w-6xl mx-auto px-4 py-8">
@@ -757,14 +818,14 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
                       e.stopPropagation();
                       handleJoinEvent(event._id);
                     }}
-                    disabled={event.participants.some((p: any) => p._id === currentUser._id || p === currentUser._id)}
+                    disabled={event.participants.some((p: any) => p._id === currentUser._id || p === currentUser._id) || !!joiningEvent[event._id]}
                     className={`w-full py-2 rounded-lg font-semibold transition-all ${
                       event.participants.some((p: any) => p._id === currentUser._id || p === currentUser._id)
                         ? "bg-gray-600 text-gray-400 cursor-not-allowed"
                         : "bg-gradient-to-r from-cyan-500 to-purple-600 text-white hover:from-cyan-600 hover:to-purple-700"
                     }`}
                   >
-                    {event.participants.some((p: any) => p._id === currentUser._id || p === currentUser._id) ? "Joined" : "Join Event"}
+                    {event.participants.some((p: any) => p._id === currentUser._id || p === currentUser._id) ? "Joined" : (!!joiningEvent[event._id] ? "Joining..." : "Join Event")}
                   </button>
                 </div>
               ))}
@@ -786,7 +847,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
               currentUserId={currentUser._id}
             />
           )}
-          
+
           {/* Event Participants Modal */}
           {participantsModalEvent && (
             <EventParticipantsModal
@@ -808,10 +869,10 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
   // Medical Services View
   if (activeCategory === "services") {
     const servicesList = [
-      "All", "personal-training", "group-classes", "nutrition", 
+      "All", "personal-training", "group-classes", "nutrition",
       "physiotherapy", "sports-massage", "mental-coaching", "technique-analysis"
     ];
-    
+
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
         <div className="max-w-6xl mx-auto px-4 py-8">
@@ -833,7 +894,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
               </div>
               <button
                 onClick={() => window.location.href = "/#/my-events"}
-                className="px-5 py-3 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white font-semibold rounded-xl transition-all flex items-center gap-2 shadow-lg"
+                className="px-5 py-3 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white font-semibold rounded-xl transition-all flex items-center gap-..."
               >
                 <Plus className="w-5 h-5" />
                 Create Service
@@ -926,7 +987,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
                     <span>{service.provider.username}</span>
                   </div>
 
-                  <button 
+                  <button
                     onClick={(e) => {
                       e.stopPropagation();
                       handleMessageUser(service.provider._id);
@@ -958,10 +1019,10 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
   // Marketplace View
   if (activeCategory === "marketplace") {
     const categories = [
-      "All", "Sports Equipment", "Apparel & Clothing", "Footwear", 
+      "All", "Sports Equipment", "Apparel & Clothing", "Footwear",
       "Accessories", "Supplements & Nutrition", "Fitness Tech & Wearables"
     ];
-    
+
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
         <div className="max-w-6xl mx-auto px-4 py-8">
@@ -1055,15 +1116,16 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
                   <div className="p-4">
                     <h3 className="font-bold text-white mb-1 line-clamp-2">{item.title}</h3>
                     <p className="text-sm text-gray-400 mb-2">{item.category}</p>
-                    
+
                     <div className="flex items-center justify-between mb-3">
                       <div className="text-2xl font-bold text-green-400">
                         ${item.price}
                         <span className="text-xs text-gray-400 ml-1">{item.currency}</span>
                       </div>
                       <button
-                        onClick={() => handleLikeItem(item._id)}
-                        className="p-2 hover:bg-white/10 rounded-full transition-colors"
+                        onClick={(e) => { e.stopPropagation(); handleLikeItem(item._id); }}
+                        disabled={!!likingItem[item._id]}
+                        className="p-2 hover:bg-white/10 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <Heart
                           className={`w-5 h-5 ${
@@ -1084,7 +1146,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
                       <span>{item.seller.username}</span>
                     </div>
 
-                    <button 
+                    <button
                       onClick={(e) => {
                         e.stopPropagation();
                         handleMessageUser(item.seller._id);
