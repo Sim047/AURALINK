@@ -31,7 +31,10 @@ type TabType = "events" | "services" | "products";
 
 export default function MyEvents({ token }: any) {
   const [activeTab, setActiveTab] = useState<TabType>("events");
-  const [events, setEvents] = useState<any[]>([]);
+  const [eventsCreated, setEventsCreated] = useState<any[]>([]);
+  const [eventsJoined, setEventsJoined] = useState<any[]>([]);
+  const [eventsPending, setEventsPending] = useState<any[]>([]);
+  const [eventsTab, setEventsTab] = useState<'organizing' | 'joined' | 'pending'>('organizing');
   const [services, setServices] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -47,18 +50,22 @@ export default function MyEvents({ token }: any) {
 
   useEffect(() => {
     if (!token) return;
-    loadMyEvents();
+    loadMyEventsAll();
     loadMyServices();
     loadMyProducts();
   }, [token]);
 
-  async function loadMyEvents() {
+  async function loadMyEventsAll() {
     try {
       setLoading(true);
-      const res = await axios.get(`${API}/api/events/my/created`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setEvents(res.data.events || []);
+      const [createdRes, joinedRes, pendingRes] = await Promise.all([
+        axios.get(`${API}/api/events/my/created`, { headers: { Authorization: `Bearer ${token}` } }),
+        axios.get(`${API}/api/events/my/joined`, { headers: { Authorization: `Bearer ${token}` } }),
+        axios.get(`${API}/api/events/my/pending`, { headers: { Authorization: `Bearer ${token}` } }),
+      ]);
+      setEventsCreated(createdRes.data.events || []);
+      setEventsJoined(joinedRes.data.events || []);
+      setEventsPending(pendingRes.data.events || []);
     } catch (err) {
       console.error("Load my events error:", err);
     } finally {
@@ -148,7 +155,7 @@ export default function MyEvents({ token }: any) {
   }
 
   function handleCreateSuccess() {
-    loadMyEvents();
+    loadMyEventsAll();
     setEditingEvent(null);
   }
 
@@ -175,7 +182,7 @@ export default function MyEvents({ token }: any) {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       alert(res.data.message || "Request approved!");
-      loadMyEvents();
+      loadMyEventsAll();
       if (participantsModalEvent && participantsModalEvent._id === eventId) {
         const updatedEvent = await axios.get(`${API}/api/events/${eventId}`);
         setParticipantsModalEvent(updatedEvent.data);
@@ -193,7 +200,7 @@ export default function MyEvents({ token }: any) {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       alert(res.data.message || "Request rejected!");
-      loadMyEvents();
+      loadMyEventsAll();
       if (participantsModalEvent && participantsModalEvent._id === eventId) {
         const updatedEvent = await axios.get(`${API}/api/events/${eventId}`);
         setParticipantsModalEvent(updatedEvent.data);
@@ -275,7 +282,7 @@ export default function MyEvents({ token }: any) {
             }`}
           >
             <Trophy className="inline w-5 h-5 mr-2" />
-            My Events ({events.length})
+            My Events ({(eventsCreated.length)})
             {activeTab === "events" && (
               <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-cyan-500 to-purple-600"></div>
             )}
@@ -403,6 +410,13 @@ export default function MyEvents({ token }: any) {
 
         {/* Content */}
         {activeTab === "events" ? (
+          <div className="mb-6">
+            <div className="inline-flex bg-white dark:bg-[#0f172a] rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+              <button onClick={() => setEventsTab('organizing')} className={`px-4 py-2 text-sm font-semibold ${eventsTab==='organizing' ? 'bg-cyan-500 text-white' : 'text-gray-600 dark:text-gray-300'}`}>Organizing ({eventsCreated.length})</button>
+              <button onClick={() => setEventsTab('joined')} className={`px-4 py-2 text-sm font-semibold ${eventsTab==='joined' ? 'bg-cyan-500 text-white' : 'text-gray-600 dark:text-gray-300'}`}>Joined ({eventsJoined.length})</button>
+              <button onClick={() => setEventsTab('pending')} className={`px-4 py-2 text-sm font-semibold ${eventsTab==='pending' ? 'bg-cyan-500 text-white' : 'text-gray-600 dark:text-gray-300'}`}>Pending ({eventsPending.length})</button>
+            </div>
+          </div>
           events.length === 0 ? (
             <div className="bg-white dark:bg-[#0f172a] rounded-3xl p-12 border border-gray-200 dark:border-gray-800 text-center">
               <div className="max-w-md mx-auto">
@@ -426,7 +440,7 @@ export default function MyEvents({ token }: any) {
             </div>
           ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {events.map((event) => (
+            {(eventsTab==='organizing' ? eventsCreated : eventsTab==='joined' ? eventsJoined : eventsPending).map((event) => (
               <div
                 key={event._id}
                 className="bg-white dark:bg-[#0f172a] rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-800 hover:shadow-xl transition-all duration-300"
