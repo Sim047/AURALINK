@@ -579,7 +579,7 @@ export default function MyEvents({ token }: any) {
               </div>
             ))}
           </div>
-          )
+          </>
         ) : activeTab === "services" ? (
           // Services Tab Content
           services.length === 0 ? (
