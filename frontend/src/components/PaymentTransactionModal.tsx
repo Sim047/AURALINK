@@ -71,7 +71,7 @@ const PaymentTransactionModal: React.FC<PaymentTransactionModalProps> = ({
               Event: {event.title}
             </h3>
             <div className="text-2xl font-bold text-cyan-400">
-              {event.pricing.currency} {event.pricing.amount.toLocaleString()}
+              {(event.pricing.currency || '$')} {Number(event.pricing.amount || 0).toLocaleString()}
             </div>
           </div>
 

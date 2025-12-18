@@ -274,12 +274,10 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
       safeLog("[Discover] Event pricing:", event?.pricing);
       safeLog("[Discover] Is paid event?", event?.pricing?.type === "paid");
 
-      // If event has pricing and is paid, or has a positive amount, show payment modal
-      const isPaidEvent =
-        !!event && (
-          event.pricing?.type === "paid" ||
-          (event.pricing?.amount && Number(event.pricing.amount) > 0)
-        );
+      // Align with backend: treat as paid only when type is 'paid' and amount > 0
+      const isPaidEvent = !!event && (
+        event.pricing?.type === "paid" && Number(event.pricing?.amount) > 0
+      );
 
       if (isPaidEvent) {
         setPaymentModalData({ show: true, event });

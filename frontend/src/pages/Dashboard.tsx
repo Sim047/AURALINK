@@ -20,6 +20,8 @@ import {
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import CreateEventModal from "../components/CreateEventModal";
+import EventDetailModal from "../components/EventDetailModal";
+import EventParticipantsModal from "../components/EventParticipantsModal";
 import MyJoinRequestsPage from "./MyJoinRequests";
 import PendingApprovalsPage from "./PendingApprovals";
 import AllEvents from "./AllEvents";
@@ -199,10 +201,17 @@ export default function Dashboard({ token, onNavigate }: any) {
   const [approvalsCount, setApprovalsCount] = useState(0);
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
   const [approvedRequestsCount, setApprovedRequestsCount] = useState(0);
+  const [selectedEvent, setSelectedEvent] = useState<any | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | undefined>(undefined);
+  const [participantsModalEvent, setParticipantsModalEvent] = useState<any | null>(null);
 
   useEffect(() => {
     if (!token) return;
     loadDashboardData();
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1])) || {};
+      setCurrentUserId(payload.id || payload._id);
+    } catch {}
   }, [token]);
 
   async function loadDashboardData() {
@@ -320,6 +329,54 @@ export default function Dashboard({ token, onNavigate }: any) {
     notifications: notifications.length,
   };
 
+  // Open Event Details (populated) by id
+  const openEventDetails = async (eventId: string) => {
+    try {
+      const resp = await axios.get(`${API}/api/events/${eventId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setSelectedEvent(resp.data);
+    } catch (e) {
+      // Fallback to locally loaded list if available
+      const fallback = upcomingEvents.find((e: any) => e._id === eventId) || null;
+      setSelectedEvent(fallback);
+    }
+  };
+
+  const openParticipantsModal = async (eventObj: any) => {
+    try {
+      const resp = await axios.get(`${API}/api/events/${eventObj._id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setParticipantsModalEvent(resp.data);
+    } catch (e) {
+      setParticipantsModalEvent(eventObj);
+    }
+    setSelectedEvent(null);
+  };
+
+  // Basic join handler: route to Discover for full join/payment flow
+  const handleJoinFromDashboard = (eventId: string) => {
+    if (onNavigate) onNavigate('discover');
+  };
+
+  // Message organizer fallback: create conversation then navigate home
+  const handleMessageOrganizer = async (organizerId: string) => {
+    if (!token) return;
+    try {
+      const res = await axios.post(
+        `${API}/api/conversations`,
+        { partnerId: organizerId },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      localStorage.setItem("auralink-active-conversation", JSON.stringify(res.data));
+      localStorage.setItem("auralink-in-dm", "true");
+      window.location.href = "/";
+    } catch (err) {
+      console.error("Failed to start conversation:", err);
+    }
+  };
+
   // View Mode Routing
   if (viewMode === 'myRequests') {
     return <MyJoinRequestsPage onBack={() => setViewMode('dashboard')} onNavigate={onNavigate} />;
@@ -330,7 +387,63 @@ export default function Dashboard({ token, onNavigate }: any) {
   }
 
   if (viewMode === 'allEvents') {
-    return <AllEvents token={token} onBack={() => setViewMode('dashboard')} onNavigate={onNavigate} onViewEvent={(id: string) => console.log('View event:', id)} />;
+    return (
+      <>
+        <AllEvents
+          token={token}
+          onBack={() => setViewMode('dashboard')}
+          onNavigate={onNavigate}
+          onViewEvent={(id: string) => openEventDetails(id)}
+        />
+        <EventDetailModal
+          event={selectedEvent}
+          onClose={() => setSelectedEvent(null)}
+          onJoin={handleJoinFromDashboard}
+          onMessage={handleMessageOrganizer}
+          onViewParticipants={openParticipantsModal}
+          currentUserId={currentUserId}
+        />
+        {participantsModalEvent && (
+          <EventParticipantsModal
+            event={participantsModalEvent}
+            onClose={() => setParticipantsModalEvent(null)}
+            onMessage={handleMessageOrganizer}
+            onApproveRequest={async (eventId: string, requestId: string) => {
+              try {
+                await axios.post(
+                  `${API}/api/events/${eventId}/approve-request/${requestId}`,
+                  {},
+                  { headers: { Authorization: `Bearer ${token}` } }
+                );
+                const refreshed = await axios.get(`${API}/api/events/${eventId}`, {
+                  headers: { Authorization: `Bearer ${token}` },
+                });
+                setParticipantsModalEvent(refreshed.data);
+              } catch (err) {
+                console.error('Approve error:', err);
+              }
+            }}
+            onRejectRequest={async (eventId: string, requestId: string) => {
+              try {
+                await axios.post(
+                  `${API}/api/events/${eventId}/reject-request/${requestId}`,
+                  {},
+                  { headers: { Authorization: `Bearer ${token}` } }
+                );
+                const refreshed = await axios.get(`${API}/api/events/${eventId}`, {
+                  headers: { Authorization: `Bearer ${token}` },
+                });
+                setParticipantsModalEvent(refreshed.data);
+              } catch (err) {
+                console.error('Reject error:', err);
+              }
+            }}
+            currentUserId={currentUserId}
+            isOrganizer={participantsModalEvent?.organizer?._id === currentUserId}
+          />
+        )}
+      </>
+    );
   }
 
   if (viewMode === 'notifications') {
@@ -573,8 +686,8 @@ export default function Dashboard({ token, onNavigate }: any) {
           </div>
         </div>
 
-        {/* Hidden old content - kept for reference but no longer displayed */}
-        <div className="hidden">
+        {/* Community & Bookings section */}
+        <div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="bg-white dark:bg-[#0f172a] rounded-2xl p-6 border border-gray-200 dark:border-gray-800">
             <div className="flex items-center justify-between mb-4">
@@ -663,7 +776,8 @@ export default function Dashboard({ token, onNavigate }: any) {
                 {upcomingEvents.slice(0, 5).map((event) => (
                   <div
                     key={event._id}
-                    className="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
+                    onClick={() => openEventDetails(event._id)}
+                    className="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors cursor-pointer"
                   >
                     <div className="flex items-start gap-3">
                       <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-xl flex items-center justify-center text-white font-bold shrink-0 shadow-lg shadow-teal-500/30">
@@ -709,6 +823,54 @@ export default function Dashboard({ token, onNavigate }: any) {
           setCreateEventModalOpen(false);
         }}
       />
+      {/* Event Detail Modal (Dashboard view) */}
+      <EventDetailModal
+        event={selectedEvent}
+        onClose={() => setSelectedEvent(null)}
+        onJoin={handleJoinFromDashboard}
+        onMessage={handleMessageOrganizer}
+        onViewParticipants={openParticipantsModal}
+        currentUserId={currentUserId}
+      />
+      {participantsModalEvent && (
+        <EventParticipantsModal
+          event={participantsModalEvent}
+          onClose={() => setParticipantsModalEvent(null)}
+          onMessage={handleMessageOrganizer}
+          onApproveRequest={async (eventId: string, requestId: string) => {
+            try {
+              await axios.post(
+                `${API}/api/events/${eventId}/approve-request/${requestId}`,
+                {},
+                { headers: { Authorization: `Bearer ${token}` } }
+              );
+              const refreshed = await axios.get(`${API}/api/events/${eventId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+              });
+              setParticipantsModalEvent(refreshed.data);
+            } catch (err) {
+              console.error('Approve error:', err);
+            }
+          }}
+          onRejectRequest={async (eventId: string, requestId: string) => {
+            try {
+              await axios.post(
+                `${API}/api/events/${eventId}/reject-request/${requestId}`,
+                {},
+                { headers: { Authorization: `Bearer ${token}` } }
+              );
+              const refreshed = await axios.get(`${API}/api/events/${eventId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+              });
+              setParticipantsModalEvent(refreshed.data);
+            } catch (err) {
+              console.error('Reject error:', err);
+            }
+          }}
+          currentUserId={currentUserId}
+          isOrganizer={participantsModalEvent?.organizer?._id === currentUserId}
+        />
+      )}
     </div>
   );
 }

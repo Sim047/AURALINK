@@ -122,7 +122,8 @@ router.get("/:id", async (req, res) => {
   try {
     const event = await Event.findById(req.params.id)
       .populate("organizer", "username avatar")
-      .populate("participants", "username avatar");
+      .populate("participants", "username avatar email")
+      .populate("joinRequests.user", "username avatar email");
     if (!event) return res.status(404).json({ error: "Event not found" });
     res.json(event);
   } catch (err) {
