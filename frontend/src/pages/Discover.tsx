@@ -283,6 +283,8 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
 
       if (isPaidEvent) {
         setPaymentModalData({ show: true, event });
+        // Clear in-flight state since we didn't call the API yet
+        finishAction(setJoiningEvent, eventId);
         return; // Wait for modal submission
       }
 
@@ -305,11 +307,27 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
         type: "success"
       });
 
-      // Refresh events list
-      await fetchEvents();
+      // Optimistically update local events list for immediate joins
+      if (!requiresApproval) {
+        setEvents((prev) => prev.map((ev) => {
+          if (ev._id !== eventId) return ev;
+          const already = (ev.participants || []).some((p: any) => p?._id === currentUser._id || p === currentUser._id);
+          if (already) return ev;
+          return { ...ev, participants: [...(ev.participants || []), currentUser] } as any;
+        }));
+      }
+
+      // Background refresh
+      fetchEvents();
 
       // Update selected event if modal is open
       if (selectedEvent && selectedEvent._id === eventId) {
+        if (!requiresApproval) {
+          const already = (selectedEvent.participants || []).some((p: any) => p?._id === currentUser._id || p === currentUser._id);
+          if (!already) {
+            setSelectedEvent({ ...selectedEvent, participants: [...(selectedEvent.participants || []), currentUser] } as any);
+          }
+        }
         try {
           const updatedEvent = await axios.get(`${API_URL}/events/${eventId}`);
           setSelectedEvent(updatedEvent.data);
@@ -355,11 +373,27 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
         type: "success",
       });
 
-      // Refresh events list
-      await fetchEvents();
+      // Optimistically update if organizer doesn't require approval
+      if (!requiresApproval) {
+        setEvents((prev) => prev.map((ev) => {
+          if (ev._id !== paymentModalData.event!._id) return ev;
+          const already = (ev.participants || []).some((p: any) => p?._id === currentUser._id || p === currentUser._id);
+          if (already) return ev;
+          return { ...ev, participants: [...(ev.participants || []), currentUser] } as any;
+        }));
+      }
+
+      // Background refresh
+      fetchEvents();
 
       // Update selected event if modal is open
       if (selectedEvent && paymentModalData.event && selectedEvent._id === paymentModalData.event._id) {
+        if (!requiresApproval) {
+          const already = (selectedEvent.participants || []).some((p: any) => p?._id === currentUser._id || p === currentUser._id);
+          if (!already) {
+            setSelectedEvent({ ...selectedEvent, participants: [...(selectedEvent.participants || []), currentUser] } as any);
+          }
+        }
         try {
           const updatedEvent = await axios.get(`${API_URL}/events/${paymentModalData.event._id}`);
           setSelectedEvent(updatedEvent.data);
