@@ -4,8 +4,6 @@ import axios from "axios";
 import { 
   Users, 
   UserPlus, 
-  Calendar, 
-  TrendingUp,
   ChevronLeft,
   ChevronRight,
   Menu,
@@ -129,20 +127,6 @@ export default function Sidebar({
       value: following,
       color: "from-purple-500 to-pink-500",
       onClick: () => onNavigate?.('following')
-    },
-    {
-      icon: Calendar,
-      label: "Events",
-      value: "—",
-      color: "from-green-500 to-emerald-500",
-      onClick: () => onNavigate?.('sports')
-    },
-    {
-      icon: TrendingUp,
-      label: "Activity",
-      value: "—",
-      color: "from-orange-500 to-red-500",
-      onClick: () => onNavigate?.('dashboard')
     }
   ];
 

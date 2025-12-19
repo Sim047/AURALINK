@@ -12,7 +12,6 @@ import {
   Trophy,
   ShoppingBag,
   Heart,
-  Activity,
   Sparkles,
   Plus,
   Filter,
@@ -47,7 +46,7 @@ dayjs.extend(relativeTime);
 export type InFlightMap = Record<string, boolean>;
 
 const safeLog = (...args: any[]) => {
-  if (process.env.NODE_ENV !== "production") {
+  if (import.meta.env?.DEV) {
     // eslint-disable-next-line no-console
     console.log(...args);
   }
@@ -95,10 +94,11 @@ interface Event {
   title: string;
   sport: string;
   description: string;
-  date: string;
+  date?: string;
+  startDate?: string;
   time: string;
   location: any;
-  maxParticipants: number;
+  maxParticipants?: number;
   participants: any[];
   organizer: {
     _id: string;
@@ -116,8 +116,8 @@ interface Event {
     paymentInstructions?: string;
   };
   capacity?: {
-    max: number;
-    current: number;
+    max?: number;
+    current?: number;
   };
 }
 
@@ -644,13 +644,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
           </div>
 
           {/* Quick Stats */}
-          <div className="mt-16 grid grid-cols-3 gap-6 max-w-3xl mx-auto">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400">
-                {events.length || 0}
-              </div>
-              <div className="text-gray-400 text-sm mt-1">Active Events</div>
-            </div>
+          <div className="mt-16 grid grid-cols-2 gap-6 max-w-3xl mx-auto">
             <div className="text-center">
               <div className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
                 {services.length || 0}

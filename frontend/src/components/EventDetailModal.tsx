@@ -8,7 +8,7 @@ interface Event {
   title: string;
   sport: string;
   description: string;
-  startDate: string;
+  startDate?: string;
   time: string;
   location: any;
   capacity?: {
