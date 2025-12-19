@@ -362,7 +362,7 @@ export default function Posts({ token, currentUserId, onShowProfile }: any) {
         {loading ? (
           <div className="space-y-6">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="rounded-2xl p-6 animate-pulse" style={{ background: 'var(--card)', color: 'var(--text)', border: '1px solid var(--border)' }}>
+              <div key={i} className="rounded-2xl p-6 animate-pulse themed-card">
                 <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
               </div>
             ))}
@@ -378,8 +378,7 @@ export default function Posts({ token, currentUserId, onShowProfile }: any) {
             {posts.map((post) => (
               <div
                 key={post._id}
-                className="rounded-2xl shadow-md overflow-hidden"
-                style={{ background: 'var(--card)', color: 'var(--text)', border: '1px solid var(--border)' }}
+                className="rounded-2xl shadow-md overflow-hidden themed-card"
               >
                 {/* Post Header */}
                 <div className="flex items-center justify-between p-4">
@@ -409,7 +408,7 @@ export default function Posts({ token, currentUserId, onShowProfile }: any) {
                       <Menu.Button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full">
                         <MoreVertical className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                       </Menu.Button>
-                      <Menu.Items className="absolute right-0 mt-2 w-48 rounded-lg shadow-lg z-10" style={{ background: 'var(--card)', color: 'var(--text)', border: '1px solid var(--border)' }}>
+                      <Menu.Items className="absolute right-0 mt-2 w-48 shadow-lg z-10 themed-menu">
                         <Menu.Item>
                           {({ active }) => (
                             <button

@@ -312,6 +312,32 @@ textarea,
 .text-muted { color: var(--muted); }
 
 /* =========================================================
+   THEMED BOX UTILITIES (reusable, replace inline styles)
+   ========================================================= */
+.themed-page {
+  background: var(--bg) !important;
+  color: var(--text) !important;
+}
+
+.themed-card {
+  background: var(--card) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+}
+
+.themed-menu {
+  background: var(--card) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 0.5rem !important;
+}
+
+.themed-sticky {
+  background: var(--card) !important;
+  border-bottom: 1px solid var(--border) !important;
+}
+
+/* =========================================================
    MESSAGE BUBBLES
    ========================================================= */
 .message {
