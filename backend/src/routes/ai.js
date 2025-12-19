@@ -4,6 +4,7 @@ import auth from '../middleware/auth.js';
 import User from '../models/User.js';
 import Event from '../models/Event.js';
 import Service from '../models/Service.js';
+import Marketplace from '../models/Marketplace.js';
 
 const router = express.Router();
 
@@ -53,13 +54,76 @@ router.get('/search', async (req, res) => {
       (userQuery.$or = userQuery.$or || []).push({ favoriteSports: sportRegex });
     }
 
-    const [events, services, users] = await Promise.all([
-      Event.find(eventQuery).limit(5),
-      Service.find(serviceQuery).limit(5),
-      User.find(userQuery).select('username avatar favoriteSports').limit(5),
+    const marketplaceQuery = {};
+    if (regex) {
+      marketplaceQuery.$or = [
+        { title: regex },
+        { description: regex },
+        { category: regex },
+        { tags: { $in: [regex] } },
+      ];
+    }
+
+    // Fetch
+    const [eventsRaw, servicesRaw, usersRaw, itemsRaw] = await Promise.all([
+      Event.find(eventQuery).limit(20),
+      Service.find(serviceQuery).limit(20),
+      User.find(userQuery).select('username avatar favoriteSports').limit(20),
+      Marketplace.find(marketplaceQuery).limit(20),
     ]);
 
-    res.json({ ok: true, events, services, users });
+    // Simple ranking by match strength and user favorites
+    const favs = (req.query.favs || '').toString().split(',').filter(Boolean);
+    const scoreText = (text = '') => {
+      let s = 0;
+      if (!regex) return s;
+      if (text.match(regex)) s += 2;
+      return s;
+    };
+    const scoreSport = (sportVal = '') => {
+      let s = 0;
+      if (sportRegex && sportVal.match(sportRegex)) s += 2;
+      if (favs.length && favs.some((f) => (sportVal || '').toLowerCase().includes(f.toLowerCase()))) s += 1;
+      return s;
+    };
+
+    const events = eventsRaw
+      .map((e) => ({
+        doc: e,
+        score: scoreText(e.title) + scoreText(e.description) + scoreText(e?.location?.city) + scoreSport(e.title),
+      }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 5)
+      .map((x) => x.doc);
+
+    const services = servicesRaw
+      .map((s) => ({
+        doc: s,
+        score: scoreText(s.name) + scoreText(s.description) + scoreSport(s.sport),
+      }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 5)
+      .map((x) => x.doc);
+
+    const users = usersRaw
+      .map((u) => ({
+        doc: u,
+        score: scoreText(u.username) + (Array.isArray(u.favoriteSports) ? u.favoriteSports.reduce((acc, sp) => acc + scoreSport(sp), 0) : 0),
+      }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 5)
+      .map((x) => x.doc);
+
+    const items = itemsRaw
+      .map((it) => ({
+        doc: it,
+        score: scoreText(it.title) + scoreText(it.description) + scoreText(it.category),
+      }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 5)
+      .map((x) => x.doc);
+
+    res.json({ ok: true, events, services, users, items });
   } catch (e) {
     console.error('[AI SEARCH] error', e);
     res.status(500).json({ error: 'search_failed', details: e.message });

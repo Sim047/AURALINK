@@ -44,8 +44,9 @@ export default function AssistantWidget({ token, user }: AssistantWidgetProps) {
     setMessages((m) => [...m, { role: "user", text: `Search: ${q}` }]);
     setLoading(true);
     try {
-      const resp = await axios.get(`${API_URL}/ai/search`, { params: { query: q } });
-      const { events = [], services = [], users = [] } = resp.data || {};
+      const favs = (user?.favoriteSports || []).join(',');
+      const resp = await axios.get(`${API_URL}/ai/search`, { params: { query: q, favs } });
+      const { events = [], services = [], users = [], items = [] } = resp.data || {};
       const lines: string[] = [];
       if (events.length) {
         lines.push(`Events:`);
@@ -54,6 +55,10 @@ export default function AssistantWidget({ token, user }: AssistantWidgetProps) {
       if (services.length) {
         lines.push(`Services:`);
         lines.push(...services.map((s: any) => `- ${s.name} (${s.sport})`));
+      }
+      if (items.length) {
+        lines.push(`Marketplace:`);
+        lines.push(...items.map((it: any) => `- ${it.title} (${it.category})`));
       }
       if (users.length) {
         lines.push(`Users:`);
