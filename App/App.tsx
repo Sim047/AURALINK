@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { SafeAreaView, View, Text, TextInput, Button, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import Constants from 'expo-constants';
+import { WebView } from 'react-native-webview';
 import { api } from './src/api';
 import { socket } from './src/socket';
 import { NavigationContainer } from '@react-navigation/native';
@@ -123,14 +124,23 @@ function DiscoverScreen({ navigation }: any) {
   );
 }
 
+function WebScreen() {
+  const webUrl = (process.env.EXPO_PUBLIC_WEB_URL as string) || (Constants.expoConfig?.extra as any)?.webUrl || 'http://localhost:5173';
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#000' }}>
+      <WebView source={{ uri: webUrl }} startInLoadingState javaScriptEnabled domStorageEnabled />
+    </SafeAreaView>
+  );
+}
+
 export default function App() {
   const [bootChecked, setBootChecked] = useState(false);
-  const [initialRoute, setInitialRoute] = useState<'Login' | 'Discover'>('Login');
+  const [initialRoute, setInitialRoute] = useState<'Login' | 'Web'>('Login');
 
   useEffect(() => {
     const check = async () => {
       const token = await readToken();
-      setInitialRoute(token ? 'Discover' : 'Login');
+      setInitialRoute(token ? 'Web' : 'Login');
       setBootChecked(true);
     };
     check();
@@ -148,7 +158,8 @@ export default function App() {
     <NavigationContainer>
       <Stack.Navigator initialRouteName={initialRoute}>
         <Stack.Screen name='Login' component={LoginScreen} options={{ headerShown: false }} />
-        <Stack.Screen name='Discover' component={DiscoverScreen} options={{ title: 'Auralink' }} />
+        <Stack.Screen name='Web' component={WebScreen} options={{ title: 'Auralink' }} />
+        <Stack.Screen name='Discover' component={DiscoverScreen} options={{ title: 'Auralink (Native)" }} />
       </Stack.Navigator>
     </NavigationContainer>
   );
