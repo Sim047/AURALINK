@@ -487,7 +487,7 @@ export default function Dashboard({ token, onNavigate }: any) {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold mb-2" style={{ color: 'var(--text)' }}>
-              Welcome back! 👋
+              Welcome back! 👋 <Sparkles className="inline w-6 h-6 text-accent align-text-bottom ml-1" />
             </h1>
             <p style={{ color: 'var(--text-secondary)' }}>
               Here's what's happening with your bookings and events
@@ -500,7 +500,7 @@ export default function Dashboard({ token, onNavigate }: any) {
           {/* My Join Requests - Clickable */}
           <button
             onClick={() => setViewMode('myRequests')}
-            className="bg-white dark:bg-[#0f172a] rounded-2xl p-6 border-2 border-blue-200 dark:border-blue-800 hover:shadow-xl hover:scale-105 transition-all duration-300 text-left group relative overflow-hidden"
+            className="bg-white dark:bg-[#0f172a] rounded-2xl p-6 border-2 border-blue-200 dark:border-blue-800 hover:shadow-xl hover:scale-105 hover:border-accent/40 transition-all duration-300 text-left group relative overflow-hidden"
           >
             <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500"></div>
             <div className="relative flex items-center justify-between">
@@ -518,7 +518,7 @@ export default function Dashboard({ token, onNavigate }: any) {
           {/* Pending Approvals - Clickable */}
           <button
             onClick={() => setViewMode('approvals')}
-            className="bg-white dark:bg-[#0f172a] rounded-2xl p-6 border-2 border-orange-200 dark:border-orange-800 hover:shadow-xl hover:scale-105 transition-all duration-300 text-left group relative overflow-hidden"
+            className="bg-white dark:bg-[#0f172a] rounded-2xl p-6 border-2 border-orange-200 dark:border-orange-800 hover:shadow-xl hover:scale-105 hover:border-accent/40 transition-all duration-300 text-left group relative overflow-hidden"
           >
             <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/10 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500"></div>
             <div className="relative flex items-center justify-between">
@@ -536,7 +536,7 @@ export default function Dashboard({ token, onNavigate }: any) {
           {/* All Events - Clickable */}
           <button
             onClick={() => setViewMode('allEvents')}
-            className="bg-white dark:bg-[#0f172a] rounded-2xl p-6 border-2 border-purple-200 dark:border-purple-800 hover:shadow-xl hover:scale-105 transition-all duration-300 text-left group relative overflow-hidden"
+            className="bg-white dark:bg-[#0f172a] rounded-2xl p-6 border-2 border-purple-200 dark:border-purple-800 hover:shadow-xl hover:scale-105 hover:border-accent/40 transition-all duration-300 text-left group relative overflow-hidden"
           >
             <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500"></div>
             <div className="relative flex items-center justify-between">
@@ -554,7 +554,7 @@ export default function Dashboard({ token, onNavigate }: any) {
           {/* Notifications - Clickable */}
           <button
             onClick={() => setViewMode('notifications')}
-            className="bg-white dark:bg-[#0f172a] rounded-2xl p-6 border-2 border-orange-200 dark:border-red-800 hover:shadow-xl hover:scale-105 transition-all duration-300 text-left group relative overflow-hidden"
+            className="bg-white dark:bg-[#0f172a] rounded-2xl p-6 border-2 border-orange-200 dark:border-red-800 hover:shadow-xl hover:scale-105 hover:border-accent/40 transition-all duration-300 text-left group relative overflow-hidden"
           >
             <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/10 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500"></div>
             <div className="relative flex items-center justify-between">
@@ -575,7 +575,7 @@ export default function Dashboard({ token, onNavigate }: any) {
           {/* Pending Requests */}
           <button
             onClick={() => setViewMode('myRequests')}
-            className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20 rounded-2xl p-6 border-2 border-amber-200 dark:border-amber-700 hover:shadow-xl hover:scale-105 transition-all duration-300 text-left"
+            className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20 rounded-2xl p-6 border-2 border-amber-200 dark:border-amber-700 hover:shadow-xl hover:scale-105 hover:border-accent/30 transition-all duration-300 text-left"
           >
             <div className="flex items-center justify-between">
               <div>
@@ -589,7 +589,7 @@ export default function Dashboard({ token, onNavigate }: any) {
           {/* Approved Requests */}
           <button
             onClick={() => setViewMode('myRequests')}
-            className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-2xl p-6 border-2 border-green-200 dark:border-green-700 hover:shadow-xl hover:scale-105 transition-all duration-300 text-left"
+            className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-2xl p-6 border-2 border-green-200 dark:border-green-700 hover:shadow-xl hover:scale-105 hover:border-accent/30 transition-all duration-300 text-left"
           >
             <div className="flex items-center justify-between">
               <div>
@@ -698,7 +698,7 @@ export default function Dashboard({ token, onNavigate }: any) {
               </h2>
               <button
                 onClick={() => onNavigate && onNavigate('discover')}
-                className="text-teal-500 hover:text-teal-600 text-sm font-medium flex items-center gap-1"
+                className="text-accent hover:text-accent-light text-sm font-medium flex items-center gap-1"
               >
                 View All <ArrowRight className="w-4 h-4" />
               </button>
@@ -710,7 +710,7 @@ export default function Dashboard({ token, onNavigate }: any) {
                 <p className="text-gray-600 dark:text-gray-400 mb-4">No bookings yet</p>
                 <button
                   onClick={() => onNavigate && onNavigate('discover')}
-                  className="px-6 py-2.5 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white text-sm font-medium rounded-xl transition-all duration-300 shadow-lg shadow-teal-500/30"
+                  className="px-6 py-2.5 bg-gradient-to-r from-accent to-accentViolet-light hover:from-accent-dark hover:to-accentViolet-dark text-white text-sm font-medium rounded-xl transition-all duration-300 shadow-lg"
                 >
                   Browse Services
                 </button>
@@ -774,7 +774,7 @@ export default function Dashboard({ token, onNavigate }: any) {
               </div>
               <button
                 onClick={() => setCreateEventModalOpen(true)}
-                className="px-4 py-2 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white text-sm font-medium rounded-xl transition-all duration-300 flex items-center gap-2 shadow-lg shadow-teal-500/30"
+                className="px-4 py-2 bg-gradient-to-r from-accent to-accentViolet-light hover:from-accent-dark hover:to-accentViolet-dark text-white text-sm font-medium rounded-xl transition-all duration-300 flex items-center gap-2 shadow-lg"
               >
                 <Plus className="w-4 h-4" />
                 Create Event
@@ -791,7 +791,7 @@ export default function Dashboard({ token, onNavigate }: any) {
                 <p className="text-gray-600 dark:text-gray-400 mb-4">No upcoming events</p>
                 <button
                   onClick={() => onNavigate && onNavigate('discover')}
-                  className="px-6 py-2.5 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white text-sm font-medium rounded-xl transition-all duration-300 shadow-lg shadow-teal-500/30"
+                  className="px-6 py-2.5 bg-gradient-to-r from-accent to-accentViolet-light hover:from-accent-dark hover:to-accentViolet-dark text-white text-sm font-medium rounded-xl transition-all duration-300 shadow-lg"
                 >
                   Explore Events
                 </button>
@@ -808,7 +808,7 @@ export default function Dashboard({ token, onNavigate }: any) {
                     className="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors cursor-pointer"
                   >
                     <div className="flex items-start gap-3">
-                      <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-xl flex items-center justify-center text-white font-bold shrink-0 shadow-lg shadow-teal-500/30">
+                      <div className="w-12 h-12 bg-gradient-to-br from-accent to-accent-light rounded-xl flex items-center justify-center text-white font-bold shrink-0 shadow-lg">
                         {dayjs(event.startDate).format('DD')}
                       </div>
                       <div className="flex-1 min-w-0">
