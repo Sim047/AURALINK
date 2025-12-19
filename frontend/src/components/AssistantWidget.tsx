@@ -1,8 +1,9 @@
 // frontend/src/components/AssistantWidget.tsx
 import React, { useState } from "react";
+import { useEffect } from "react";
 import axios from "axios";
 import { API_URL } from "../config/api";
-import { MessageCircle, X, Send, Search as SearchIcon, Bot } from "lucide-react";
+import { MessageCircle, X, Send, Search as SearchIcon, Bot, EyeOff, Eye } from "lucide-react";
 
 interface AssistantWidgetProps {
   token: string | null;
@@ -16,6 +17,25 @@ export default function AssistantWidget({ token, user, currentView, view }: Assi
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<{ role: "user" | "assistant"; text: string }[]>([]);
   const [loading, setLoading] = useState(false);
+  const [hidden, setHidden] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('auralink.assistantHidden') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const ce = e as CustomEvent<{ hidden: boolean }>;
+      const next = ce?.detail?.hidden;
+      if (typeof next === 'boolean') {
+        setHidden(next);
+      }
+    };
+    window.addEventListener('auralink.assistant.toggle', handler as EventListener);
+    return () => window.removeEventListener('auralink.assistant.toggle', handler as EventListener);
+  }, []);
 
   async function send() {
     const text = input.trim();
@@ -77,6 +97,23 @@ export default function AssistantWidget({ token, user, currentView, view }: Assi
   const activeView = currentView ?? view;
   const bottomClass = 'bottom-6';
   const positionClass = activeView === 'posts' ? 'left-6' : 'right-20 md:right-6';
+
+  if (hidden) {
+    return (
+      <div className={`fixed ${bottomClass} ${positionClass} z-40`}>
+        <button
+          onClick={() => {
+            setHidden(false);
+            try { localStorage.setItem('auralink.assistantHidden', 'false'); } catch {}
+          }}
+          className="p-3 rounded-full shadow-lg themed-card hover:shadow-xl transition-all"
+          aria-label="Show assistant"
+        >
+          <Bot className="w-6 h-6 text-accent" />
+        </button>
+      </div>
+    );
+  }
   return (
     <div className={`fixed ${bottomClass} ${positionClass} z-40`}>
       {!open ? (
@@ -94,9 +131,22 @@ export default function AssistantWidget({ token, user, currentView, view }: Assi
               <Bot className="w-5 h-5 text-accent" />
               <span className="font-semibold text-heading">Assistant</span>
             </div>
-            <button onClick={() => setOpen(false)} className="themed-card p-2 rounded">
-              <X className="w-4 h-4" />
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  setHidden(true);
+                  try { localStorage.setItem('auralink.assistantHidden', 'true'); } catch {}
+                  setOpen(false);
+                }}
+                className="themed-card p-2 rounded"
+                title="Hide assistant"
+              >
+                <EyeOff className="w-4 h-4" />
+              </button>
+              <button onClick={() => setOpen(false)} className="themed-card p-2 rounded" title="Close">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
           {/* Quick chips */}

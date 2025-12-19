@@ -15,7 +15,10 @@ import {
   LogOut,
   Sun,
   Moon,
-  TrendingUp
+  TrendingUp,
+  Bot,
+  Eye,
+  EyeOff
 } from "lucide-react";
 import Avatar from "./Avatar";
 import StatusPicker from "./StatusPicker";
@@ -69,6 +72,9 @@ export default function Sidebar({
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [assistantHidden, setAssistantHidden] = useState<boolean>(() => {
+    try { return localStorage.getItem('auralink.assistantHidden') === 'true'; } catch { return false; }
+  });
 
   useEffect(() => {
     loadUserStats();
@@ -458,6 +464,24 @@ export default function Sidebar({
             </p>
           </div>
         )}
+      </div>
+
+      {/* Assistant Toggle */}
+      <div className="p-4 border-t border-slate-700">
+        <button
+          onClick={() => {
+            const next = !assistantHidden;
+            setAssistantHidden(next);
+            try { localStorage.setItem('auralink.assistantHidden', next ? 'true' : 'false'); } catch {}
+            window.dispatchEvent(new CustomEvent('auralink.assistant.toggle', { detail: { hidden: next } }));
+          }}
+          className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'justify-center gap-2'} px-4 py-2 themed-card border transition-all`}
+          title={assistantHidden ? 'Show Assistant' : 'Hide Assistant'}
+          style={{ borderColor: 'var(--border)' }}
+        >
+          <Bot className="w-4 h-4 text-accent" />
+          {!isCollapsed && <span>{assistantHidden ? 'Show Assistant' : 'Hide Assistant'}</span>}
+        </button>
       </div>
 
       {/* Logout and Footer */}
