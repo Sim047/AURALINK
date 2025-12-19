@@ -58,6 +58,7 @@ type User = {
 
 export default function App() {
   const [theme, setTheme] = useState<string>(getInitialTheme());
+  const ASSISTANT_ENABLED = (import.meta.env.VITE_ASSISTANT_ENABLED ?? 'true') !== 'false';
   
   useEffect(() => {
     // Add smooth transition class
@@ -1828,7 +1829,7 @@ function onMyStatusUpdated(newStatus: any) {
         </div>
       )}
       {/* AI Assistant Widget */}
-      <AssistantWidget token={token} user={user as any} />
+      {ASSISTANT_ENABLED && <AssistantWidget token={token} user={user as any} />}
     </div>
   );
 }

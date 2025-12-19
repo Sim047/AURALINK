@@ -36,6 +36,8 @@ const __dirname = path.dirname(__filename);
 // EXPRESS INIT — MUST COME BEFORE app.use()
 const app = express();
 const server = http.createServer(app);
+// Feature toggles
+const AI_ENABLED = (process.env.AI_ENABLED ?? 'true') !== 'false';
 
 // FRONTEND URL(s) for CORS & socket origin
 // Accepts comma-separated values, e.g. "https://app.vercel.app,https://my-preview.vercel.app"
@@ -216,7 +218,9 @@ app.use("/api/bookings-simple", bookingsSimpleRoutes); // NEW SIMPLE SYSTEM
 app.use("/api/bookings", bookingsRoutes); // OLD SYSTEM (keeping for now)
 app.use("/api/posts", postsRoutes);
 app.use("/api/marketplace", marketplaceRoutes);
-app.use("/api/ai", aiRoutes);
+if (AI_ENABLED) {
+  app.use("/api/ai", aiRoutes);
+}
 
 // lightweight health check (useful for probes / verify deployment)
 app.get('/', (req, res) => res.json({ ok: true, service: 'auralink-backend' }));
