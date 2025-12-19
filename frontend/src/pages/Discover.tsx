@@ -890,7 +890,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
                       <h3 className="text-xl font-bold text-white mb-2">{service.name}</h3>
                       <p className="text-sm text-theme-secondary capitalize">{service.category.replace(/-/g, " ")}</p>
                     </div>
-                    <div className="bg-neutral-700 px-4 py-2 rounded-full">
+                    <div className="themed-card px-4 py-2 rounded-full">
                       <span className="text-heading font-bold">
                         ${service.pricing.amount}
                         <span className="text-xs font-normal">/{service.pricing.type}</span>
