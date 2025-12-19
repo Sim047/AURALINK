@@ -566,7 +566,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
         <div className="max-w-6xl mx-auto px-4 py-12">
           {/* Header */}
           <div className="text-center mb-16">
-            <h1 className="text-5xl font-bold text-white mb-4">Discover <span className="text-cyan-300">More</span></h1>
+            <h1 className="text-5xl font-bold text-heading mb-4">Discover <span className="text-cyan-300">More</span></h1>
             <p className="text-theme-secondary text-lg">
               Explore sports events, professional services, and marketplace
             </p>
@@ -584,7 +584,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
                   <Trophy className="w-12 h-12 text-cyan-300" />
                 </div>
               </div>
-              <h2 className="text-2xl font-bold text-white text-center mb-3">
+              <h2 className="text-2xl font-bold text-heading text-center mb-3">
                 Sports Events
               </h2>
               <p className="text-theme-secondary text-center mb-6">
@@ -606,7 +606,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
                   <Stethoscope className="w-12 h-12 text-violet-300" />
                 </div>
               </div>
-              <h2 className="text-2xl font-bold text-white text-center mb-3">
+              <h2 className="text-2xl font-bold text-heading text-center mb-3">
                 Medical Services
               </h2>
               <p className="text-theme-secondary text-center mb-6">
@@ -628,7 +628,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
                   <ShoppingBag className="w-12 h-12 text-amber-300" />
                 </div>
               </div>
-              <h2 className="text-2xl font-bold text-white text-center mb-3">
+              <h2 className="text-2xl font-bold text-heading text-center mb-3">
                 Marketplace
               </h2>
               <p className="text-theme-secondary text-center mb-6">
@@ -677,7 +677,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
               <ChevronLeft className="w-5 h-5 mr-1" />
               Back to Discover
             </button>
-            <h1 className="text-4xl font-bold text-white mb-2">
+            <h1 className="text-4xl font-bold text-heading mb-2">
               Sports Events <Trophy className="inline w-8 h-8 text-cyan-300 ml-2" />
             </h1>
             <p className="text-theme-secondary">Join sports activities and meet new people</p>
@@ -718,7 +718,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
                 >
                   <div className="flex items-start justify-between mb-4">
                     <div>
-                      <h3 className="text-lg font-bold text-white mb-1">{event.title}</h3>
+                      <h3 className="text-lg font-bold text-heading mb-1">{event.title}</h3>
                       <p className="text-sm text-theme-secondary">{event.sport}</p>
                     </div>
                     <div className="flex flex-col items-end gap-1">
@@ -837,7 +837,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
             </button>
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-4xl font-bold text-white mb-2">
+                <h1 className="text-4xl font-bold text-heading mb-2">
                   Medical Services <Stethoscope className="inline w-8 h-8 text-violet-300 ml-2" />
                 </h1>
                 <p className="text-theme-secondary">Find professional health and training services</p>
@@ -982,7 +982,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
               <ChevronLeft className="w-5 h-5 mr-1" />
               Back to Discover
             </button>
-            <h1 className="text-4xl font-bold text-white mb-2">
+            <h1 className="text-4xl font-bold text-heading mb-2">
               Marketplace <ShoppingBag className="inline w-8 h-8 text-amber-300 ml-2" />
             </h1>
             <p className="text-theme-secondary">Buy and sell sports equipment and gear</p>
@@ -1061,7 +1061,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
 
                   {/* Item Details */}
                   <div className="p-4">
-                    <h3 className="font-bold text-white mb-1 line-clamp-2">{item.title}</h3>
+                    <h3 className="font-bold text-heading mb-1 line-clamp-2">{item.title}</h3>
                     <p className="text-sm text-theme-secondary mb-2">{item.category}</p>
 
                     <div className="flex items-center justify-between mb-3">
