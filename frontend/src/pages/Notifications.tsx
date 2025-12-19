@@ -110,7 +110,7 @@ export default function Notifications({ token, onBack }: any) {
             <Loader className="w-8 h-8 animate-spin text-blue-600" />
           </div>
         ) : notifications.length === 0 ? (
-          <div className="bg-white dark:bg-[#0f172a] rounded-2xl border border-gray-200 dark:border-gray-800 p-12 text-center">
+          <div className="rounded-2xl p-12 text-center" style={{ background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)' }}>
             <Bell className="w-16 h-16 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
               No notifications
@@ -124,7 +124,8 @@ export default function Notifications({ token, onBack }: any) {
             {notifications.map((notif) => (
               <div
                 key={notif.id}
-                className="bg-white dark:bg-[#0f172a] rounded-2xl border border-gray-200 dark:border-gray-800 p-6 hover:shadow-lg transition-all duration-300 group"
+                className="rounded-2xl p-6 hover:shadow-lg transition-all duration-300 group"
+                style={{ background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)' }}
               >
                 <div className="flex items-start gap-4">
                   <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${

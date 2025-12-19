@@ -129,7 +129,7 @@ export default function MyJoinRequests({ onBack, onNavigate }: any) {
 
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white dark:bg-[#0f172a] rounded-xl p-4 border border-gray-200 dark:border-gray-800">
+          <div className="rounded-xl p-4" style={{ background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)' }}>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Total</p>
             <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.total}</p>
           </div>
@@ -174,7 +174,7 @@ export default function MyJoinRequests({ onBack, onNavigate }: any) {
             {error}
           </div>
         ) : filteredBookings.length === 0 ? (
-          <div className="bg-white dark:bg-[#0f172a] rounded-2xl border border-gray-200 dark:border-gray-800 p-12 text-center">
+          <div className="rounded-2xl p-12 text-center" style={{ background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)' }}>
             <CheckCircle className="w-16 h-16 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
               No {filter !== "all" ? filter : ""} requests
@@ -191,7 +191,8 @@ export default function MyJoinRequests({ onBack, onNavigate }: any) {
             {filteredBookings.map((booking) => (
               <div
                 key={booking._id}
-                className="bg-white dark:bg-[#0f172a] rounded-2xl border border-gray-200 dark:border-gray-800 p-6 hover:shadow-xl transition-all duration-300 group"
+                className="rounded-2xl p-6 hover:shadow-xl transition-all duration-300 group"
+                style={{ background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)' }}
               >
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div className="flex-1 space-y-3">

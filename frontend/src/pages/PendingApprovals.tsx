@@ -197,7 +197,7 @@ export default function PendingApprovals({ token, onBack, onNavigate }: any) {
             {error}
           </div>
         ) : pendingBookings.length === 0 && approvedUnpaid.length === 0 ? (
-          <div className="bg-white dark:bg-[#0f172a] rounded-2xl border border-gray-200 dark:border-gray-800 p-12 text-center">
+          <div className="rounded-2xl p-12 text-center" style={{ background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)' }}>
             <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
               All caught up!
@@ -219,7 +219,8 @@ export default function PendingApprovals({ token, onBack, onNavigate }: any) {
                   {pendingBookings.map((booking) => (
                     <div
                       key={booking._id}
-                      className="bg-white dark:bg-[#0f172a] rounded-2xl border-2 border-orange-200 dark:border-orange-800 p-6 hover:shadow-xl transition-all duration-300"
+                      className="rounded-2xl border-2 border-orange-200 dark:border-orange-800 p-6 hover:shadow-xl transition-all duration-300"
+                      style={{ background: 'var(--card)', color: 'var(--text)' }}
                     >
                       <div className="flex flex-col md:flex-row justify-between gap-6">
                         <div className="flex-1 space-y-4">
@@ -321,7 +322,8 @@ export default function PendingApprovals({ token, onBack, onNavigate }: any) {
                   {approvedUnpaid.map((booking) => (
                     <div
                       key={booking._id}
-                      className="bg-white dark:bg-[#0f172a] rounded-2xl border-2 border-blue-200 dark:border-blue-800 p-6"
+                      className="rounded-2xl border-2 border-blue-200 dark:border-blue-800 p-6"
+                      style={{ background: 'var(--card)', color: 'var(--text)' }}
                     >
                       <div className="flex flex-col md:flex-row justify-between gap-4">
                         <div className="space-y-2">
@@ -359,7 +361,7 @@ export default function PendingApprovals({ token, onBack, onNavigate }: any) {
       {/* Rejection Modal */}
       {showRejectionModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-[#0f172a] rounded-2xl p-6 max-w-md w-full border border-gray-200 dark:border-gray-800">
+          <div className="rounded-2xl p-6 max-w-md w-full" style={{ background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)' }}>
             <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
               Reject Join Request
             </h3>
