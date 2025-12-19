@@ -566,7 +566,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
         <div className="max-w-6xl mx-auto px-4 py-12">
           {/* Header */}
           <div className="text-center mb-16">
-            <h1 className="text-5xl font-bold text-white mb-4">Discover <span className="text-gray-200">More</span></h1>
+            <h1 className="text-5xl font-bold text-white mb-4">Discover <span className="text-cyan-300">More</span></h1>
             <p className="text-gray-300 text-lg">
               Explore sports events, professional services, and marketplace
             </p>
@@ -577,11 +577,11 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
             {/* Sports Events Card */}
             <div
               onClick={() => setActiveCategory("sports")}
-              className="group cursor-pointer bg-neutral-800 rounded-2xl p-8 border border-neutral-700 hover:border-neutral-500 transition-all"
+              className="group cursor-pointer bg-neutral-800 rounded-2xl p-8 border border-neutral-700 hover:border-cyan-500/40 transition-all"
             >
               <div className="flex justify-center mb-6">
-                <div className="bg-neutral-700 p-6 rounded-2xl group-hover:scale-110 transition-transform duration-300">
-                  <Trophy className="w-12 h-12 text-white" />
+                <div className="bg-cyan-400/10 p-6 rounded-2xl group-hover:scale-110 transition-transform duration-300">
+                  <Trophy className="w-12 h-12 text-cyan-300" />
                 </div>
               </div>
               <h2 className="text-2xl font-bold text-white text-center mb-3">
@@ -590,7 +590,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
               <p className="text-gray-300 text-center mb-6">
                 Find and join sports activities, tournaments, and training sessions
               </p>
-              <div className="flex items-center justify-center text-gray-300 group-hover:text-gray-200 transition-colors">
+              <div className="flex items-center justify-center text-cyan-300 group-hover:text-cyan-200 transition-colors">
                 <span className="font-semibold">Explore Events</span>
                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </div>
@@ -599,11 +599,11 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
             {/* Medical Services Card */}
             <div
               onClick={() => setActiveCategory("services")}
-              className="group cursor-pointer bg-neutral-800 rounded-2xl p-8 border border-neutral-700 hover:border-neutral-500 transition-all"
+              className="group cursor-pointer bg-neutral-800 rounded-2xl p-8 border border-neutral-700 hover:border-violet-500/40 transition-all"
             >
               <div className="flex justify-center mb-6">
-                <div className="bg-neutral-700 p-6 rounded-2xl group-hover:scale-110 transition-transform duration-300">
-                  <Stethoscope className="w-12 h-12 text-white" />
+                <div className="bg-violet-400/10 p-6 rounded-2xl group-hover:scale-110 transition-transform duration-300">
+                  <Stethoscope className="w-12 h-12 text-violet-300" />
                 </div>
               </div>
               <h2 className="text-2xl font-bold text-white text-center mb-3">
@@ -612,7 +612,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
               <p className="text-gray-300 text-center mb-6">
                 Physiotherapy, massage, nutrition, personal training & more
               </p>
-              <div className="flex items-center justify-center text-gray-300 group-hover:text-gray-200 transition-colors">
+              <div className="flex items-center justify-center text-violet-300 group-hover:text-violet-200 transition-colors">
                 <span className="font-semibold">Browse Services</span>
                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </div>
@@ -621,11 +621,11 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
             {/* Marketplace Card */}
             <div
               onClick={() => setActiveCategory("marketplace")}
-              className="group cursor-pointer bg-neutral-800 rounded-2xl p-8 border border-neutral-700 hover:border-neutral-500 transition-all"
+              className="group cursor-pointer bg-neutral-800 rounded-2xl p-8 border border-neutral-700 hover:border-amber-500/40 transition-all"
             >
               <div className="flex justify-center mb-6">
-                <div className="bg-neutral-700 p-6 rounded-2xl group-hover:scale-110 transition-transform duration-300">
-                  <ShoppingBag className="w-12 h-12 text-white" />
+                <div className="bg-amber-400/10 p-6 rounded-2xl group-hover:scale-110 transition-transform duration-300">
+                  <ShoppingBag className="w-12 h-12 text-amber-300" />
                 </div>
               </div>
               <h2 className="text-2xl font-bold text-white text-center mb-3">
@@ -634,7 +634,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
               <p className="text-gray-300 text-center mb-6">
                 Buy and sell sports equipment, apparel, supplements & gear
               </p>
-              <div className="flex items-center justify-center text-gray-300 group-hover:text-gray-200 transition-colors">
+              <div className="flex items-center justify-center text-amber-300 group-hover:text-amber-200 transition-colors">
                 <span className="font-semibold">Shop Now</span>
                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </div>
@@ -678,7 +678,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
               Back to Discover
             </button>
             <h1 className="text-4xl font-bold text-white mb-2">
-              Sports Events <Trophy className="inline w-8 h-8 text-gray-300 ml-2" />
+              Sports Events <Trophy className="inline w-8 h-8 text-cyan-300 ml-2" />
             </h1>
             <p className="text-gray-300">Join sports activities and meet new people</p>
           </div>
@@ -838,7 +838,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-4xl font-bold text-white mb-2">
-                  Medical Services <Stethoscope className="inline w-8 h-8 text-gray-300 ml-2" />
+                  Medical Services <Stethoscope className="inline w-8 h-8 text-violet-300 ml-2" />
                 </h1>
                 <p className="text-gray-300">Find professional health and training services</p>
               </div>
@@ -986,7 +986,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
               Back to Discover
             </button>
             <h1 className="text-4xl font-bold text-white mb-2">
-              Marketplace <ShoppingBag className="inline w-8 h-8 text-gray-300 ml-2" />
+              Marketplace <ShoppingBag className="inline w-8 h-8 text-amber-300 ml-2" />
             </h1>
             <p className="text-gray-300">Buy and sell sports equipment and gear</p>
           </div>

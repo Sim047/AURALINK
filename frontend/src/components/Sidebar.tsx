@@ -415,7 +415,7 @@ export default function Sidebar({
                   onClick={stat.onClick}
                   className={`
                     relative rounded-xl p-3 cursor-pointer border
-                    transition-all duration-300 hover:scale-105 hover:shadow-xl
+                    transition-all duration-300 hover:scale-105 hover:shadow-xl hover:border-cyan-500/40
                     ${isCollapsed ? 'aspect-square' : ''}
                   `}
                   style={{
@@ -426,7 +426,7 @@ export default function Sidebar({
                   <div className="relative z-10">
                     <div className={`flex ${isCollapsed ? 'flex-col items-center justify-center h-full' : 'items-center justify-between'}`}>
                       <div className={isCollapsed ? 'mb-1' : ''}>
-                        <Icon className="w-5 h-5" style={{ color: 'var(--text)' }} />
+                        <Icon className="w-5 h-5 text-cyan-300" />
                       </div>
                       {!isCollapsed && (
                         <div className="text-right">
