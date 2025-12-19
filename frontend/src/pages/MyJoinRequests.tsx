@@ -100,7 +100,7 @@ export default function MyJoinRequests({ onBack, onNavigate }: any) {
         <div className="mb-8">
           <button
             onClick={onBack}
-            className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-4 transition-colors"
+            className="flex items-center gap-2 text-sm text-theme-secondary hover:text-heading mb-4 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Dashboard
@@ -108,10 +108,10 @@ export default function MyJoinRequests({ onBack, onNavigate }: any) {
           
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold mb-2">
+              <h1 className="text-3xl font-bold text-heading mb-2">
                 My Join Requests
               </h1>
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-theme-secondary">
                 Track your event join requests and their status
               </p>
             </div>
@@ -156,7 +156,7 @@ export default function MyJoinRequests({ onBack, onNavigate }: any) {
               className={`px-4 py-2 rounded-lg font-medium transition-all ${
                 filter === status
                   ? "bg-blue-600 text-white shadow-lg shadow-blue-500/30"
-                  : "bg-white dark:bg-[#0f172a] text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-800 hover:border-blue-500"
+                  : "themed-card text-theme-secondary hover:border-blue-500"
               }`}
             >
               {status.charAt(0).toUpperCase() + status.slice(1)}
@@ -175,11 +175,11 @@ export default function MyJoinRequests({ onBack, onNavigate }: any) {
           </div>
         ) : filteredBookings.length === 0 ? (
           <div className="rounded-2xl p-12 text-center themed-card">
-            <CheckCircle className="w-16 h-16 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+            <CheckCircle className="w-16 h-16 text-theme-secondary mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-heading mb-2">
               No {filter !== "all" ? filter : ""} requests
             </h3>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-theme-secondary">
               {filter === "all" 
                 ? "You haven't joined any events yet"
                 : `You don't have any ${filter} requests`
@@ -197,7 +197,7 @@ export default function MyJoinRequests({ onBack, onNavigate }: any) {
                   <div className="flex-1 space-y-3">
                     {/* Event Title */}
                     <div className="flex items-start justify-between gap-4">
-                      <h3 className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                      <h3 className="text-xl font-bold text-heading group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                         {booking.event?.title || ''}
                       </h3>
                       <span className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap ${getStatusColor(booking.status)}`}>
@@ -208,13 +208,13 @@ export default function MyJoinRequests({ onBack, onNavigate }: any) {
 
                     {/* Event Details */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                      <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                      <div className="flex items-center gap-2 text-theme-secondary">
                         <Calendar className="w-4 h-4 text-blue-500" />
                         <span>{dayjs(booking.event.startDate).format("MMM D, YYYY")}</span>
                       </div>
                       
                       {booking.event.location && (
-                        <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                        <div className="flex items-center gap-2 text-theme-secondary">
                           <MapPin className="w-4 h-4 text-red-500" />
                           <span>
                             {booking.event.location.city || booking.event.location.name}
@@ -225,7 +225,7 @@ export default function MyJoinRequests({ onBack, onNavigate }: any) {
 
                       <div 
                         onClick={() => onNavigate && onNavigate('profile', booking.event.organizer._id)}
-                        className="flex items-center gap-2 text-gray-600 dark:text-gray-400 cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                        className="flex items-center gap-2 text-theme-secondary cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                       >
                         <User className="w-4 h-4 text-purple-500" />
                         <span>By <span className="font-semibold">{booking.event.organizer.username}</span></span>
@@ -246,7 +246,7 @@ export default function MyJoinRequests({ onBack, onNavigate }: any) {
                     )}
 
                     {/* Submitted Time */}
-                    <p className="text-xs text-gray-500 dark:text-gray-500">
+                    <p className="text-xs text-theme-secondary">
                       Submitted {dayjs(booking.createdAt).fromNow()}
                     </p>
                   </div>

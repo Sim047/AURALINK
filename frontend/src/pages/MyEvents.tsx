@@ -226,12 +226,12 @@ export default function MyEvents({ token }: any) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-[#071029] dark:via-[#0a1435] dark:to-[#071029] p-6">
+      <div className="min-h-screen themed-page p-6">
         <div className="max-w-7xl mx-auto">
           <div className="animate-pulse space-y-6">
-            <div className="h-8 bg-gray-200 dark:bg-gray-800 rounded w-1/3"></div>
+            <div className="h-8 rounded w-1/3" style={{ background: 'var(--muted)' }}></div>
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-48 bg-gray-200 dark:bg-gray-800 rounded-2xl"></div>
+              <div key={i} className="h-48 rounded-2xl themed-card"></div>
             ))}
           </div>
         </div>
@@ -245,10 +245,10 @@ export default function MyEvents({ token }: any) {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+            <h1 className="text-3xl font-bold text-heading mb-2">
               My Activities
             </h1>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-theme-secondary">
               Manage your events, services, and product listings
             </p>
           </div>
@@ -273,14 +273,14 @@ export default function MyEvents({ token }: any) {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-8 border-b border-gray-200 dark:border-gray-800 overflow-x-auto">
+        <div className="flex gap-2 mb-8 border-b overflow-x-auto" style={{ borderColor: 'var(--border)' }}>
           <button
             onClick={() => setActiveTab("events")}
             data-tab="events"
             className={`px-6 py-3 font-semibold transition-all relative whitespace-nowrap ${
               activeTab === "events"
                 ? "text-cyan-600 dark:text-cyan-400"
-                : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                : "text-theme-secondary hover:text-heading"
             }`}
           >
             <Trophy className="inline w-5 h-5 mr-2" />
@@ -295,7 +295,7 @@ export default function MyEvents({ token }: any) {
             className={`px-6 py-3 font-semibold transition-all relative whitespace-nowrap ${
               activeTab === "services"
                 ? "text-purple-600 dark:text-purple-400"
-                : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                : "text-theme-secondary hover:text-heading"
             }`}
           >
             <Stethoscope className="inline w-5 h-5 mr-2" />
@@ -310,7 +310,7 @@ export default function MyEvents({ token }: any) {
             className={`px-6 py-3 font-semibold transition-all relative whitespace-nowrap ${
               activeTab === "products"
                 ? "text-green-600 dark:text-green-400"
-                : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                : "text-theme-secondary hover:text-heading"
             }`}
           >
             <ShoppingBag className="inline w-5 h-5 mr-2" />
@@ -327,8 +327,8 @@ export default function MyEvents({ token }: any) {
             <div className="rounded-2xl p-6 themed-card">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Total Events</p>
-                  <p className="text-3xl font-bold text-gray-900 dark:text-white">{(eventsCreated.length + eventsJoined.length + eventsPending.length)}</p>
+                  <p className="text-sm text-theme-secondary mb-1">Total Events</p>
+                  <p className="text-3xl font-bold text-heading">{(eventsCreated.length + eventsJoined.length + eventsPending.length)}</p>
                 </div>
                 <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-xl flex items-center justify-center">
                   <Trophy className="w-6 h-6 text-white" />
@@ -339,8 +339,8 @@ export default function MyEvents({ token }: any) {
             <div className="rounded-2xl p-6 themed-card">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Total Participants</p>
-                  <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                  <p className="text-sm text-theme-secondary mb-1">Total Participants</p>
+                  <p className="text-3xl font-bold text-heading">
                     {[...eventsCreated, ...eventsJoined].reduce((sum, e) => sum + (e.capacity?.current || (e.participants?.length || 0)), 0)}
                   </p>
                 </div>
@@ -353,8 +353,8 @@ export default function MyEvents({ token }: any) {
             <div className="rounded-2xl p-6 themed-card">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Active Events</p>
-                  <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                  <p className="text-sm text-theme-secondary mb-1">Active Events</p>
+                  <p className="text-3xl font-bold text-heading">
                     {[...eventsCreated, ...eventsJoined, ...eventsPending].filter((e) => e.status === "published").length}
                   </p>
                 </div>
@@ -369,8 +369,8 @@ export default function MyEvents({ token }: any) {
             <div className="rounded-2xl p-6 themed-card">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Total Services</p>
-                  <p className="text-3xl font-bold text-gray-900 dark:text-white">{services.length}</p>
+                  <p className="text-sm text-theme-secondary mb-1">Total Services</p>
+                  <p className="text-3xl font-bold text-heading">{services.length}</p>
                 </div>
                 <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
                   <Stethoscope className="w-6 h-6 text-white" />
@@ -381,8 +381,8 @@ export default function MyEvents({ token }: any) {
             <div className="rounded-2xl p-6" style={{ background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)' }}>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Active Services</p>
-                  <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                  <p className="text-sm text-theme-secondary mb-1">Active Services</p>
+                  <p className="text-3xl font-bold text-heading">
                     {services.filter((s) => s.active).length}
                   </p>
                 </div>
@@ -395,8 +395,8 @@ export default function MyEvents({ token }: any) {
             <div className="rounded-2xl p-6" style={{ background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)' }}>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Avg. Rating</p>
-                  <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                  <p className="text-sm text-theme-secondary mb-1">Avg. Rating</p>
+                  <p className="text-3xl font-bold text-heading">
                     {services.length > 0
                       ? (services.reduce((sum, s) => sum + (s.rating?.average || 0), 0) / services.length).toFixed(1)
                       : "0.0"}
@@ -417,9 +417,9 @@ export default function MyEvents({ token }: any) {
               <div>
                 <div className="mb-6">
                   <div className="inline-flex rounded-xl overflow-hidden themed-card">
-                    <button onClick={() => setEventsTab('organizing')} className={`px-4 py-2 text-sm font-semibold ${eventsTab==='organizing' ? 'bg-cyan-500 text-white' : 'text-gray-600 dark:text-gray-300'}`}>Organizing ({eventsCreated.length})</button>
-                    <button onClick={() => setEventsTab('joined')} className={`px-4 py-2 text-sm font-semibold ${eventsTab==='joined' ? 'bg-cyan-500 text-white' : 'text-gray-600 dark:text-gray-300'}`}>Joined ({eventsJoined.length})</button>
-                    <button onClick={() => setEventsTab('pending')} className={`px-4 py-2 text-sm font-semibold ${eventsTab==='pending' ? 'bg-cyan-500 text-white' : 'text-gray-600 dark:text-gray-300'}`}>Pending ({eventsPending.length})</button>
+                    <button onClick={() => setEventsTab('organizing')} className={`px-4 py-2 text-sm font-semibold ${eventsTab==='organizing' ? 'bg-cyan-500 text-white' : 'text-theme-secondary'}`}>Organizing ({eventsCreated.length})</button>
+                    <button onClick={() => setEventsTab('joined')} className={`px-4 py-2 text-sm font-semibold ${eventsTab==='joined' ? 'bg-cyan-500 text-white' : 'text-theme-secondary'}`}>Joined ({eventsJoined.length})</button>
+                    <button onClick={() => setEventsTab('pending')} className={`px-4 py-2 text-sm font-semibold ${eventsTab==='pending' ? 'bg-cyan-500 text-white' : 'text-theme-secondary'}`}>Pending ({eventsPending.length})</button>
                   </div>
                 </div>
                 {(eventsTab==='organizing' ? eventsCreated : eventsTab==='joined' ? eventsJoined : eventsPending).length === 0 ? (
@@ -428,10 +428,10 @@ export default function MyEvents({ token }: any) {
                       <div className="w-20 h-20 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 rounded-2xl flex items-center justify-center mx-auto mb-4">
                         <Calendar className="w-10 h-10 text-slate-500" />
                       </div>
-                      <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                      <h3 className="text-xl font-bold text-heading mb-2">
                         No Events Yet
                       </h3>
-                      <p className="text-gray-600 dark:text-gray-400 mb-6">
+                      <p className="text-theme-secondary mb-6">
                         You haven't created any events. Start by creating your first event!
                       </p>
                       <button
@@ -485,12 +485,12 @@ export default function MyEvents({ token }: any) {
 
                         {/* Event Details */}
                         <div className="p-6 space-y-4">
-                          <p className="text-gray-600 dark:text-gray-400 line-clamp-2">
+                          <p className="text-theme-secondary line-clamp-2">
                             {event.description}
                           </p>
 
-                          <div className="space-y-2 text-sm">
-                            <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                            <div className="space-y-2 text-sm">
+                              <div className="flex items-center gap-2 text-theme-secondary">
                               <Calendar className="w-4 h-4 text-slate-500" />
                               <span>
                                 {dayjs(event.startDate).format("MMM D, YYYY")}
@@ -498,8 +498,8 @@ export default function MyEvents({ token }: any) {
                               </span>
                             </div>
 
-                            {event.location?.city && (
-                              <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                              {event.location?.city && (
+                              <div className="flex items-center gap-2 text-theme-secondary">
                                 <MapPin className="w-4 h-4 text-slate-500" />
                                 <span>
                                   {event.location.name && `${event.location.name}, `}
@@ -510,7 +510,7 @@ export default function MyEvents({ token }: any) {
                             )}
 
                             <div className="space-y-2">
-                              <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                              <div className="flex items-center gap-2 text-theme-secondary">
                                 <Users className="w-4 h-4 text-slate-500" />
                                 <span>
                                   {event.capacity?.current || 0} / {event.capacity?.max || 0} participants
@@ -546,7 +546,7 @@ export default function MyEvents({ token }: any) {
                             </div>
 
                             {event.pricing?.type === "paid" && (
-                              <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                              <div className="flex items-center gap-2 text-theme-secondary">
                                 <DollarSign className="w-4 h-4 text-slate-500" />
                                 <span>
                                   {event.pricing.currency} {event.pricing.amount}
@@ -563,7 +563,7 @@ export default function MyEvents({ token }: any) {
                           </div>
 
                           {/* Status & Meta */}
-                          <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
+                          <div className="flex items-center justify-between pt-4 border-t" style={{ borderColor: 'var(--border)' }}>
                             <span
                               className={`px-3 py-1 rounded-lg text-xs font-medium ${
                                 event.status === "published"
@@ -575,7 +575,7 @@ export default function MyEvents({ token }: any) {
                             >
                               {event.status}
                             </span>
-                            <span className="text-xs text-gray-500 dark:text-gray-500">
+                            <span className="text-xs text-theme-secondary">
                               Created {dayjs(event.createdAt).fromNow()}
                             </span>
                           </div>
@@ -652,24 +652,24 @@ export default function MyEvents({ token }: any) {
 
                         {/* Service Details */}
                         <div className="p-6 space-y-4">
-                          <p className="text-gray-600 dark:text-gray-400 line-clamp-2">
+                          <p className="text-theme-secondary line-clamp-2">
                             {service.description}
                           </p>
 
                           <div className="space-y-2 text-sm">
-                            <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                            <div className="flex items-center gap-2 text-theme-secondary">
                               <Trophy className="w-4 h-4 text-purple-500" />
                               <span>{service.sport}</span>
                             </div>
 
-                            <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                            <div className="flex items-center gap-2 text-theme-secondary">
                               <DollarSign className="w-4 h-4 text-green-500" />
                               <span>
                                 ${service.pricing.amount} / {service.pricing.type.replace(/-/g, " ")}
                               </span>
                             </div>
 
-                            <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                            <div className="flex items-center gap-2 text-theme-secondary">
                               <MapPin className="w-4 h-4 text-pink-500" />
                               <span className="capitalize">
                                 {service.location.type === "online"
@@ -679,7 +679,7 @@ export default function MyEvents({ token }: any) {
                             </div>
 
                             {service.duration && (
-                              <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                              <div className="flex items-center gap-2 text-theme-secondary">
                                 <Clock className="w-4 h-4 text-cyan-500" />
                                 <span>
                                   {service.duration.value} {service.duration.unit}
@@ -699,7 +699,7 @@ export default function MyEvents({ token }: any) {
                                 </span>
                               ))}
                               {service.qualifications.length > 3 && (
-                                <span className="text-xs text-gray-500 dark:text-gray-400 self-center">
+                                <span className="text-xs text-theme-secondary self-center">
                                   +{service.qualifications.length - 3} more
                                 </span>
                               )}
@@ -707,7 +707,7 @@ export default function MyEvents({ token }: any) {
                           )}
 
                           {/* Status & Meta */}
-                          <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
+                          <div className="flex items-center justify-between pt-4 border-t" style={{ borderColor: 'var(--border)' }}>
                             <div className="flex items-center gap-2">
                               <span
                                 className={`px-3 py-1 rounded-lg text-xs font-medium ${
@@ -727,7 +727,7 @@ export default function MyEvents({ token }: any) {
                                 </div>
                               )}
                             </div>
-                            <span className="text-xs text-gray-500 dark:text-gray-500">
+                            <span className="text-xs text-theme-secondary">
                               Created {dayjs(service.createdAt).fromNow()}
                             </span>
                           </div>
@@ -804,32 +804,32 @@ export default function MyEvents({ token }: any) {
 
                         {/* Product Details */}
                         <div className="p-6 space-y-4">
-                          <p className="text-gray-600 dark:text-gray-400 line-clamp-2">
+                          <p className="text-theme-secondary line-clamp-2">
                             {product.description}
                           </p>
 
                           <div className="space-y-2 text-sm">
-                            <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                            <div className="flex items-center gap-2 text-theme-secondary">
                               <DollarSign className="w-4 h-4 text-green-500" />
                               <span className="font-semibold text-lg">
                                 {product.price} {product.currency || "USD"}
                               </span>
                             </div>
 
-                            <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                            <div className="flex items-center gap-2 text-theme-secondary">
                               <Package className="w-4 h-4 text-green-500" />
                               <span className="capitalize">{product.condition}</span>
                             </div>
 
                             {product.location && (
-                              <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                              <div className="flex items-center gap-2 text-theme-secondary">
                                 <MapPin className="w-4 h-4 text-green-500" />
                                 <span>{product.location}</span>
                               </div>
                             )}
 
                             {product.shippingAvailable && (
-                              <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                              <div className="flex items-center gap-2 text-theme-secondary">
                                 <Truck className="w-4 h-4 text-blue-500" />
                                 <span className="text-blue-600 dark:text-blue-400 font-medium">
                                   Shipping Available
@@ -839,7 +839,7 @@ export default function MyEvents({ token }: any) {
                             )}
 
                             {product.quantity && (
-                              <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                              <div className="flex items-center gap-2 text-theme-secondary">
                                 <Package className="w-4 h-4 text-gray-500" />
                                 <span>{product.quantity} available</span>
                               </div>
@@ -857,7 +857,7 @@ export default function MyEvents({ token }: any) {
                                 </span>
                               ))}
                               {product.tags.length > 3 && (
-                                <span className="text-xs text-gray-500 dark:text-gray-400 self-center">
+                                <span className="text-xs text-theme-secondary self-center">
                                   +{product.tags.length - 3} more
                                 </span>
                               )}
@@ -865,7 +865,7 @@ export default function MyEvents({ token }: any) {
                           )}
 
                           {/* Status & Meta */}
-                          <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
+                          <div className="flex items-center justify-between pt-4 border-t" style={{ borderColor: 'var(--border)' }}>
                             <div className="flex items-center gap-2">
                               <span
                                 className={`px-3 py-1 rounded-lg text-xs font-medium ${
@@ -876,12 +876,12 @@ export default function MyEvents({ token }: any) {
                               >
                                 {product.status}
                               </span>
-                              <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
+                              <div className="flex items-center gap-1 text-theme-secondary">
                                 <Eye className="w-4 h-4" />
                                 <span className="text-xs">{product.views || 0}</span>
                               </div>
                             </div>
-                            <span className="text-xs text-gray-500 dark:text-gray-500">
+                            <span className="text-xs text-theme-secondary">
                               Created {dayjs(product.createdAt).fromNow()}
                             </span>
                           </div>

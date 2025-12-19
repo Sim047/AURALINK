@@ -86,7 +86,7 @@ export default function Notifications({ token, onBack }: any) {
         <div className="mb-8">
           <button
             onClick={onBack}
-            className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-4 transition-colors"
+            className="flex items-center gap-2 text-sm text-theme-secondary hover:text-heading mb-4 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Dashboard
@@ -97,9 +97,7 @@ export default function Notifications({ token, onBack }: any) {
               <h1 className="text-3xl font-bold mb-2">
                 Notifications
               </h1>
-              <p className="text-gray-600 dark:text-gray-400">
-                Stay updated with your bookings and events
-              </p>
+              <p className="text-theme-secondary">Stay updated with your bookings and events</p>
             </div>
           </div>
         </div>
@@ -111,11 +109,11 @@ export default function Notifications({ token, onBack }: any) {
           </div>
         ) : notifications.length === 0 ? (
           <div className="rounded-2xl p-12 text-center themed-card">
-            <Bell className="w-16 h-16 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+            <Bell className="w-16 h-16 text-theme-secondary mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-heading mb-2">
               No notifications
             </h3>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-theme-secondary">
               You're all caught up! Check back later for updates.
             </p>
           </div>
@@ -144,10 +142,10 @@ export default function Notifications({ token, onBack }: any) {
                   </div>
                   
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-bold text-gray-900 dark:text-white mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                    <h3 className="font-bold text-heading mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                       {notif.title}
                     </h3>
-                    <p className="text-gray-600 dark:text-gray-400 mb-2">
+                    <p className="text-theme-secondary mb-2">
                       {notif.message}
                     </p>
                     <div className="flex items-center gap-2">
@@ -158,7 +156,7 @@ export default function Notifications({ token, onBack }: any) {
                       }`}>
                         {notif.type === 'event' ? 'Event' : 'Booking'}
                       </span>
-                      <span className="text-xs text-gray-500 dark:text-gray-500">
+                      <span className="text-xs text-theme-secondary">
                         {notif.time}
                       </span>
                     </div>

@@ -101,7 +101,7 @@ export default function AllEvents({ token, onBack, onNavigate, onViewEvent }: an
         <div className="mb-8">
           <button
             onClick={onBack}
-            className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-4 transition-colors"
+            className="flex items-center gap-2 text-sm text-theme-secondary hover:text-heading mb-4 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Dashboard
@@ -109,10 +109,10 @@ export default function AllEvents({ token, onBack, onNavigate, onViewEvent }: an
           
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold mb-2">
+              <h1 className="text-3xl font-bold text-heading mb-2">
                 All Events
               </h1>
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-theme-secondary">
                 Manage all your events in one place
               </p>
             </div>
@@ -129,7 +129,7 @@ export default function AllEvents({ token, onBack, onNavigate, onViewEvent }: an
                 : "hover:border-blue-500 themed-card"
             }`}
           >
-            <p className={`text-sm mb-1 ${filter === "all" ? "text-blue-100" : "text-gray-600 dark:text-gray-400"}`}>
+            <p className={`text-sm mb-1 ${filter === "all" ? "text-blue-100" : "text-theme-secondary"}`}>
               All Events
             </p>
             <p className="text-2xl font-bold">{stats.all}</p>
@@ -143,7 +143,7 @@ export default function AllEvents({ token, onBack, onNavigate, onViewEvent }: an
                 : "hover:border-purple-500 themed-card"
             }`}
           >
-            <p className={`text-sm mb-1 ${filter === "organizing" ? "text-purple-100" : "text-gray-600 dark:text-gray-400"}`}>
+            <p className={`text-sm mb-1 ${filter === "organizing" ? "text-purple-100" : "text-theme-secondary"}`}>
               Organizing
             </p>
             <p className="text-2xl font-bold">{stats.organizing}</p>
@@ -157,7 +157,7 @@ export default function AllEvents({ token, onBack, onNavigate, onViewEvent }: an
                 : "hover:border-green-500 themed-card"
             }`}
           >
-            <p className={`text-sm mb-1 ${filter === "participating" ? "text-green-100" : "text-gray-600 dark:text-gray-400"}`}>
+            <p className={`text-sm mb-1 ${filter === "participating" ? "text-green-100" : "text-theme-secondary"}`}>
               Participating
             </p>
             <p className="text-2xl font-bold">{stats.participating}</p>
@@ -171,7 +171,7 @@ export default function AllEvents({ token, onBack, onNavigate, onViewEvent }: an
                 : "hover:border-orange-500 themed-card"
             }`}
           >
-            <p className={`text-sm mb-1 ${filter === "upcoming" ? "text-orange-100" : "text-gray-600 dark:text-gray-400"}`}>
+            <p className={`text-sm mb-1 ${filter === "upcoming" ? "text-orange-100" : "text-theme-secondary"}`}>
               Upcoming
             </p>
             <p className="text-2xl font-bold">{stats.upcoming}</p>
@@ -185,7 +185,7 @@ export default function AllEvents({ token, onBack, onNavigate, onViewEvent }: an
                 : "hover:border-gray-500 themed-card"
             }`}
           >
-            <p className={`text-sm mb-1 ${filter === "past" ? "text-gray-100" : "text-gray-600 dark:text-gray-400"}`}>
+            <p className={`text-sm mb-1 ${filter === "past" ? "text-gray-100" : "text-theme-secondary"}`}>
               Past
             </p>
             <p className="text-2xl font-bold">{stats.past}</p>
@@ -203,11 +203,11 @@ export default function AllEvents({ token, onBack, onNavigate, onViewEvent }: an
           </div>
         ) : filteredEvents.length === 0 ? (
           <div className="rounded-2xl p-12 text-center themed-card">
-            <Calendar className="w-16 h-16 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+            <Calendar className="w-16 h-16 text-theme-secondary mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-heading mb-2">
               No {filter !== "all" ? filter : ""} events
             </h3>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-theme-secondary">
               {filter === "organizing" 
                 ? "You haven't created any events yet"
                 : filter === "participating"
@@ -260,19 +260,19 @@ export default function AllEvents({ token, onBack, onNavigate, onViewEvent }: an
                     {event.sport && (
                       <div className="flex items-center gap-2 mt-8">
                         <Trophy className="w-4 h-4 text-blue-500" />
-                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <span className="text-sm font-medium text-theme-secondary">
                           {event.sport}
                         </span>
                       </div>
                     )}
 
                     {/* Title */}
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                    <h3 className="text-xl font-bold text-heading group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                       {event.title}
                     </h3>
 
                     {/* Details */}
-                    <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                    <div className="space-y-2 text-sm text-theme-secondary">
                       <div className="flex items-center gap-2">
                         <Calendar className="w-4 h-4 text-blue-500" />
                         <span>{dayjs(event.startDate).format("MMM D, YYYY")}</span>
@@ -308,8 +308,8 @@ export default function AllEvents({ token, onBack, onNavigate, onViewEvent }: an
 
                     {/* Organizer */}
                     {event.organizer && (
-                      <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
-                        <p className="text-xs text-gray-500 dark:text-gray-500">
+                      <div className="pt-3 border-t" style={{ borderColor: 'var(--border)' }}>
+                        <p className="text-xs text-theme-secondary">
                           By {event.organizer.username}
                         </p>
                       </div>
