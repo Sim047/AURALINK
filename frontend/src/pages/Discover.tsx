@@ -562,7 +562,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
   // Hub Landing Page
   if (!activeCategory) {
     return (
-      <div className="min-h-screen bg-neutral-950">
+      <div className="min-h-screen themed-page">
         <div className="max-w-6xl mx-auto px-4 py-12">
           {/* Header */}
           <div className="text-center mb-16">
@@ -577,7 +577,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
             {/* Sports Events Card */}
             <div
               onClick={() => setActiveCategory("sports")}
-              className="group cursor-pointer bg-neutral-800 rounded-2xl p-8 border border-neutral-700 hover:border-cyan-500/40 transition-all"
+              className="group cursor-pointer rounded-2xl p-8 border hover:border-cyan-500/40 transition-all themed-card"
             >
               <div className="flex justify-center mb-6">
                 <div className="bg-cyan-400/10 p-6 rounded-2xl group-hover:scale-110 transition-transform duration-300">
@@ -599,7 +599,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
             {/* Medical Services Card */}
             <div
               onClick={() => setActiveCategory("services")}
-              className="group cursor-pointer bg-neutral-800 rounded-2xl p-8 border border-neutral-700 hover:border-violet-500/40 transition-all"
+              className="group cursor-pointer rounded-2xl p-8 border hover:border-violet-500/40 transition-all themed-card"
             >
               <div className="flex justify-center mb-6">
                 <div className="bg-violet-400/10 p-6 rounded-2xl group-hover:scale-110 transition-transform duration-300">
@@ -621,7 +621,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
             {/* Marketplace Card */}
             <div
               onClick={() => setActiveCategory("marketplace")}
-              className="group cursor-pointer bg-neutral-800 rounded-2xl p-8 border border-neutral-700 hover:border-amber-500/40 transition-all"
+              className="group cursor-pointer rounded-2xl p-8 border hover:border-amber-500/40 transition-all themed-card"
             >
               <div className="flex justify-center mb-6">
                 <div className="bg-amber-400/10 p-6 rounded-2xl group-hover:scale-110 transition-transform duration-300">
@@ -666,7 +666,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
     const sportsList = ["All Sports", "Football", "Basketball", "Tennis", "Running", "Swimming", "Cycling", "Gym", "Volleyball", "Baseball"];
 
     return (
-      <div className="min-h-screen bg-neutral-950">
+      <div className="min-h-screen themed-page">
         <div className="max-w-6xl mx-auto px-4 py-8">
           {/* Back Button & Header */}
           <div className="mb-8">
@@ -690,10 +690,10 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
                 key={sport}
                 onClick={() => setSelectedSport(sport)}
                 className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-all ${
-                  selectedSport === sport
-                    ? "bg-neutral-700 text-white"
-                    : "bg-neutral-800 text-gray-300 hover:bg-neutral-700"
-                }`}
+                    selectedSport === sport
+                      ? "bg-gradient-to-r from-cyan-500 to-purple-500 text-white"
+                      : "themed-card hover:opacity-90"
+                  }`}
               >
                 {sport}
               </button>
@@ -714,7 +714,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
                 <div
                   key={event._id}
                   onClick={() => openEventDetails(event._id)}
-                  className="bg-neutral-800 backdrop-blur-lg rounded-xl p-6 border border-neutral-700 hover:border-neutral-500 transition-all hover:scale-105 cursor-pointer"
+                  className="rounded-xl p-6 hover:scale-105 cursor-pointer themed-card"
                 >
                   <div className="flex items-start justify-between mb-4">
                     <div>
@@ -824,7 +824,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
     ];
 
     return (
-      <div className="min-h-screen bg-neutral-950">
+      <div className="min-h-screen themed-page">
         <div className="max-w-6xl mx-auto px-4 py-8">
           {/* Back Button & Header */}
           <div className="mb-8">
@@ -860,8 +860,8 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
                 onClick={() => setFilterCategory(category === "All" ? "" : category)}
                 className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-all capitalize ${
                   (category === "All" && !filterCategory) || filterCategory === category
-                    ? "bg-neutral-700 text-white"
-                    : "bg-neutral-800 text-gray-300 hover:bg-neutral-700"
+                    ? "bg-gradient-to-r from-cyan-500 to-purple-500 text-white"
+                    : "themed-card hover:opacity-90"
                 }`}
               >
                 {category.replace(/-/g, " ")}
@@ -883,7 +883,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
                 <div
                   key={service._id}
                   onClick={() => setSelectedService(service)}
-                  className="bg-neutral-800 backdrop-blur-lg rounded-xl p-6 border border-neutral-700 hover:border-neutral-500 transition-all cursor-pointer"
+                  className="rounded-xl p-6 transition-all cursor-pointer themed-card"
                 >
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
@@ -974,7 +974,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
     ];
 
     return (
-      <div className="min-h-screen bg-neutral-950">
+      <div className="min-h-screen themed-page">
         <div className="max-w-6xl mx-auto px-4 py-8">
           {/* Back Button & Header */}
           <div className="mb-8">
@@ -1001,7 +1001,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && fetchMarketplaceItems()}
-                className="w-full bg-neutral-800 border border-neutral-700 rounded-lg pl-12 pr-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-neutral-500"
+                className="w-full input pl-12 pr-4 py-3 rounded-lg"
               />
             </div>
 
@@ -1012,8 +1012,8 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
                   onClick={() => setFilterCategory(category === "All" ? "" : category)}
                   className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-all ${
                     (category === "All" && !filterCategory) || filterCategory === category
-                      ? "bg-neutral-700 text-white"
-                      : "bg-neutral-800 text-gray-300 hover:bg-neutral-700"
+                      ? "bg-gradient-to-r from-cyan-500 to-purple-500 text-white"
+                      : "themed-card hover:opacity-90"
                   }`}
                 >
                   {category}
@@ -1035,7 +1035,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
               {marketplaceItems.map((item) => (
                 <div
                   key={item._id}
-                  className="bg-neutral-800 backdrop-blur-lg rounded-xl overflow-hidden border border-neutral-700 hover:border-neutral-500 transition-all hover:scale-105 cursor-pointer"
+                  className="rounded-xl overflow-hidden transition-all hover:scale-105 cursor-pointer themed-card"
                   onClick={() => setSelectedProduct(item)}
                 >
                   {/* Item Image */}
