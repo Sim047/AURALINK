@@ -7,9 +7,10 @@ import { MessageCircle, X, Send, Search as SearchIcon, Bot } from "lucide-react"
 interface AssistantWidgetProps {
   token: string | null;
   user?: { username?: string; favoriteSports?: string[] } | null;
+  view?: string;
 }
 
-export default function AssistantWidget({ token, user }: AssistantWidgetProps) {
+export default function AssistantWidget({ token, user, view }: AssistantWidgetProps) {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<{ role: "user" | "assistant"; text: string }[]>([]);
@@ -72,8 +73,9 @@ export default function AssistantWidget({ token, user }: AssistantWidgetProps) {
     }
   }
 
+  const containerPos = view === 'posts' ? 'bottom-6 right-24 md:right-6' : 'bottom-6 right-6';
   return (
-    <div className="fixed bottom-6 right-20 md:right-6 z-40">
+    <div className={`fixed ${containerPos} z-40`}>
       {!open ? (
         <button
           onClick={() => setOpen(true)}

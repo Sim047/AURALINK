@@ -1829,7 +1829,7 @@ function onMyStatusUpdated(newStatus: any) {
         </div>
       )}
       {/* AI Assistant Widget */}
-      {ASSISTANT_ENABLED && <AssistantWidget token={token} user={user as any} />}
+      {ASSISTANT_ENABLED && <AssistantWidget token={token} user={user as any} view={view} />}
     </div>
   );
 }
