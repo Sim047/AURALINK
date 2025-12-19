@@ -158,10 +158,10 @@ export default function AllUsers({ token, onOpenConversation, currentUserId, onS
   =========================================================== */
 
   return (
-    <div className="p-6">
+    <div className="min-h-screen p-6" style={{ background: 'var(--bg)', color: 'var(--text)' }}>
       {/* HEADER */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
-        <h2 className="text-2xl font-bold">📋 All Users</h2>
+        <h2 className="text-2xl font-bold" style={{ color: 'var(--text)' }}>📋 All Users</h2>
 
         <div className="flex items-center gap-2 w-full sm:w-auto">
           <div className="relative flex-1 sm:flex-none">
@@ -201,9 +201,9 @@ export default function AllUsers({ token, onOpenConversation, currentUserId, onS
 
       {/* USERS */}
       {loading ? (
-        <div className="text-slate-600 dark:text-slate-400">Loading users…</div>
+        <div className="text-theme-muted">Loading users…</div>
       ) : users.length === 0 ? (
-        <div className="text-slate-600 dark:text-slate-400 text-center py-12">
+        <div className="text-theme-muted text-center py-12">
           <div className="text-4xl mb-3">🔍</div>
           <div>{search ? `No users found matching "${search}"` : "No users found."}</div>
         </div>
@@ -214,12 +214,11 @@ export default function AllUsers({ token, onOpenConversation, currentUserId, onS
             <div
               key={u._id}
               className="
-                bg-white dark:bg-slate-800
-                rounded-xl border border-gray-200 dark:border-gray-700
-                p-3 sm:p-5 flex flex-col items-center text-center 
+                rounded-xl p-3 sm:p-5 flex flex-col items-center text-center 
                 shadow-sm hover:shadow-lg transition-all
                 min-h-[260px] sm:min-h-[280px]
               "
+              style={{ background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)' }}
             >
               {/* Avatar */}
               <div className="relative group mb-2 sm:mb-3 flex-shrink-0">
@@ -252,15 +251,11 @@ export default function AllUsers({ token, onOpenConversation, currentUserId, onS
 
               {/* Username */}
               <div
-                className="mt-1 font-semibold cursor-pointer truncate w-full text-slate-900 dark:text-slate-100 text-sm sm:text-base"
+                className="mt-1 font-semibold cursor-pointer truncate w-full text-sm sm:text-base"
+                style={{ color: 'var(--text)' }}
                 onClick={() => openProfile(u)}
               >
                 {u.username}
-              </div>
-
-              {/* Email */}
-              <div className="text-xs text-slate-600 dark:text-slate-400 truncate w-full mb-3 sm:mb-4">
-                {u.email}
               </div>
 
               {/* Buttons */}
@@ -295,10 +290,10 @@ export default function AllUsers({ token, onOpenConversation, currentUserId, onS
               className="
                 flex flex-col sm:flex-row sm:items-center sm:justify-between 
                 p-3 sm:p-4 rounded-lg 
-                bg-white dark:bg-slate-800
-                border border-gray-200 dark:border-gray-700
+                
                 gap-3
               "
+              style={{ background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)' }}
             >
               <div className="flex items-center gap-3">
                 <div className="relative group flex-shrink-0">
@@ -331,12 +326,12 @@ export default function AllUsers({ token, onOpenConversation, currentUserId, onS
 
                 <div className="flex-1 min-w-0">
                   <div
-                    className="font-bold cursor-pointer text-slate-900 dark:text-slate-100 truncate"
+                    className="font-bold cursor-pointer truncate"
+                    style={{ color: 'var(--text)' }}
                     onClick={() => openProfile(u)}
                   >
                     {u.username}
                   </div>
-                  <div className="text-xs text-slate-600 dark:text-slate-400 truncate">{u.email}</div>
                 </div>
               </div>
 
