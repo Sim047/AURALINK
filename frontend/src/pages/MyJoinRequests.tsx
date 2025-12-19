@@ -94,7 +94,7 @@ export default function MyJoinRequests({ onBack, onNavigate }: any) {
   };
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--bg)', color: 'var(--text)' }}>
+    <div className="min-h-screen themed-page">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -108,7 +108,7 @@ export default function MyJoinRequests({ onBack, onNavigate }: any) {
           
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold mb-2" style={{ color: 'var(--text)' }}>
+              <h1 className="text-3xl font-bold mb-2">
                 My Join Requests
               </h1>
               <p className="text-gray-600 dark:text-gray-400">
@@ -129,7 +129,7 @@ export default function MyJoinRequests({ onBack, onNavigate }: any) {
 
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div className="rounded-xl p-4" style={{ background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)' }}>
+          <div className="rounded-xl p-4 themed-card">
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Total</p>
             <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.total}</p>
           </div>
@@ -174,7 +174,7 @@ export default function MyJoinRequests({ onBack, onNavigate }: any) {
             {error}
           </div>
         ) : filteredBookings.length === 0 ? (
-          <div className="rounded-2xl p-12 text-center" style={{ background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)' }}>
+          <div className="rounded-2xl p-12 text-center themed-card">
             <CheckCircle className="w-16 h-16 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
               No {filter !== "all" ? filter : ""} requests
@@ -191,8 +191,7 @@ export default function MyJoinRequests({ onBack, onNavigate }: any) {
             {filteredBookings.map((booking) => (
               <div
                 key={booking._id}
-                className="rounded-2xl p-6 hover:shadow-xl transition-all duration-300 group"
-                style={{ background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)' }}
+                className="rounded-2xl p-6 hover:shadow-xl transition-all duration-300 group themed-card"
               >
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div className="flex-1 space-y-3">

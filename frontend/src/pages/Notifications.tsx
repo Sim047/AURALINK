@@ -80,7 +80,7 @@ export default function Notifications({ token, onBack }: any) {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--bg)', color: 'var(--text)' }}>
+    <div className="min-h-screen themed-page">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -94,7 +94,7 @@ export default function Notifications({ token, onBack }: any) {
           
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold mb-2" style={{ color: 'var(--text)' }}>
+              <h1 className="text-3xl font-bold mb-2">
                 Notifications
               </h1>
               <p className="text-gray-600 dark:text-gray-400">
@@ -110,7 +110,7 @@ export default function Notifications({ token, onBack }: any) {
             <Loader className="w-8 h-8 animate-spin text-blue-600" />
           </div>
         ) : notifications.length === 0 ? (
-          <div className="rounded-2xl p-12 text-center" style={{ background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)' }}>
+          <div className="rounded-2xl p-12 text-center themed-card">
             <Bell className="w-16 h-16 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
               No notifications
@@ -124,8 +124,7 @@ export default function Notifications({ token, onBack }: any) {
             {notifications.map((notif) => (
               <div
                 key={notif.id}
-                className="rounded-2xl p-6 hover:shadow-lg transition-all duration-300 group"
-                style={{ background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)' }}
+                className="rounded-2xl p-6 hover:shadow-lg transition-all duration-300 group themed-card"
               >
                 <div className="flex items-start gap-4">
                   <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${

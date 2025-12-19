@@ -240,7 +240,7 @@ export default function MyEvents({ token }: any) {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--bg)', color: 'var(--text)' }}>
+    <div className="min-h-screen themed-page">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
@@ -324,7 +324,7 @@ export default function MyEvents({ token }: any) {
         {/* Stats */}
         {activeTab === "events" ? (
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-            <div className="rounded-2xl p-6" style={{ background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)' }}>
+            <div className="rounded-2xl p-6 themed-card">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Total Events</p>
@@ -336,7 +336,7 @@ export default function MyEvents({ token }: any) {
               </div>
             </div>
 
-            <div className="rounded-2xl p-6" style={{ background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)' }}>
+            <div className="rounded-2xl p-6 themed-card">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Total Participants</p>
@@ -350,7 +350,7 @@ export default function MyEvents({ token }: any) {
               </div>
             </div>
 
-            <div className="rounded-2xl p-6" style={{ background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)' }}>
+            <div className="rounded-2xl p-6 themed-card">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Active Events</p>
@@ -366,7 +366,7 @@ export default function MyEvents({ token }: any) {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-            <div className="rounded-2xl p-6" style={{ background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)' }}>
+            <div className="rounded-2xl p-6 themed-card">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Total Services</p>
@@ -416,14 +416,14 @@ export default function MyEvents({ token }: any) {
             return (
               <div>
                 <div className="mb-6">
-                  <div className="inline-flex rounded-xl overflow-hidden" style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
+                  <div className="inline-flex rounded-xl overflow-hidden themed-card">
                     <button onClick={() => setEventsTab('organizing')} className={`px-4 py-2 text-sm font-semibold ${eventsTab==='organizing' ? 'bg-cyan-500 text-white' : 'text-gray-600 dark:text-gray-300'}`}>Organizing ({eventsCreated.length})</button>
                     <button onClick={() => setEventsTab('joined')} className={`px-4 py-2 text-sm font-semibold ${eventsTab==='joined' ? 'bg-cyan-500 text-white' : 'text-gray-600 dark:text-gray-300'}`}>Joined ({eventsJoined.length})</button>
                     <button onClick={() => setEventsTab('pending')} className={`px-4 py-2 text-sm font-semibold ${eventsTab==='pending' ? 'bg-cyan-500 text-white' : 'text-gray-600 dark:text-gray-300'}`}>Pending ({eventsPending.length})</button>
                   </div>
                 </div>
                 {(eventsTab==='organizing' ? eventsCreated : eventsTab==='joined' ? eventsJoined : eventsPending).length === 0 ? (
-                  <div className="rounded-3xl p-12 text-center" style={{ background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)' }}>
+                  <div className="rounded-3xl p-12 text-center themed-card">
                     <div className="max-w-md mx-auto">
                       <div className="w-20 h-20 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 rounded-2xl flex items-center justify-center mx-auto mb-4">
                         <Calendar className="w-10 h-10 text-slate-500" />
@@ -448,8 +448,7 @@ export default function MyEvents({ token }: any) {
                     {(eventsTab==='organizing' ? eventsCreated : eventsTab==='joined' ? eventsJoined : eventsPending).map((event) => (
                       <div
                         key={event._id}
-                        className="rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300"
-                        style={{ background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)' }}
+                        className="rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 themed-card"
                       >
                         {/* Event Header */}
                         <div className="bg-gradient-to-r from-slate-600 to-slate-700 dark:from-slate-700 dark:to-slate-800 p-6">

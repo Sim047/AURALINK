@@ -481,15 +481,15 @@ export default function Dashboard({ token, onNavigate }: any) {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--bg)', color: 'var(--text)' }}>
+    <div className="min-h-screen themed-page">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold mb-2" style={{ color: 'var(--text)' }}>
+            <h1 className="text-3xl font-bold mb-2">
               Welcome back! 👋 <Sparkles className="inline w-6 h-6 text-accent align-text-bottom ml-1" />
             </h1>
-            <p style={{ color: 'var(--text-secondary)' }}>
+            <p className="text-theme-secondary">
               Here's what's happening with your bookings and events
             </p>
           </div>
@@ -605,7 +605,7 @@ export default function Dashboard({ token, onNavigate }: any) {
           </button>
 
           {/* Total Bookings */}
-          <div className="rounded-2xl p-6 hover:shadow-lg transition-all duration-300" style={{ background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)' }}>
+          <div className="rounded-2xl p-6 hover:shadow-lg transition-all duration-300 themed-card">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Total Bookings</p>
@@ -616,7 +616,7 @@ export default function Dashboard({ token, onNavigate }: any) {
           </div>
 
           {/* Confirmed Bookings */}
-          <div className="rounded-2xl p-6 hover:shadow-lg transition-all duration-300" style={{ background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)' }}>
+          <div className="rounded-2xl p-6 hover:shadow-lg transition-all duration-300 themed-card">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Confirmed</p>
@@ -695,7 +695,7 @@ export default function Dashboard({ token, onNavigate }: any) {
         {/* Community & Bookings section */}
         <div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="rounded-2xl p-6" style={{ background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)' }}>
+            <div className="rounded-2xl p-6 themed-card">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-900 dark:text-white">
                 My Bookings
@@ -752,7 +752,7 @@ export default function Dashboard({ token, onNavigate }: any) {
           </div>
 
           {/* Upcoming Events */}
-          <div className="rounded-2xl p-6" style={{ background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)' }}>
+          <div className="rounded-2xl p-6 themed-card">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-900 dark:text-white">
                 Community Events

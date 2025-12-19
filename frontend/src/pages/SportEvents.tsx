@@ -54,7 +54,7 @@ export default function SportEvents({ sport, token, onBack }: any) {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--bg)', color: 'var(--text)' }}>
+    <div className="min-h-screen themed-page">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -82,12 +82,12 @@ export default function SportEvents({ sport, token, onBack }: any) {
 
         {/* Events Grid */}
         {events.length === 0 ? (
-          <div className="rounded-3xl p-12 text-center" style={{ background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)' }}>
+          <div className="rounded-3xl p-12 text-center themed-card">
             <div className="max-w-md mx-auto">
               <div className="w-20 h-20 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <Calendar className="w-10 h-10 text-slate-500" />
               </div>
-              <h3 className="text-xl font-bold mb-2" style={{ color: 'var(--text)' }}>
+              <h3 className="text-xl font-bold mb-2">
                 No Events Found
               </h3>
               <p className="text-gray-600 dark:text-gray-400">
@@ -100,8 +100,7 @@ export default function SportEvents({ sport, token, onBack }: any) {
             {events.map((event) => (
               <div
                 key={event._id}
-                className="rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300"
-                style={{ background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)' }}
+                className="rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 themed-card"
               >
                 <div className="bg-gradient-to-r from-teal-500 to-cyan-500 p-6">
                   <h3 className="text-xl font-bold text-white mb-2 line-clamp-2">

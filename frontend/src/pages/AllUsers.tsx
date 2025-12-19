@@ -158,10 +158,10 @@ export default function AllUsers({ token, onOpenConversation, currentUserId, onS
   =========================================================== */
 
   return (
-    <div className="min-h-screen p-6" style={{ background: 'var(--bg)', color: 'var(--text)' }}>
+    <div className="min-h-screen p-6 themed-page">
       {/* HEADER */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
-        <h2 className="text-2xl font-bold" style={{ color: 'var(--text)' }}>📋 All Users</h2>
+        <h2 className="text-2xl font-bold">📋 All Users</h2>
 
         <div className="flex items-center gap-2 w-full sm:w-auto">
           <div className="relative flex-1 sm:flex-none">
@@ -216,9 +216,8 @@ export default function AllUsers({ token, onOpenConversation, currentUserId, onS
               className="
                 rounded-xl p-3 sm:p-5 flex flex-col items-center text-center 
                 shadow-sm hover:shadow-lg transition-all
-                min-h-[260px] sm:min-h-[280px]
+                min-h-[260px] sm:min-h-[280px] themed-card
               "
-              style={{ background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)' }}
             >
               {/* Avatar */}
               <div className="relative group mb-2 sm:mb-3 flex-shrink-0">
@@ -252,7 +251,6 @@ export default function AllUsers({ token, onOpenConversation, currentUserId, onS
               {/* Username */}
               <div
                 className="mt-1 font-semibold cursor-pointer truncate w-full text-sm sm:text-base"
-                style={{ color: 'var(--text)' }}
                 onClick={() => openProfile(u)}
               >
                 {u.username}
@@ -289,11 +287,9 @@ export default function AllUsers({ token, onOpenConversation, currentUserId, onS
               key={u._id}
               className="
                 flex flex-col sm:flex-row sm:items-center sm:justify-between 
-                p-3 sm:p-4 rounded-lg 
-                
+                p-3 sm:p-4 rounded-lg themed-card
                 gap-3
               "
-              style={{ background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)' }}
             >
               <div className="flex items-center gap-3">
                 <div className="relative group flex-shrink-0">
@@ -327,7 +323,6 @@ export default function AllUsers({ token, onOpenConversation, currentUserId, onS
                 <div className="flex-1 min-w-0">
                   <div
                     className="font-bold cursor-pointer truncate"
-                    style={{ color: 'var(--text)' }}
                     onClick={() => openProfile(u)}
                   >
                     {u.username}

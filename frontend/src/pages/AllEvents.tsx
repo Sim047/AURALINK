@@ -95,7 +95,7 @@ export default function AllEvents({ token, onBack, onNavigate, onViewEvent }: an
   };
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--bg)', color: 'var(--text)' }}>
+    <div className="min-h-screen themed-page">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -109,7 +109,7 @@ export default function AllEvents({ token, onBack, onNavigate, onViewEvent }: an
           
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold mb-2" style={{ color: 'var(--text)' }}>
+              <h1 className="text-3xl font-bold mb-2">
                 All Events
               </h1>
               <p className="text-gray-600 dark:text-gray-400">
@@ -126,9 +126,8 @@ export default function AllEvents({ token, onBack, onNavigate, onViewEvent }: an
             className={`p-4 rounded-xl transition-all ${
               filter === "all"
                 ? "bg-blue-600 text-white shadow-lg shadow-blue-500/30"
-                : "hover:border-blue-500"
+                : "hover:border-blue-500 themed-card"
             }`}
-            style={filter === "all" ? undefined : { background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)' }}
           >
             <p className={`text-sm mb-1 ${filter === "all" ? "text-blue-100" : "text-gray-600 dark:text-gray-400"}`}>
               All Events
@@ -141,9 +140,8 @@ export default function AllEvents({ token, onBack, onNavigate, onViewEvent }: an
             className={`p-4 rounded-xl transition-all ${
               filter === "organizing"
                 ? "bg-purple-600 text-white shadow-lg shadow-purple-500/30"
-                : "hover:border-purple-500"
+                : "hover:border-purple-500 themed-card"
             }`}
-            style={filter === "organizing" ? undefined : { background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)' }}
           >
             <p className={`text-sm mb-1 ${filter === "organizing" ? "text-purple-100" : "text-gray-600 dark:text-gray-400"}`}>
               Organizing
@@ -156,9 +154,8 @@ export default function AllEvents({ token, onBack, onNavigate, onViewEvent }: an
             className={`p-4 rounded-xl transition-all ${
               filter === "participating"
                 ? "bg-green-600 text-white shadow-lg shadow-green-500/30"
-                : "hover:border-green-500"
+                : "hover:border-green-500 themed-card"
             }`}
-            style={filter === "participating" ? undefined : { background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)' }}
           >
             <p className={`text-sm mb-1 ${filter === "participating" ? "text-green-100" : "text-gray-600 dark:text-gray-400"}`}>
               Participating
@@ -171,9 +168,8 @@ export default function AllEvents({ token, onBack, onNavigate, onViewEvent }: an
             className={`p-4 rounded-xl transition-all ${
               filter === "upcoming"
                 ? "bg-orange-600 text-white shadow-lg shadow-orange-500/30"
-                : "hover:border-orange-500"
+                : "hover:border-orange-500 themed-card"
             }`}
-            style={filter === "upcoming" ? undefined : { background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)' }}
           >
             <p className={`text-sm mb-1 ${filter === "upcoming" ? "text-orange-100" : "text-gray-600 dark:text-gray-400"}`}>
               Upcoming
@@ -186,9 +182,8 @@ export default function AllEvents({ token, onBack, onNavigate, onViewEvent }: an
             className={`p-4 rounded-xl transition-all ${
               filter === "past"
                 ? "bg-gray-600 text-white shadow-lg shadow-gray-500/30"
-                : "hover:border-gray-500"
+                : "hover:border-gray-500 themed-card"
             }`}
-            style={filter === "past" ? undefined : { background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)' }}
           >
             <p className={`text-sm mb-1 ${filter === "past" ? "text-gray-100" : "text-gray-600 dark:text-gray-400"}`}>
               Past
@@ -207,7 +202,7 @@ export default function AllEvents({ token, onBack, onNavigate, onViewEvent }: an
             {error}
           </div>
         ) : filteredEvents.length === 0 ? (
-          <div className="rounded-2xl p-12 text-center" style={{ background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)' }}>
+          <div className="rounded-2xl p-12 text-center themed-card">
             <Calendar className="w-16 h-16 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
               No {filter !== "all" ? filter : ""} events
@@ -234,8 +229,7 @@ export default function AllEvents({ token, onBack, onNavigate, onViewEvent }: an
                 <div
                   key={event._id}
                   onClick={() => onViewEvent && onViewEvent(event._id)}
-                  className="rounded-2xl p-6 hover:shadow-xl transition-all duration-300 cursor-pointer group relative overflow-hidden"
-                  style={{ background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)' }}
+                  className="rounded-2xl p-6 hover:shadow-xl transition-all duration-300 cursor-pointer group relative overflow-hidden themed-card"
                 >
                   {/* Role Badge */}
                   <div className="absolute top-4 right-4 z-10">

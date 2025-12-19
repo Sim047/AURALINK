@@ -120,7 +120,7 @@ export default function MyPendingRequests() {
 
   if (loading) {
     return (
-      <div className="rounded-2xl shadow-lg p-6" style={{ background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)' }}>
+      <div className="rounded-2xl shadow-lg p-6 themed-card">
         <div className="flex items-center justify-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
         </div>
@@ -129,7 +129,7 @@ export default function MyPendingRequests() {
   }
 
   return (
-    <div className="rounded-2xl shadow-lg p-6" style={{ background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)' }}>
+    <div className="rounded-2xl shadow-lg p-6 themed-card">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
