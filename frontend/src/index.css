@@ -26,25 +26,25 @@
 
 /* Light Theme */
 :root.light {
-  --bg: linear-gradient(to bottom right, #f8fafc, #f1f5f9, #e2e8f0);
+  --bg: linear-gradient(to bottom right, #f9fafb, #f3f4f6, #eef2f7);
   --bg-secondary: #ffffff;
-  --sidebar: linear-gradient(to bottom, #ffffff, #f8fafc, #f1f5f9);
-  --text: #1e293b;
+  --sidebar: linear-gradient(to bottom, #ffffff, #f8fafc, #eef2f7);
+  --text: #0f172a;
   --text-secondary: #475569;
   --muted: #64748b;
 
   --card: #ffffff;
   --card-solid: #ffffff;
-  --border: #e2e8f0;
+  --border: #d9e0ea;
 
-  --bubble-mine: #dcfce7;
-  --bubble-other: #f1f5f9;
+  --bubble-mine: #e7f9ff;
+  --bubble-other: #f7f9fc;
 
-  --date-pill: #e0e7ff;
+  --date-pill: #e6ebff;
 
   --accent-start: #22d3ee;
   --accent-end: #7c3aed;
-  --btn-text: #0f172a;
+  --btn-text: #0b1220;
   /* Subtle accent tokens for UI touches */
   --accent-cyan: #22d3ee;
   --accent-cyan-muted: rgba(34, 211, 238, 0.10);
@@ -53,8 +53,8 @@
   --accent-amber: #f59e0b;
   --accent-amber-muted: rgba(245, 158, 11, 0.12);
   
-  --input-bg: #f8fafc;
-  --input-border: #cbd5e1;
+  --input-bg: #ffffff;
+  --input-border: #d1d9e6;
 }
 
 /* Dark Theme — fully solid boxes (no see-through) */
@@ -323,6 +323,12 @@ textarea,
   background: var(--card) !important;
   color: var(--text) !important;
   border: 1px solid var(--border) !important;
+}
+
+/* Add subtle elevation in light for better separation */
+:root.light .themed-card,
+:root.light .themed-menu {
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
 }
 
 .themed-menu {

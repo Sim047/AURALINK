@@ -567,7 +567,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
           {/* Header */}
           <div className="text-center mb-16">
             <h1 className="text-5xl font-bold text-white mb-4">Discover <span className="text-cyan-300">More</span></h1>
-            <p className="text-gray-300 text-lg">
+            <p className="text-theme-secondary text-lg">
               Explore sports events, professional services, and marketplace
             </p>
           </div>
@@ -587,7 +587,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
               <h2 className="text-2xl font-bold text-white text-center mb-3">
                 Sports Events
               </h2>
-              <p className="text-gray-300 text-center mb-6">
+              <p className="text-theme-secondary text-center mb-6">
                 Find and join sports activities, tournaments, and training sessions
               </p>
               <div className="flex items-center justify-center text-cyan-300 group-hover:text-cyan-200 transition-colors">
@@ -609,7 +609,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
               <h2 className="text-2xl font-bold text-white text-center mb-3">
                 Medical Services
               </h2>
-              <p className="text-gray-300 text-center mb-6">
+              <p className="text-theme-secondary text-center mb-6">
                 Physiotherapy, massage, nutrition, personal training & more
               </p>
               <div className="flex items-center justify-center text-violet-300 group-hover:text-violet-200 transition-colors">
@@ -631,7 +631,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
               <h2 className="text-2xl font-bold text-white text-center mb-3">
                 Marketplace
               </h2>
-              <p className="text-gray-300 text-center mb-6">
+              <p className="text-theme-secondary text-center mb-6">
                 Buy and sell sports equipment, apparel, supplements & gear
               </p>
               <div className="flex items-center justify-center text-amber-300 group-hover:text-amber-200 transition-colors">
@@ -644,16 +644,16 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
           {/* Quick Stats */}
           <div className="mt-16 grid grid-cols-2 gap-6 max-w-3xl mx-auto">
             <div className="text-center">
-              <div className="text-3xl font-bold text-gray-100">
+              <div className="text-3xl font-bold text-heading">
                 {services.length || 0}
               </div>
-              <div className="text-gray-400 text-sm mt-1">Services Available</div>
+              <div className="text-theme-secondary text-sm mt-1">Services Available</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-gray-100">
+              <div className="text-3xl font-bold text-heading">
                 {marketplaceItems.length || 0}
               </div>
-              <div className="text-gray-400 text-sm mt-1">Items for Sale</div>
+              <div className="text-theme-secondary text-sm mt-1">Items for Sale</div>
             </div>
           </div>
         </div>
@@ -672,7 +672,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
           <div className="mb-8">
             <button
               onClick={() => setActiveCategory(null)}
-              className="flex items-center text-gray-300 hover:text-white mb-6 transition-colors"
+              className="flex items-center text-theme-secondary hover:text-heading mb-6 transition-colors"
             >
               <ChevronLeft className="w-5 h-5 mr-1" />
               Back to Discover
@@ -680,7 +680,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
             <h1 className="text-4xl font-bold text-white mb-2">
               Sports Events <Trophy className="inline w-8 h-8 text-cyan-300 ml-2" />
             </h1>
-            <p className="text-gray-300">Join sports activities and meet new people</p>
+            <p className="text-theme-secondary">Join sports activities and meet new people</p>
           </div>
 
           {/* Sport Filter */}
@@ -702,9 +702,9 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
 
           {/* Events Grid */}
           {loading ? (
-            <div className="text-center text-gray-300 py-12">Loading events...</div>
+            <div className="text-center text-theme-secondary py-12">Loading events...</div>
           ) : events.length === 0 ? (
-            <div className="text-center text-gray-400 py-12">
+            <div className="text-center text-theme-secondary py-12">
               <Trophy className="w-16 h-16 mx-auto mb-4 opacity-50" />
               <p>No events found for {selectedSport}</p>
             </div>
@@ -719,7 +719,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
                   <div className="flex items-start justify-between mb-4">
                     <div>
                       <h3 className="text-lg font-bold text-white mb-1">{event.title}</h3>
-                      <p className="text-sm text-gray-400">{event.sport}</p>
+                      <p className="text-sm text-theme-secondary">{event.sport}</p>
                     </div>
                     <div className="flex flex-col items-end gap-1">
                       {event.participants?.some((p: any) => p?._id === currentUser._id || p === currentUser._id) && (
@@ -730,19 +730,19 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
                     </div>
                   </div>
 
-                  <p className="text-gray-300 text-sm mb-4 line-clamp-2">{event.description}</p>
+                  <p className="text-theme-secondary text-sm mb-4 line-clamp-2">{event.description}</p>
 
-                  <div className="space-y-2 text-sm text-gray-300 mb-4">
+                  <div className="space-y-2 text-sm text-theme-secondary mb-4">
                     <div className="flex items-center">
-                      <Calendar className="w-4 h-4 mr-2 text-gray-400" />
+                      <Calendar className="w-4 h-4 mr-2 text-theme-secondary" />
                       {dayjs(event.startDate || event.date).format("MMM D, YYYY")} at {event.time}
                     </div>
                     <div className="flex items-center">
-                      <MapPin className="w-4 h-4 mr-2 text-gray-400" />
+                      <MapPin className="w-4 h-4 mr-2 text-theme-secondary" />
                       {event.location?.city || event.location?.name || event.location?.address || event.location || "Location TBA"}
                     </div>
                     <div className="flex items-center">
-                      <Users className="w-4 h-4 mr-2 text-gray-400" />
+                      <Users className="w-4 h-4 mr-2 text-theme-secondary" />
                       {event.participants?.length || 0}/{event.capacity?.max || 0} participants
                     </div>
                     {event.organizer && (
@@ -752,7 +752,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
                           alt={event.organizer.username}
                           className="w-5 h-5 rounded-full mr-2 border border-neutral-600"
                         />
-                        <span className="text-gray-400 text-xs">by {event.organizer.username}</span>
+                        <span className="text-theme-secondary text-xs">by {event.organizer.username}</span>
                       </div>
                     )}
                   </div>
@@ -765,8 +765,8 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
                     disabled={event.participants.some((p: any) => p._id === currentUser._id || p === currentUser._id) || !!joiningEvent[event._id]}
                     className={`w-full py-2 rounded-lg font-semibold transition-all ${
                       event.participants.some((p: any) => p._id === currentUser._id || p === currentUser._id)
-                        ? "bg-gray-700 text-gray-400 cursor-not-allowed"
-                        : "bg-neutral-700 text-white hover:bg-neutral-600"
+                        ? "btn opacity-50 cursor-not-allowed"
+                        : "btn"
                     }`}
                   >
                     {event.participants.some((p: any) => p._id === currentUser._id || p === currentUser._id) ? "Joined" : (!!joiningEvent[event._id] ? "Joining..." : "Join Event")}
@@ -830,7 +830,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
           <div className="mb-8">
             <button
               onClick={() => setActiveCategory(null)}
-              className="flex items-center text-gray-300 hover:text-white mb-6 transition-colors"
+              className="flex items-center text-theme-secondary hover:text-heading mb-6 transition-colors"
             >
               <ChevronLeft className="w-5 h-5 mr-1" />
               Back to Discover
@@ -840,11 +840,11 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
                 <h1 className="text-4xl font-bold text-white mb-2">
                   Medical Services <Stethoscope className="inline w-8 h-8 text-violet-300 ml-2" />
                 </h1>
-                <p className="text-gray-300">Find professional health and training services</p>
+                <p className="text-theme-secondary">Find professional health and training services</p>
               </div>
               <button
                 onClick={() => window.location.href = "/#/my-events"}
-                className="px-5 py-3 bg-neutral-700 hover:bg-neutral-600 text-white font-semibold rounded-xl transition-all flex items-center gap-2"
+                className="btn flex items-center gap-2"
               >
                 <Plus className="w-5 h-5" />
                 Create Service
@@ -871,9 +871,9 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
 
           {/* Services Grid */}
           {loading ? (
-            <div className="text-center text-gray-300 py-12">Loading services...</div>
+            <div className="text-center text-theme-secondary py-12">Loading services...</div>
           ) : services.length === 0 ? (
-            <div className="text-center text-gray-400 py-12">
+            <div className="text-center text-theme-secondary py-12">
               <Stethoscope className="w-16 h-16 mx-auto mb-4 opacity-50" />
               <p>No services found</p>
             </div>
@@ -888,25 +888,25 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
                       <h3 className="text-xl font-bold text-white mb-2">{service.name}</h3>
-                      <p className="text-sm text-gray-400 capitalize">{service.category.replace(/-/g, " ")}</p>
+                      <p className="text-sm text-theme-secondary capitalize">{service.category.replace(/-/g, " ")}</p>
                     </div>
                     <div className="bg-neutral-700 px-4 py-2 rounded-full">
-                      <span className="text-gray-100 font-bold">
+                      <span className="text-heading font-bold">
                         ${service.pricing.amount}
                         <span className="text-xs font-normal">/{service.pricing.type}</span>
                       </span>
                     </div>
                   </div>
 
-                  <p className="text-gray-300 text-sm mb-4">{service.description}</p>
+                  <p className="text-theme-secondary text-sm mb-4">{service.description}</p>
 
                   <div className="space-y-2 text-sm mb-4">
-                    <div className="flex items-center text-gray-300">
-                      <MapPin className="w-4 h-4 mr-2 text-gray-400" />
+                    <div className="flex items-center text-theme-secondary">
+                      <MapPin className="w-4 h-4 mr-2 text-theme-secondary" />
                       {service.location?.city || service.location?.type || "Location not specified"}
                     </div>
                     {service.experience && (
-                      <div className="flex items-center text-gray-300">
+                      <div className="flex items-center text-theme-secondary">
                         <Star className="w-4 h-4 mr-2 text-yellow-400" />
                         {service.experience}
                       </div>
@@ -919,7 +919,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
                         {service.qualifications.slice(0, 3).map((qual, idx) => (
                           <span
                             key={idx}
-                            className="bg-neutral-700 text-gray-300 px-3 py-1 rounded-full text-xs"
+                            className="themed-card text-theme-secondary px-3 py-1 rounded-full text-xs"
                           >
                             {qual}
                           </span>
@@ -928,7 +928,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
                     </div>
                   )}
 
-                  <div className="flex items-center text-gray-400 text-sm mb-4">
+                  <div className="flex items-center text-theme-secondary text-sm mb-4">
                     <img
                       src={service.provider.avatar || `https://ui-avatars.com/api/?name=${service.provider.username}`}
                       alt={service.provider.username}
@@ -942,7 +942,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
                       e.stopPropagation();
                       handleMessageUser(service.provider._id);
                     }}
-                    className="w-full bg-neutral-700 text-white py-2 rounded-lg font-semibold hover:bg-neutral-600 transition-all"
+                    className="btn w-full text-sm justify-center"
                   >
                     Contact Provider
                   </button>
@@ -980,7 +980,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
           <div className="mb-8">
             <button
               onClick={() => setActiveCategory(null)}
-              className="flex items-center text-gray-300 hover:text-white mb-6 transition-colors"
+              className="flex items-center text-theme-secondary hover:text-heading mb-6 transition-colors"
             >
               <ChevronLeft className="w-5 h-5 mr-1" />
               Back to Discover
@@ -988,13 +988,13 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
             <h1 className="text-4xl font-bold text-white mb-2">
               Marketplace <ShoppingBag className="inline w-8 h-8 text-amber-300 ml-2" />
             </h1>
-            <p className="text-gray-300">Buy and sell sports equipment and gear</p>
+            <p className="text-theme-secondary">Buy and sell sports equipment and gear</p>
           </div>
 
           {/* Search & Filter */}
           <div className="mb-8 space-y-4">
             <div className="relative">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-theme-secondary w-5 h-5" />
               <input
                 type="text"
                 placeholder="Search items..."
@@ -1024,9 +1024,9 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
 
           {/* Marketplace Grid */}
           {loading ? (
-            <div className="text-center text-gray-300 py-12">Loading items...</div>
+            <div className="text-center text-theme-secondary py-12">Loading items...</div>
           ) : marketplaceItems.length === 0 ? (
-            <div className="text-center text-gray-400 py-12">
+            <div className="text-center text-theme-secondary py-12">
               <ShoppingBag className="w-16 h-16 mx-auto mb-4 opacity-50" />
               <p>No items found</p>
             </div>
@@ -1039,7 +1039,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
                   onClick={() => setSelectedProduct(item)}
                 >
                   {/* Item Image */}
-                  <div className="relative h-48 bg-gray-800">
+                  <div className="relative h-48 themed-card">
                     {item.images && item.images.length > 0 ? (
                       <img
                         src={item.images[0]}
@@ -1048,7 +1048,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
                       />
                     ) : (
                       <div className="flex items-center justify-center h-full">
-                        <Package className="w-16 h-16 text-gray-600" />
+                        <Package className="w-16 h-16 text-theme-secondary" />
                       </div>
                     )}
                     <div className="absolute top-2 right-2 bg-black/50 backdrop-blur px-2 py-1 rounded-full text-xs text-white">
@@ -1065,29 +1065,29 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
                   {/* Item Details */}
                   <div className="p-4">
                     <h3 className="font-bold text-white mb-1 line-clamp-2">{item.title}</h3>
-                    <p className="text-sm text-gray-400 mb-2">{item.category}</p>
+                    <p className="text-sm text-theme-secondary mb-2">{item.category}</p>
 
                     <div className="flex items-center justify-between mb-3">
-                      <div className="text-2xl font-bold text-gray-100">
+                      <div className="text-2xl font-bold text-heading">
                         ${item.price}
-                        <span className="text-xs text-gray-400 ml-1">{item.currency}</span>
+                        <span className="text-xs text-theme-secondary ml-1">{item.currency}</span>
                       </div>
                       <button
                         onClick={(e) => { e.stopPropagation(); handleLikeItem(item._id); }}
                         disabled={!!likingItem[item._id]}
-                        className="p-2 hover:bg-white/10 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="p-2 themed-card hover:opacity-80 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <Heart
                           className={`w-5 h-5 ${
                             item.likes.includes(currentUser._id)
                               ? "fill-red-500 text-red-500"
-                              : "text-gray-400"
+                              : "text-theme-secondary"
                           }`}
                         />
                       </button>
                     </div>
 
-                    <div className="flex items-center text-xs text-gray-400 mb-3">
+                    <div className="flex items-center text-xs text-theme-secondary mb-3">
                       <img
                         src={item.seller.avatar || `https://ui-avatars.com/api/?name=${item.seller.username}`}
                         alt={item.seller.username}
@@ -1101,7 +1101,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
                         e.stopPropagation();
                         handleMessageUser(item.seller._id);
                       }}
-                      className="w-full bg-neutral-700 text-white py-2 rounded-lg font-semibold text-sm hover:bg-neutral-600 transition-all"
+                      className="btn w-full text-sm justify-center"
                     >
                       Contact Seller
                     </button>

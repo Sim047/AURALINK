@@ -43,9 +43,9 @@ export default function SportEvents({ sport, token, onBack }: any) {
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-[#071029] dark:via-[#0a1435] dark:to-[#071029] p-6">
         <div className="max-w-7xl mx-auto">
           <div className="animate-pulse space-y-6">
-            <div className="h-8 bg-gray-200 dark:bg-gray-800 rounded w-1/3"></div>
+            <div className="h-8 themed-card rounded w-1/3"></div>
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-48 bg-gray-200 dark:bg-gray-800 rounded-2xl"></div>
+              <div key={i} className="h-48 themed-card rounded-2xl"></div>
             ))}
           </div>
         </div>
@@ -60,7 +60,7 @@ export default function SportEvents({ sport, token, onBack }: any) {
         <div className="mb-8">
           <button
             onClick={onBack}
-            className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-4 transition"
+            className="flex items-center gap-2 text-theme-secondary hover:text-heading mb-4 transition"
           >
             <ArrowLeft className="w-5 h-5" />
             Back to Dashboard
@@ -70,10 +70,10 @@ export default function SportEvents({ sport, token, onBack }: any) {
               <Trophy className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              <h1 className="text-3xl font-bold text-heading">
                 {sport} Events
               </h1>
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-theme-secondary">
                 {events.length} {events.length === 1 ? "event" : "events"} available
               </p>
             </div>
@@ -90,7 +90,7 @@ export default function SportEvents({ sport, token, onBack }: any) {
               <h3 className="text-xl font-bold mb-2">
                 No Events Found
               </h3>
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-theme-secondary">
                 There are no {sport} events scheduled at the moment.
               </p>
             </div>
@@ -119,12 +119,12 @@ export default function SportEvents({ sport, token, onBack }: any) {
                 </div>
 
                 <div className="p-6 space-y-4">
-                  <p className="text-gray-600 dark:text-gray-400 line-clamp-3">
+                  <p className="text-theme-secondary line-clamp-3">
                     {event.description}
                   </p>
 
                   <div className="space-y-2 text-sm">
-                    <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                    <div className="flex items-center gap-2 text-theme-secondary">
                       <Calendar className="w-4 h-4 text-teal-500" />
                       <span>
                         {dayjs(event.startDate).format("MMM D, YYYY")}
@@ -133,7 +133,7 @@ export default function SportEvents({ sport, token, onBack }: any) {
                     </div>
 
                     {event.location?.city && (
-                      <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                      <div className="flex items-center gap-2 text-theme-secondary">
                         <MapPin className="w-4 h-4 text-teal-500" />
                         <span>
                           {event.location.city}
@@ -142,7 +142,7 @@ export default function SportEvents({ sport, token, onBack }: any) {
                       </div>
                     )}
 
-                    <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                    <div className="flex items-center gap-2 text-theme-secondary">
                       <Users className="w-4 h-4 text-teal-500" />
                       <span>
                         {event.capacity?.current || 0} / {event.capacity?.max || 0} participants
@@ -150,7 +150,7 @@ export default function SportEvents({ sport, token, onBack }: any) {
                     </div>
 
                     {event.pricing?.type === "paid" && (
-                      <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                      <div className="flex items-center gap-2 text-theme-secondary">
                         <DollarSign className="w-4 h-4 text-teal-500" />
                         <span>
                           {event.pricing.currency} {event.pricing.amount}
