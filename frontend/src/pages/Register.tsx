@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import GoogleLoginButton from "../components/GoogleLoginButton";
 import Logo from "../assets/auralink-logo.png";
 
 const API = import.meta.env.VITE_API_URL || "";
@@ -125,6 +126,16 @@ export default function Register({ onSuccess, switchToLogin }) {
             Register
           </button>
         </form>
+
+        {/* Or divider */}
+        <div className="my-6 flex items-center gap-3 opacity-70">
+          <div className="h-px bg-slate-600 flex-1" />
+          <span className="text-sm">OR</span>
+          <div className="h-px bg-slate-600 flex-1" />
+        </div>
+
+        {/* Google Sign-Up (same as login) */}
+        <GoogleLoginButton onSuccess={onSuccess} className="flex justify-center" />
 
         <p className="mt-6 text-sm text-center opacity-80">
           Already have an account?{" "}
