@@ -566,7 +566,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
         <div className="max-w-6xl mx-auto px-4 py-12">
           {/* Header */}
           <div className="text-center mb-16">
-            <h1 className="text-5xl font-bold text-white mb-4">Discover <span className="text-blue-400">More</span></h1>
+            <h1 className="text-5xl font-bold text-white mb-4">Discover <span className="text-gray-200">More</span></h1>
             <p className="text-gray-300 text-lg">
               Explore sports events, professional services, and marketplace
             </p>
@@ -590,7 +590,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
               <p className="text-gray-300 text-center mb-6">
                 Find and join sports activities, tournaments, and training sessions
               </p>
-              <div className="flex items-center justify-center text-blue-400 group-hover:text-blue-300 transition-colors">
+              <div className="flex items-center justify-center text-gray-300 group-hover:text-gray-200 transition-colors">
                 <span className="font-semibold">Explore Events</span>
                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </div>
@@ -612,7 +612,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
               <p className="text-gray-300 text-center mb-6">
                 Physiotherapy, massage, nutrition, personal training & more
               </p>
-              <div className="flex items-center justify-center text-blue-400 group-hover:text-blue-300 transition-colors">
+              <div className="flex items-center justify-center text-gray-300 group-hover:text-gray-200 transition-colors">
                 <span className="font-semibold">Browse Services</span>
                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </div>
@@ -634,7 +634,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
               <p className="text-gray-300 text-center mb-6">
                 Buy and sell sports equipment, apparel, supplements & gear
               </p>
-              <div className="flex items-center justify-center text-blue-400 group-hover:text-blue-300 transition-colors">
+              <div className="flex items-center justify-center text-gray-300 group-hover:text-gray-200 transition-colors">
                 <span className="font-semibold">Shop Now</span>
                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </div>
@@ -678,7 +678,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
               Back to Discover
             </button>
             <h1 className="text-4xl font-bold text-white mb-2">
-              Sports Events <Trophy className="inline w-8 h-8 text-blue-400 ml-2" />
+              Sports Events <Trophy className="inline w-8 h-8 text-gray-300 ml-2" />
             </h1>
             <p className="text-gray-300">Join sports activities and meet new people</p>
           </div>
@@ -766,7 +766,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
                     className={`w-full py-2 rounded-lg font-semibold transition-all ${
                       event.participants.some((p: any) => p._id === currentUser._id || p === currentUser._id)
                         ? "bg-gray-700 text-gray-400 cursor-not-allowed"
-                        : "bg-blue-600 text-white hover:bg-blue-700"
+                        : "bg-neutral-700 text-white hover:bg-neutral-600"
                     }`}
                   >
                     {event.participants.some((p: any) => p._id === currentUser._id || p === currentUser._id) ? "Joined" : (!!joiningEvent[event._id] ? "Joining..." : "Join Event")}
@@ -838,13 +838,13 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-4xl font-bold text-white mb-2">
-                  Medical Services <Stethoscope className="inline w-8 h-8 text-blue-400 ml-2" />
+                  Medical Services <Stethoscope className="inline w-8 h-8 text-gray-300 ml-2" />
                 </h1>
                 <p className="text-gray-300">Find professional health and training services</p>
               </div>
               <button
                 onClick={() => window.location.href = "/#/my-events"}
-                className="px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all flex items-center gap-2"
+                className="px-5 py-3 bg-neutral-700 hover:bg-neutral-600 text-white font-semibold rounded-xl transition-all flex items-center gap-2"
               >
                 <Plus className="w-5 h-5" />
                 Create Service
@@ -942,7 +942,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
                       e.stopPropagation();
                       handleMessageUser(service.provider._id);
                     }}
-                    className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition-all"
+                    className="w-full bg-neutral-700 text-white py-2 rounded-lg font-semibold hover:bg-neutral-600 transition-all"
                   >
                     Contact Provider
                   </button>
@@ -986,7 +986,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
               Back to Discover
             </button>
             <h1 className="text-4xl font-bold text-white mb-2">
-              Marketplace <ShoppingBag className="inline w-8 h-8 text-blue-400 ml-2" />
+              Marketplace <ShoppingBag className="inline w-8 h-8 text-gray-300 ml-2" />
             </h1>
             <p className="text-gray-300">Buy and sell sports equipment and gear</p>
           </div>
@@ -1101,7 +1101,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
                         e.stopPropagation();
                         handleMessageUser(item.seller._id);
                       }}
-                      className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold text-sm hover:bg-blue-700 transition-all"
+                      className="w-full bg-neutral-700 text-white py-2 rounded-lg font-semibold text-sm hover:bg-neutral-600 transition-all"
                     >
                       Contact Seller
                     </button>
