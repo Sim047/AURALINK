@@ -509,68 +509,65 @@ export default function Dashboard({ token, onNavigate }: any) {
           </div>
         </div>
 
-        {/* Community & Bookings section */}
-        <div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="rounded-2xl p-6 themed-card">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-heading">
-                My Bookings
-              </h2>
-              <button
-                onClick={() => onNavigate && onNavigate('discover')}
-                className="text-accent hover:text-accent-light text-sm font-medium flex items-center gap-1"
-              >
-                View All <ArrowRight className="w-4 h-4" />
-              </button>
+        {/* Community Events section */}
+        <div className="rounded-2xl p-6 themed-card">
+          <div className="flex flex-col gap-3 mb-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold text-heading">Community Events</h2>
             </div>
-
-            {bookings.length === 0 ? (
-              <div className="text-center py-12">
-                <BookOpen className="w-12 h-12 text-theme-secondary mx-auto mb-3" />
-                <p className="text-theme-secondary mb-4">No bookings yet</p>
-                <button
-                  onClick={() => onNavigate && onNavigate('discover')}
-                  className="px-6 py-2.5 bg-gradient-to-r from-accent to-accentViolet-light hover:from-accent-dark hover:to-accentViolet-dark text-white text-sm font-medium rounded-xl transition-all duration-300 shadow-lg"
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <label className="text-sm text-theme-secondary">Filter:</label>
+                <select
+                  value={eventsFilter}
+                  onChange={(e) => setEventsFilter(e.target.value as any)}
+                  className="input text-sm rounded-xl"
                 >
-                  Browse Services
+                  <option value="all">All</option>
+                  <option value="free">Free</option>
+                  <option value="paid">Paid</option>
+                </select>
+                <button
+                  onClick={() => setShowEvents((v) => !v)}
+                  className="text-sm px-3 py-2 rounded-xl border-2"
+                  style={{ borderColor: 'var(--border)', background: 'var(--card)', color: 'var(--text)' }}
+                  aria-expanded={showEvents}
+                >
+                  {showEvents ? 'Hide' : 'Show'}
                 </button>
               </div>
-            ) : (
-              <div className="space-y-3">
-                {bookings.slice(0, 5).map((booking) => (
-                  <div
-                    key={booking._id}
-                    className="p-4 rounded-xl themed-card hover:shadow-md transition-colors"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-heading mb-1">
-                          {getBookingTitle(booking)}
-                        </h3>
-                        <div className="flex items-center gap-2 text-sm text-theme-secondary">
-                          <Calendar className="w-4 h-4 shrink-0" />
-                          <span className="truncate">
-                            {booking.scheduledDate
-                              ? dayjs(booking.scheduledDate).format('MMM D, YYYY')
-                              : 'Date TBD'}
-                          </span>
-                        </div>
-                      </div>
-                      <div className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 shrink-0 ${getStatusColor(booking.status)}`}>
-                        {getStatusIcon(booking.status)}
-                        {booking.status}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+              <button
+                onClick={() => setCreateEventModalOpen(true)}
+                className="px-4 py-2 bg-gradient-to-r from-accent to-accentViolet-light hover:from-accent-dark hover:to-accentViolet-dark text-white text-sm font-medium rounded-xl transition-all duration-300 flex items-center gap-2 shadow-lg"
+              >
+                <Plus className="w-4 h-4" />
+                Create Event
+              </button>
+            </div>
           </div>
 
-          {/* Community Events section */}
-          <div>
-            <div className="rounded-2xl p-6 themed-card">
+          {!showEvents ? (
+            <div className="text-center py-10 text-theme-secondary">
+              Events are hidden. Click "Show" to view.
+            </div>
+          ) : upcomingEvents.length === 0 ? (
+            <div className="text-center py-12">
+              <Calendar className="w-12 h-12 text-theme-secondary mx-auto mb-3" />
+              <p className="text-theme-secondary mb-4">No upcoming events</p>
+              <button
+                onClick={() => onNavigate && onNavigate('discover')}
+                className="px-6 py-2.5 bg-gradient-to-r from-accent to-accentViolet-light hover:from-accent-dark hover:to-accentViolet-dark text-white text-sm font-medium rounded-xl transition-all duration-300 shadow-lg"
+              >
+                Explore Events
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {upcomingEvents
+                .filter((e) => eventsFilter === 'all' || (e.pricing?.type || 'free') === eventsFilter)
+                .slice(0, 5)
+                .map((event) => (
+                  <div
                     key={event._id}
                     onClick={() => openEventDetails(event._id)}
                     className="p-4 rounded-xl themed-card hover:shadow-md transition-colors cursor-pointer"
@@ -580,9 +577,7 @@ export default function Dashboard({ token, onNavigate }: any) {
                         {dayjs(event.startDate).format('DD')}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-heading mb-1">
-                          {event.title}
-                        </h3>
+                        <h3 className="font-semibold text-heading mb-1">{event.title}</h3>
                         <div className="space-y-1">
                           <div className="flex items-center gap-2 text-sm text-theme-secondary">
                             <Clock className="w-4 h-4 shrink-0" />
@@ -602,13 +597,9 @@ export default function Dashboard({ token, onNavigate }: any) {
                     </div>
                   </div>
                 ))}
-              </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
-        </div>
-      </div>
-
       {/* Create Event Modal */}
       <CreateEventModal
         isOpen={createEventModalOpen}
