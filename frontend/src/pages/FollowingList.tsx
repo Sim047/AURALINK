@@ -48,12 +48,12 @@ export default function FollowingList({
   }
 
   return (
-    <div className="p-6 text-slate-900 dark:text-slate-100">
+    <div className="themed-page p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+        <h2 className="text-2xl font-bold text-heading flex items-center gap-2">
           <span>Following</span>
-          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-slate-100">{following.length}</span>
+          <span className="badge">{following.length}</span>
         </h2>
         
         <select
@@ -67,9 +67,9 @@ export default function FollowingList({
       </div>
 
       {loading ? (
-        <div className="text-slate-600 dark:text-slate-400">Loading…</div>
+        <div className="text-theme-secondary">Loading…</div>
       ) : following.length === 0 ? (
-        <div className="text-slate-600 dark:text-slate-400 text-center py-12">
+        <div className="text-theme-secondary text-center py-12">
           <div className="text-4xl mb-3">➕</div>
           <div>Not following anyone yet.</div>
         </div>

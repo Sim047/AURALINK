@@ -73,13 +73,13 @@ export default function UserCard({
         />
 
         <div
-          className="mt-1 font-semibold cursor-pointer truncate w-full text-slate-900 dark:text-slate-100"
+          className="mt-1 font-semibold cursor-pointer truncate w-full card-text"
           onClick={() => onShowProfile(user)}
         >
           {user.username}
         </div>
 
-        <div className="text-xs text-slate-600 dark:text-slate-400 truncate w-full mb-4">
+        <div className="text-xs card-text-muted truncate w-full mb-4">
           {user.email}
         </div>
 
@@ -102,8 +102,8 @@ export default function UserCard({
       />
 
       <div className="flex-1 cursor-pointer min-w-0" onClick={() => onShowProfile(user)}>
-        <div className="font-semibold text-slate-900 dark:text-slate-100 truncate">{user.username}</div>
-        <div className="text-sm text-slate-600 dark:text-slate-400 truncate">{user.email}</div>
+        <div className="font-semibold card-text truncate">{user.username}</div>
+        <div className="text-sm card-text-muted truncate">{user.email}</div>
       </div>
 
       <div className="flex gap-2 w-full sm:w-auto">
