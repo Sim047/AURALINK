@@ -395,7 +395,7 @@ export default function Dashboard({ token, onNavigate }: any) {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-heading mb-2">
-              Welcome back! 👋 <Sparkles className="inline w-6 h-6 text-accent align-text-bottom ml-1" />
+              Welcome 👋 <Sparkles className="inline w-6 h-6 text-accent align-text-bottom ml-1" />
             </h1>
             <p className="text-theme-secondary">
               Here's what's happening with your bookings and events
@@ -475,14 +475,8 @@ export default function Dashboard({ token, onNavigate }: any) {
               </button>
               <button
                 onClick={() => {
-                  if (onNavigate) {
-                    onNavigate('my-activities');
-                    // Set active tab to services
-                    setTimeout(() => {
-                      const servicesTab = document.querySelector('[data-tab="services"]') as HTMLElement;
-                      if (servicesTab) servicesTab.click();
-                    }, 100);
-                  }
+                  localStorage.setItem('auralink-my-activities-tab', 'services');
+                  onNavigate && onNavigate('my-activities');
                 }}
                 className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white font-bold rounded-xl hover:from-purple-600 hover:to-pink-700 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 flex items-center gap-2"
               >
@@ -491,19 +485,23 @@ export default function Dashboard({ token, onNavigate }: any) {
               </button>
               <button
                 onClick={() => {
-                  if (onNavigate) {
-                    onNavigate('my-activities');
-                    // Set active tab to products
-                    setTimeout(() => {
-                      const productsTab = document.querySelector('[data-tab="products"]') as HTMLElement;
-                      if (productsTab) productsTab.click();
-                    }, 100);
-                  }
+                  localStorage.setItem('auralink-my-activities-tab', 'products');
+                  onNavigate && onNavigate('my-activities');
                 }}
                 className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 flex items-center gap-2"
               >
                 <Plus className="w-5 h-5" />
                 Sell Product
+              </button>
+              <button
+                onClick={() => {
+                  localStorage.setItem('auralink-discover-category', 'other');
+                  onNavigate && onNavigate('discover');
+                }}
+                className="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 flex items-center gap-2"
+              >
+                <Calendar className="w-5 h-5" />
+                Other Events
               </button>
             </div>
           </div>

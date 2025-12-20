@@ -30,7 +30,10 @@ const API = import.meta.env.VITE_API_URL || "";
 type TabType = "events" | "services" | "products";
 
 export default function MyEvents({ token }: any) {
-  const [activeTab, setActiveTab] = useState<TabType>("events");
+  const [activeTab, setActiveTab] = useState<TabType>(() => {
+    const saved = localStorage.getItem('auralink-my-activities-tab') as TabType | null;
+    return (saved as TabType) || 'events';
+  });
   const [eventsCreated, setEventsCreated] = useState<any[]>([]);
   const [eventsJoined, setEventsJoined] = useState<any[]>([]);
   const [eventsPending, setEventsPending] = useState<any[]>([]);
@@ -53,6 +56,12 @@ export default function MyEvents({ token }: any) {
     loadMyEventsAll();
     loadMyServices();
     loadMyProducts();
+    // Consume default tab hint provided by dashboard
+    const hint = localStorage.getItem('auralink-my-activities-tab') as TabType | null;
+    if (hint) {
+      setActiveTab(hint);
+      localStorage.removeItem('auralink-my-activities-tab');
+    }
   }, [token]);
 
   async function loadMyEventsAll() {
