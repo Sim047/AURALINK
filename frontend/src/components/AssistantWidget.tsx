@@ -95,8 +95,10 @@ export default function AssistantWidget({ token, user, currentView, view }: Assi
   }
 
   const activeView = currentView ?? view;
-  const bottomClass = 'bottom-6';
-  const positionClass = activeView === 'posts' ? 'left-6' : 'right-20 md:right-6';
+  // Safe bottom spacing for mobile (accounts for device safe-area)
+  const bottomClass = 'bottom-[max(1rem,env(safe-area-inset-bottom))]';
+  // Predictable side anchoring: tighter on mobile, roomy on desktop
+  const positionClass = activeView === 'posts' ? 'left-4 md:left-6' : 'right-4 md:right-6';
 
   if (hidden) return null;
   return (
@@ -110,7 +112,7 @@ export default function AssistantWidget({ token, user, currentView, view }: Assi
           <Bot className="w-6 h-6" />
         </button>
       ) : (
-        <div className="w-[340px] rounded-2xl themed-card shadow-xl">
+        <div className="w-[min(92vw,360px)] md:w-[360px] rounded-2xl themed-card shadow-xl">
           <div className="flex items-center justify-between p-3 border-b" style={{ borderColor: 'var(--border)' }}>
             <div className="flex items-center gap-2">
               <Bot className="w-5 h-5 text-accent" />
