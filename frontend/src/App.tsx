@@ -1245,7 +1245,7 @@ function onMyStatusUpdated(newStatus: any) {
         
         {/* MY ACTIVITIES PAGE */}
         {(view === "my-activities" || view === "my-events") && (
-          <MyEvents token={token} />
+          <MyEvents token={token as any} onNavigate={(newView: string) => setView(newView as any)} />
         )}
         
         {/* DISCOVER PAGE */}

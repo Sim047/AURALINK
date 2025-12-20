@@ -29,7 +29,9 @@ const API = import.meta.env.VITE_API_URL || "";
 
 type TabType = "events" | "services" | "products";
 
-export default function MyEvents({ token }: any) {
+type NavigateFn = (view: string) => void;
+
+export default function MyEvents({ token, onNavigate }: { token: string; onNavigate?: NavigateFn }) {
   const [activeTab, setActiveTab] = useState<TabType>(() => {
     const saved = localStorage.getItem('auralink-my-activities-tab') as TabType | null;
     return (saved as TabType) || 'events';
@@ -280,7 +282,7 @@ export default function MyEvents({ token }: any) {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-8 border-b overflow-x-auto" style={{ borderColor: 'var(--border)' }}>
+        <div className="flex flex-wrap gap-2 mb-8 border-b" style={{ borderColor: 'var(--border)' }}>
           <button
             onClick={() => setActiveTab("events")}
             data-tab="events"
@@ -589,7 +591,27 @@ export default function MyEvents({ token }: any) {
                     ))}
                   </div>
                 )}
+              {/* Inline discover: Other Events CTA */}
+              <div className="mt-8">
+                <div className="rounded-2xl p-6 themed-card">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-xl font-bold text-heading mb-1">Other Events</h3>
+                      <p className="text-theme-secondary">Discover community activities beyond sports.</p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        localStorage.setItem('auralink-discover-category', 'other');
+                        onNavigate && onNavigate('discover');
+                      }}
+                      className="px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-all"
+                    >
+                      Explore Other Events
+                    </button>
+                  </div>
+                </div>
               </div>
+            </div>
             );
           } else if (activeTab === "services") {
             return (
