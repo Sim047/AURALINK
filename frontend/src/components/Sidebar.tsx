@@ -416,10 +416,11 @@ export default function Sidebar({
                   key={index}
                   onClick={stat.onClick}
                   className={`
-                    relative rounded-xl p-3 cursor-pointer themed-card bg-gradient-to-r ${stat.color}
+                    relative rounded-xl p-3 cursor-pointer border bg-gradient-to-r ${stat.color}
                     transition-all duration-300 hover:scale-105 hover:shadow-xl hover:border-emerald-500/40
                     ${isCollapsed ? 'aspect-square' : ''}
                   `}
+                  style={{ borderColor: 'var(--border)', color: 'var(--text)' }}
                 >
                   <div className="relative z-10">
                     <div className={`flex ${isCollapsed ? 'flex-col items-center justify-center h-full' : 'items-center justify-between'}`}>
