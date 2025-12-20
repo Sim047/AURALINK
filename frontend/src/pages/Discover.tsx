@@ -191,7 +191,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
   const [marketplaceItems, setMarketplaceItems] = useState<MarketplaceItem[]>([]);
   const [otherEvents, setOtherEvents] = useState<any[]>([]);
   const [createOtherOpen, setCreateOtherOpen] = useState(false);
-  const [newOther, setNewOther] = useState({ caption: "", imageUrl: "", location: "", tags: "event" });
+  const [newOther, setNewOther] = useState({ title: "", caption: "", imageUrl: "", location: "", tags: "event" });
   const [uploadingOtherImage, setUploadingOtherImage] = useState(false);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState(() => localStorage.getItem("auralink-discover-search") || "");
@@ -321,12 +321,12 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
     }
   };
 
-  const handleCreateOther = async () => {
+    const handleCreateOther = async () => {
     if (!token) {
       alert("Please log in to create an event post");
       return;
     }
-    if (!newOther.caption.trim() && !newOther.imageUrl) {
+    if (!newOther.title.trim() && !newOther.caption.trim() && !newOther.imageUrl) {
       alert("Please add a caption or image");
       return;
     }
@@ -337,11 +337,11 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
         .filter(Boolean);
       const res = await axios.post(
         `${API_URL}/posts`,
-        { caption: newOther.caption, imageUrl: newOther.imageUrl, tags, location: newOther.location },
+        { title: newOther.title || "", caption: newOther.caption, imageUrl: newOther.imageUrl, tags, location: newOther.location },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setOtherEvents((prev) => [res.data, ...prev]);
-      setNewOther({ caption: "", imageUrl: "", location: "", tags: "event" });
+      setNewOther({ title: "", caption: "", imageUrl: "", location: "", tags: "event" });
       setCreateOtherOpen(false);
     } catch (err) {
       console.error("Failed to create event post:", err);
@@ -1359,6 +1359,15 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
             <div className="rounded-2xl p-6 mb-6 themed-card">
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
+                  <label className="text-sm text-theme-secondary">Event Name</label>
+                  <input
+                    value={newOther.title}
+                    onChange={(e) => setNewOther((p) => ({ ...p, title: e.target.value }))}
+                    className="w-full mt-1 rounded-lg input"
+                    placeholder="e.g. Community Fundraiser"
+                  />
+                </div>
+                <div>
                   <label className="text-sm text-theme-secondary">Caption</label>
                   <textarea
                     value={newOther.caption}
@@ -1444,13 +1453,21 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
                 if (!q) return true;
                 const tagStr = Array.isArray(p.tags) ? p.tags.join(" ") : "";
                 return (
+                  String(p.title || "").toLowerCase().includes(q) ||
                   String(p.caption || "").toLowerCase().includes(q) ||
                   String(tagStr).toLowerCase().includes(q) ||
                   String(p.location || "").toLowerCase().includes(q)
                 );
               }).map((post) => (
-                <div key={post._id} className="rounded-xl p-6 themed-card">
-                  <h3 className="text-lg font-bold text-heading mb-2 line-clamp-2">{post.caption || "Untitled"}</h3>
+                <div key={post._id} className="rounded-xl overflow-hidden themed-card">
+                  {/* Poster Image */}
+                  {post.imageUrl && (
+                    <div className="h-40 w-full bg-black/10">
+                      <img src={post.imageUrl} alt={post.title || post.caption || 'Event'} className="w-full h-full object-cover" />
+                    </div>
+                  )}
+                  <div className="p-6">
+                    <h3 className="text-lg font-bold text-heading mb-2 line-clamp-2">{post.title || post.caption || "Untitled"}</h3>
                   {Array.isArray(post.tags) && post.tags.length > 0 && (
                     <div className="flex flex-wrap gap-2 mb-3">
                       {post.tags.slice(0, 5).map((t: string, idx: number) => (
@@ -1474,6 +1491,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
                   >
                     Message Author
                   </button>
+                  </div>
                 </div>
               ))}
             </div>

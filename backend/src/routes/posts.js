@@ -70,10 +70,11 @@ router.get("/:id", auth, async (req, res) => {
 // Create new post
 router.post("/", auth, async (req, res) => {
   try {
-    const { caption, imageUrl, tags, location } = req.body;
+    const { title, caption, imageUrl, tags, location } = req.body;
 
     const post = new Post({
       author: req.user.id,
+      title: title || "",
       caption,
       imageUrl,
       tags: tags || [],
@@ -110,7 +111,8 @@ router.put("/:id", auth, async (req, res) => {
       return res.status(403).json({ error: "Not authorized" });
     }
 
-    const { caption, tags, location } = req.body;
+    const { title, caption, tags, location } = req.body;
+      if (title !== undefined) post.title = title;
     
     // Track if caption was actually changed
     if (caption !== undefined && caption !== post.caption) {

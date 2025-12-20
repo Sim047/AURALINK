@@ -19,6 +19,7 @@ const CommentSchema = new mongoose.Schema(
 const PostSchema = new mongoose.Schema(
   {
     author: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    title: { type: String, default: "" },
     caption: { type: String, default: "" },
     imageUrl: { type: String, default: "" },
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
