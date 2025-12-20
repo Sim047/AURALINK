@@ -6,6 +6,7 @@ export interface UserCardProps {
   user: any;
   mode: "grid" | "list";
   isFollowingPage?: boolean;
+  userStatus?: any;
   onShowProfile: (u: any) => void;
   onOpenConversation: (opts: { partnerId: string }) => void;
   onToggleFollow: (u: any) => void;
@@ -16,6 +17,7 @@ export default function UserCard({
   user,
   mode,
   isFollowingPage,
+  userStatus,
   onShowProfile,
   onOpenConversation,
   onToggleFollow,
@@ -81,7 +83,7 @@ export default function UserCard({
         </div>
 
         {(() => {
-          const subtitle = getUserSubtitle(user);
+          const subtitle = getUserSubtitle(user, userStatus);
           return subtitle ? (
             <div className="text-xs card-text-muted truncate w-full mb-4">{subtitle}</div>
           ) : (
@@ -110,7 +112,7 @@ export default function UserCard({
       <div className="flex-1 cursor-pointer min-w-0" onClick={() => onShowProfile(user)}>
         <div className="font-semibold card-text truncate">{user.username}</div>
         {(() => {
-          const subtitle = getUserSubtitle(user);
+          const subtitle = getUserSubtitle(user, userStatus);
           return subtitle ? (
             <div className="text-sm card-text-muted truncate">{subtitle}</div>
           ) : null;

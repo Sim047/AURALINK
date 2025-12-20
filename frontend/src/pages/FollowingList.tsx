@@ -13,6 +13,7 @@ export default function FollowingList({
   const [following, setFollowing] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [listMode, setListMode] = useState<"grid" | "list">("grid");
+  const [statuses, setStatuses] = useState<Record<string, any>>({});
 
   useEffect(() => {
     if (!token || !currentUserId) return;
@@ -23,6 +24,21 @@ export default function FollowingList({
       .then((res) => setFollowing(res.data.following || []))
       .finally(() => setLoading(false));
   }, [token, currentUserId]);
+
+  // Load user statuses for harmonized subtitle
+  useEffect(() => {
+    if (!token) return;
+    axios
+      .get(`${API}/api/status`, { headers: { Authorization: `Bearer ${token}` } })
+      .then((res) => {
+        const map: Record<string, any> = {};
+        (res.data || []).forEach((s: any) => {
+          if (s?.userId) map[String(s.userId)] = s;
+        });
+        setStatuses(map);
+      })
+      .catch(() => setStatuses({}));
+  }, [token]);
 
   function avatarUrl(u: any) {
     if (!u?.avatar) return "https://ui-avatars.com/api/?name=User&background=0D8ABC&color=fff";
@@ -81,6 +97,7 @@ export default function FollowingList({
               user={u}
               mode="grid"
               isFollowingPage={true}
+              userStatus={statuses[String(u._id)]}
               onShowProfile={onShowProfile}
               onOpenConversation={onOpenConversation}
               onToggleFollow={toggleFollow}
@@ -96,6 +113,7 @@ export default function FollowingList({
               user={u}
               mode="list"
               isFollowingPage={true}
+              userStatus={statuses[String(u._id)]}
               onShowProfile={onShowProfile}
               onOpenConversation={onOpenConversation}
               onToggleFollow={toggleFollow}
