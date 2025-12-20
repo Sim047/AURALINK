@@ -4,136 +4,31 @@ import axios from "axios";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { 
-  RefreshCw, CheckCircle, XCircle, Loader, ArrowLeft, 
-  Calendar, DollarSign, User, FileText, AlertCircle,
-  CheckSquare, ShieldCheck
-} from "lucide-react";
+  import { ArrowLeft } from "lucide-react";
+  import { useState } from "react";
 
-dayjs.extend(relativeTime);
-
-const API = (import.meta as any).env?.VITE_API_URL || "";
-
-interface SimpleBooking {
-  _id: string;
-  status: "pending" | "approved" | "rejected";
-  transactionCode: string;
-  isPaid: boolean;
-  user: {
-    _id: string;
-    username: string;
-    email: string;
-    avatar?: string;
-  };
-  event: {
-    _id: string;
-    title: string;
-    startDate: string;
-    pricing?: {
-      amount: number;
-      currency: string;
-    };
-  };
-  createdAt: string;
-}
-
-export default function PendingApprovals({ token, onBack, onNavigate }: any) {
-  const [bookings, setBookings] = useState<SimpleBooking[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [processing, setProcessing] = useState<string | null>(null);
-  const [error, setError] = useState("");
-  const [showRejectionModal, setShowRejectionModal] = useState<string | null>(null);
-  const [rejectionReason, setRejectionReason] = useState("");
-
-  useEffect(() => {
-    loadRequests();
-  }, []);
-
-  async function loadRequests() {
-    try {
-      setLoading(true);
-      setError("");
-      const { data } = await axios.get(`${API}/api/bookings-simple/to-approve`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setBookings(data.bookings || []);
-    } catch (err: any) {
-      console.error("[PendingApprovals] Error:", err);
-      setError(err.response?.data?.error || "Failed to load approvals");
-    } finally {
-      setLoading(false);
-    }
+  export default function PendingApprovals({ onBack }: any) {
+    const [_, __] = useState(null); // placeholder to ensure component compiles
+    return (
+      <div className="min-h-screen themed-page">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <button
+            onClick={onBack}
+            className="flex items-center gap-2 text-sm text-theme-secondary hover:text-heading mb-6 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Dashboard
+          </button>
+          <div className="rounded-2xl p-8 themed-card text-center">
+            <h1 className="text-2xl font-bold text-heading mb-2">Pending Approvals Retired</h1>
+            <p className="text-theme-secondary">
+              The booking system has been removed. This page is no longer available.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
   }
-
-  async function handleApprove(bookingId: string) {
-    if (!confirm("Approve this join request?")) return;
-    
-    try {
-      setProcessing(bookingId);
-      await axios.post(
-        `${API}/api/bookings-simple/${bookingId}/decide`,
-        { approved: true },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      await loadRequests();
-    } catch (err: any) {
-      console.error("Approve error:", err);
-      alert(err.response?.data?.error || "Failed to approve");
-    } finally {
-      setProcessing(null);
-    }
-  }
-
-  async function handleReject(bookingId: string) {
-    if (!rejectionReason.trim()) {
-      alert("Please provide a reason for rejection");
-      return;
-    }
-
-    try {
-      setProcessing(bookingId);
-      await axios.post(
-        `${API}/api/bookings-simple/${bookingId}/decide`,
-        { approved: false, rejectionReason },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setShowRejectionModal(null);
-      setRejectionReason("");
-      await loadRequests();
-    } catch (err: any) {
-      console.error("Reject error:", err);
-      alert(err.response?.data?.error || "Failed to reject");
-    } finally {
-      setProcessing(null);
-    }
-  }
-
-  async function handleVerifyPayment(bookingId: string) {
-    if (!confirm("Mark payment as verified?")) return;
-
-    try {
-      setProcessing(bookingId);
-      await axios.post(
-        `${API}/api/bookings-simple/${bookingId}/verify-payment`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      await loadRequests();
-    } catch (err: any) {
-      console.error("Verify payment error:", err);
-      alert(err.response?.data?.error || "Failed to verify payment");
-    } finally {
-      setProcessing(null);
-    }
-  }
-
-  const pendingBookings = bookings.filter(b => b.status === "pending");
-  const approvedUnpaid = bookings.filter(
-    b => b.status === "approved" && !b.isPaid && b.event.pricing && b.event.pricing.amount > 0
-  );
-
-  return (
-    <div className="min-h-screen themed-page">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
           <button

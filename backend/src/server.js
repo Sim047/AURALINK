@@ -20,8 +20,6 @@ import conversationsRoutes from "./routes/conversations.js";
 import coachesRoutes from "./routes/coaches.js";
 import eventsRoutes from "./routes/events.js";
 import servicesRoutes from "./routes/services.js";
-import bookingsRoutes from "./routes/bookings.js";
-import bookingsSimpleRoutes from "./routes/bookings-simple.js";
 import postsRoutes from "./routes/posts.js";
 import marketplaceRoutes from "./routes/marketplace.js";
 import aiRoutes from "./routes/ai.js";
@@ -214,8 +212,6 @@ app.use("/api/conversations", conversationsRoutes);
 app.use("/api/coaches", coachesRoutes);
 app.use("/api/events", eventsRoutes);
 app.use("/api/services", servicesRoutes);
-app.use("/api/bookings-simple", bookingsSimpleRoutes); // NEW SIMPLE SYSTEM
-app.use("/api/bookings", bookingsRoutes); // OLD SYSTEM (keeping for now)
 app.use("/api/posts", postsRoutes);
 app.use("/api/marketplace", marketplaceRoutes);
 if (AI_ENABLED) {

@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { Bell, ArrowLeft, Calendar, CheckCircle, AlertCircle, Loader, Trash2 } from "lucide-react";
+import { Bell, ArrowLeft, Calendar, Loader } from "lucide-react";
 
 dayjs.extend(relativeTime);
 
@@ -20,34 +20,17 @@ export default function Notifications({ token, onBack }: any) {
   async function loadNotifications() {
     try {
       setLoading(true);
-      
-      // Load bookings and events to generate notifications
-      const [bookingsRes, eventsRes] = await Promise.all([
-        axios.get(`${API}/api/bookings/my-bookings`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        axios.get(`${API}/api/events?status=published&limit=10`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-      ]);
+      // Load events to generate notifications (bookings removed)
+      const eventsRes = await axios.get(`${API}/api/events?status=published&limit=10`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-      const bookings = bookingsRes.data.bookings || [];
       const events = (eventsRes.data.events || []).filter((event: any) => {
         const eventDate = new Date(event.startDate);
         const now = new Date();
         const thirtyDaysFromNow = new Date();
         thirtyDaysFromNow.setDate(now.getDate() + 30);
         return eventDate >= now && eventDate <= thirtyDaysFromNow;
-      });
-
-      // Create notifications for upcoming bookings
-      const upcomingBookings = bookings.filter((booking: any) => {
-        if (!booking.scheduledDate) return false;
-        const bookingDate = new Date(booking.scheduledDate);
-        const now = new Date();
-        const threeDaysFromNow = new Date();
-        threeDaysFromNow.setDate(now.getDate() + 3);
-        return bookingDate >= now && bookingDate <= threeDaysFromNow && booking.status === 'confirmed';
       });
 
       const eventNotifications = events.map((event: any) => ({
@@ -58,17 +41,7 @@ export default function Notifications({ token, onBack }: any) {
         time: dayjs(event.startDate).fromNow(),
         date: event.startDate,
       }));
-
-      const bookingNotifications = upcomingBookings.map((booking: any) => ({
-        id: booking._id,
-        type: 'booking',
-        title: `Booking reminder`,
-        message: `${booking.bookingType} on ${dayjs(booking.scheduledDate).format('MMM D')}`,
-        time: dayjs(booking.scheduledDate).fromNow(),
-        date: booking.scheduledDate,
-      }));
-
-      const allNotifications = [...bookingNotifications, ...eventNotifications]
+      const allNotifications = [...eventNotifications]
         .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
       setNotifications(allNotifications);
@@ -97,7 +70,7 @@ export default function Notifications({ token, onBack }: any) {
               <h1 className="text-3xl font-bold mb-2">
                 Notifications
               </h1>
-              <p className="text-theme-secondary">Stay updated with your bookings and events</p>
+              <p className="text-theme-secondary">Stay updated with upcoming events</p>
             </div>
           </div>
         </div>
@@ -125,20 +98,8 @@ export default function Notifications({ token, onBack }: any) {
                 className="rounded-2xl p-6 hover:shadow-lg transition-all duration-300 group themed-card"
               >
                 <div className="flex items-start gap-4">
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                    notif.type === 'event' 
-                      ? 'bg-purple-100 dark:bg-purple-900/30' 
-                      : 'bg-blue-100 dark:bg-blue-900/30'
-                  }`}>
-                    {notif.type === 'event' ? (
-                      <Calendar className={`w-6 h-6 ${
-                        notif.type === 'event' 
-                          ? 'text-purple-600 dark:text-purple-400' 
-                          : 'text-blue-600 dark:text-blue-400'
-                      }`} />
-                    ) : (
-                      <CheckCircle className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-                    )}
+                  <div className={"w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 bg-purple-100 dark:bg-purple-900/30"}>
+                    <Calendar className="w-6 h-6 text-purple-600 dark:text-purple-400" />
                   </div>
                   
                   <div className="flex-1 min-w-0">
@@ -149,12 +110,8 @@ export default function Notifications({ token, onBack }: any) {
                       {notif.message}
                     </p>
                     <div className="flex items-center gap-2">
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                        notif.type === 'event'
-                          ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
-                          : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                      }`}>
-                        {notif.type === 'event' ? 'Event' : 'Booking'}
+                      <span className={"px-3 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400"}>
+                        Event
                       </span>
                       <span className="text-xs text-theme-secondary">
                         {notif.time}
