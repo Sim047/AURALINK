@@ -87,7 +87,7 @@ const finishAction = (
 };
 
 
-type CategoryType = "sports" | "services" | "marketplace" | null;
+type CategoryType = "sports" | "services" | "marketplace" | "other" | null;
 
 interface Event {
   _id: string;
@@ -189,6 +189,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
   const [events, setEvents] = useState<Event[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [marketplaceItems, setMarketplaceItems] = useState<MarketplaceItem[]>([]);
+  const [otherEvents, setOtherEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState(() => localStorage.getItem("auralink-discover-search") || "");
   const [filterCategory, setFilterCategory] = useState(() => localStorage.getItem("auralink-discover-filter") || "");
@@ -214,6 +215,8 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
       fetchServices();
     } else if (activeCategory === "marketplace") {
       fetchMarketplaceItems();
+    } else if (activeCategory === "other") {
+      fetchOtherEvents();
     }
   }, [activeCategory, selectedSport, filterCategory]);
 
@@ -267,6 +270,23 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
       setMarketplaceItems(response.data.items || response.data);
     } catch (error) {
       console.error("Error fetching marketplace items:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchOtherEvents = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`${API_URL}/posts`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      });
+      const posts = response.data.posts || response.data || [];
+      const filtered = (posts || []).filter((p: any) => Array.isArray(p.tags) && p.tags.some((t: string) => /event/i.test(t)));
+      setOtherEvents(filtered);
+    } catch (error) {
+      console.error("Error fetching other events (posts):", error);
+      setOtherEvents([]);
     } finally {
       setLoading(false);
     }
@@ -590,7 +610,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
           </div>
 
           {/* Category Cards */}
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-8 lg:grid-cols-4">
             {/* Sports Events Card */}
             <div
               onClick={() => setActiveCategory("sports")}
@@ -613,7 +633,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
               </div>
             </div>
 
-            {/* Medical Services Card */}
+            {/* Services Card */}
             <div
               onClick={() => setActiveCategory("services")}
               className="group cursor-pointer rounded-2xl p-8 border hover:border-violet-500/40 transition-all themed-card"
@@ -624,7 +644,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
                 </div>
               </div>
               <h2 className="text-2xl font-bold text-heading text-center mb-3">
-                Medical Services
+                Services
               </h2>
               <p className="text-theme-secondary text-center mb-6">
                 Physiotherapy, massage, nutrition, personal training & more
@@ -653,6 +673,28 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
               </p>
               <div className="flex items-center justify-center text-amber-300 group-hover:text-amber-200 transition-colors">
                 <span className="font-semibold">Shop Now</span>
+                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </div>
+
+            {/* Other Events Card */}
+            <div
+              onClick={() => setActiveCategory("other")}
+              className="group cursor-pointer rounded-2xl p-8 border hover:border-blue-500/40 transition-all themed-card"
+            >
+              <div className="flex justify-center mb-6">
+                <div className="bg-blue-400/10 p-6 rounded-2xl group-hover:scale-110 transition-transform duration-300">
+                  <Calendar className="w-12 h-12 text-blue-300" />
+                </div>
+              </div>
+              <h2 className="text-2xl font-bold text-heading text-center mb-3">
+                Other Events
+              </h2>
+              <p className="text-theme-secondary text-center mb-6">
+                See community posts tagged as events
+              </p>
+              <div className="flex items-center justify-center text-blue-300 group-hover:text-blue-200 transition-colors">
+                <span className="font-semibold">Explore</span>
                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </div>
             </div>
@@ -700,6 +742,19 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
             <p className="text-theme-secondary">Join sports activities and meet new people</p>
           </div>
 
+          {/* Search */}
+          <div className="mb-6">
+            <div className="relative">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-theme-secondary" />
+              <input
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search by title, sport, or location"
+                className="w-full pl-10 pr-4 py-2 rounded-lg input"
+              />
+            </div>
+          </div>
+
           {/* Sport Filter */}
           <div className="mb-8 flex gap-2 overflow-x-auto pb-2">
             {sportsList.map((sport) => (
@@ -720,14 +775,32 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
           {/* Events Grid */}
           {loading ? (
             <div className="text-center text-theme-secondary py-12">Loading events...</div>
-          ) : events.length === 0 ? (
+          ) : events.filter((e) => {
+              const q = searchTerm.trim().toLowerCase();
+              if (!q) return true;
+              const loc = e.location?.city || e.location?.name || e.location?.address || e.location || "";
+              return (
+                String(e.title || "").toLowerCase().includes(q) ||
+                String(e.sport || "").toLowerCase().includes(q) ||
+                String(loc).toLowerCase().includes(q)
+              );
+            }).length === 0 ? (
             <div className="text-center text-theme-secondary py-12">
               <Trophy className="w-16 h-16 mx-auto mb-4 opacity-50" />
               <p>No events found for {selectedSport}</p>
             </div>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {events.map((event) => (
+              {events.filter((e) => {
+                const q = searchTerm.trim().toLowerCase();
+                if (!q) return true;
+                const loc = e.location?.city || e.location?.name || e.location?.address || e.location || "";
+                return (
+                  String(e.title || "").toLowerCase().includes(q) ||
+                  String(e.sport || "").toLowerCase().includes(q) ||
+                  String(loc).toLowerCase().includes(q)
+                );
+              }).map((event) => (
                 <div
                   key={event._id}
                   onClick={() => openEventDetails(event._id)}
@@ -833,7 +906,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
     );
   }
 
-  // Medical Services View
+  // Services View
   if (activeCategory === "services") {
     const servicesList = [
       "All", "personal-training", "group-classes", "nutrition",
@@ -855,7 +928,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-4xl font-bold text-heading mb-2">
-                  Medical Services <Stethoscope className="inline w-8 h-8 text-violet-300 ml-2" />
+                  Services <Stethoscope className="inline w-8 h-8 text-violet-300 ml-2" />
                 </h1>
                 <p className="text-theme-secondary">Find professional health and training services</p>
               </div>
@@ -866,6 +939,19 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
                 <Plus className="w-5 h-5" />
                 Create Service
               </button>
+            </div>
+          </div>
+
+          {/* Search */}
+          <div className="mb-6">
+            <div className="relative">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-theme-secondary" />
+              <input
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search services by name, category, or city"
+                className="w-full pl-10 pr-4 py-2 rounded-lg input"
+              />
             </div>
           </div>
 
@@ -889,14 +975,34 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
           {/* Services Grid */}
           {loading ? (
             <div className="text-center text-theme-secondary py-12">Loading services...</div>
-          ) : services.length === 0 ? (
+          ) : services.filter((s) => {
+              const q = searchTerm.trim().toLowerCase();
+              if (!q) return true;
+              const city = s.location?.city || s.location?.address || "";
+              return (
+                String(s.name || "").toLowerCase().includes(q) ||
+                String(s.category || "").toLowerCase().includes(q) ||
+                String(city).toLowerCase().includes(q) ||
+                String(s.provider?.username || "").toLowerCase().includes(q)
+              );
+            }).length === 0 ? (
             <div className="text-center text-theme-secondary py-12">
               <Stethoscope className="w-16 h-16 mx-auto mb-4 opacity-50" />
               <p>No services found</p>
             </div>
           ) : (
             <div className="grid md:grid-cols-2 gap-6">
-              {services.map((service) => (
+              {services.filter((s) => {
+                const q = searchTerm.trim().toLowerCase();
+                if (!q) return true;
+                const city = s.location?.city || s.location?.address || "";
+                return (
+                  String(s.name || "").toLowerCase().includes(q) ||
+                  String(s.category || "").toLowerCase().includes(q) ||
+                  String(city).toLowerCase().includes(q) ||
+                  String(s.provider?.username || "").toLowerCase().includes(q)
+                );
+              }).map((service) => (
                 <div
                   key={service._id}
                   onClick={() => setSelectedService(service)}
@@ -1166,6 +1272,102 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
               type={notification.type}
               onClose={() => setNotification(null)}
             />
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Other Events View (posts tagged as events)
+  if (activeCategory === "other") {
+    return (
+      <div className="min-h-screen themed-page">
+        <div className="max-w-6xl mx-auto px-4 py-8">
+          {/* Back Button & Header */}
+          <div className="mb-8">
+            <button
+              onClick={() => setActiveCategory(null)}
+              className="flex items-center text-theme-secondary hover:text-heading mb-6 transition-colors"
+            >
+              <ChevronLeft className="w-5 h-5 mr-1" />
+              Back to Discover
+            </button>
+            <h1 className="text-4xl font-bold text-heading mb-2">
+              Other Events <Calendar className="inline w-8 h-8 text-blue-300 ml-2" />
+            </h1>
+            <p className="text-theme-secondary">Community posts related to events and announcements</p>
+          </div>
+
+          {/* Search */}
+          <div className="mb-6">
+            <div className="relative">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-theme-secondary" />
+              <input
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search posts by caption, tag, or location"
+                className="w-full pl-10 pr-4 py-2 rounded-lg input"
+              />
+            </div>
+          </div>
+
+          {/* Posts Grid */}
+          {loading ? (
+            <div className="text-center text-theme-secondary py-12">Loading posts...</div>
+          ) : otherEvents.filter((p) => {
+              const q = searchTerm.trim().toLowerCase();
+              if (!q) return true;
+              const tagStr = Array.isArray(p.tags) ? p.tags.join(" ") : "";
+              return (
+                String(p.caption || "").toLowerCase().includes(q) ||
+                String(tagStr).toLowerCase().includes(q) ||
+                String(p.location || "").toLowerCase().includes(q)
+              );
+            }).length === 0 ? (
+            <div className="text-center text-theme-secondary py-12">
+              <Calendar className="w-16 h-16 mx-auto mb-4 opacity-50" />
+              <p>No posts found</p>
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {otherEvents.filter((p) => {
+                const q = searchTerm.trim().toLowerCase();
+                if (!q) return true;
+                const tagStr = Array.isArray(p.tags) ? p.tags.join(" ") : "";
+                return (
+                  String(p.caption || "").toLowerCase().includes(q) ||
+                  String(tagStr).toLowerCase().includes(q) ||
+                  String(p.location || "").toLowerCase().includes(q)
+                );
+              }).map((post) => (
+                <div key={post._id} className="rounded-xl p-6 themed-card">
+                  <h3 className="text-lg font-bold text-heading mb-2 line-clamp-2">{post.caption || "Untitled"}</h3>
+                  {Array.isArray(post.tags) && post.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      {post.tags.slice(0, 5).map((t: string, idx: number) => (
+                        <span key={idx} className="badge text-xs">{t}</span>
+                      ))}
+                    </div>
+                  )}
+                  <div className="flex items-center text-xs text-theme-secondary mb-3">
+                    <img
+                      src={(post.author?.avatar) || `https://ui-avatars.com/api/?name=${post.author?.username || 'User'}`}
+                      alt={post.author?.username || 'User'}
+                      className="w-5 h-5 rounded-full mr-2"
+                    />
+                    <span>{post.author?.username || 'Unknown'}</span>
+                    <span className="mx-2">•</span>
+                    <span>{dayjs(post.createdAt).fromNow()}</span>
+                  </div>
+                  <button
+                    onClick={() => onStartConversation(post.author?._id)}
+                    className="btn w-full text-sm justify-center"
+                  >
+                    Message Author
+                  </button>
+                </div>
+              ))}
+            </div>
           )}
         </div>
       </div>

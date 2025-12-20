@@ -6,7 +6,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import { 
   Calendar, Clock, MapPin, Users, ArrowLeft, 
   Filter, CheckCircle, XCircle, AlertCircle, 
-  Loader, Star, Trophy, DollarSign
+  Loader, Star, Trophy, DollarSign, Search
 } from "lucide-react";
 
 dayjs.extend(relativeTime);
@@ -20,6 +20,7 @@ export default function AllEvents({ token, onBack, onNavigate, onViewEvent }: an
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterType>("all");
   const [error, setError] = useState("");
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     loadEvents();
@@ -85,6 +86,16 @@ export default function AllEvents({ token, onBack, onNavigate, onViewEvent }: an
   };
 
   const filteredEvents = getFilteredEvents();
+  const displayEvents = filteredEvents.filter((e) => {
+    const q = search.trim().toLowerCase();
+    if (!q) return true;
+    const loc = e.location?.city || e.location?.name || e.location?.state || "";
+    return (
+      String(e.title || "").toLowerCase().includes(q) ||
+      String(e.sport || "").toLowerCase().includes(q) ||
+      String(loc).toLowerCase().includes(q)
+    );
+  });
 
   const stats = {
     all: events.length,
@@ -116,6 +127,19 @@ export default function AllEvents({ token, onBack, onNavigate, onViewEvent }: an
                 Manage all your events in one place
               </p>
             </div>
+          </div>
+        </div>
+
+        {/* Search */}
+        <div className="mb-6 max-w-xl">
+          <div className="relative">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-theme-secondary" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search by title, sport, or location"
+              className="w-full pl-10 pr-4 py-2 rounded-lg input"
+            />
           </div>
         </div>
 
@@ -201,7 +225,7 @@ export default function AllEvents({ token, onBack, onNavigate, onViewEvent }: an
           <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 text-red-700 dark:text-red-400">
             {error}
           </div>
-        ) : filteredEvents.length === 0 ? (
+        ) : displayEvents.length === 0 ? (
           <div className="rounded-2xl p-12 text-center themed-card">
             <Calendar className="w-16 h-16 text-theme-secondary mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-heading mb-2">
@@ -222,7 +246,7 @@ export default function AllEvents({ token, onBack, onNavigate, onViewEvent }: an
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredEvents.map((event) => {
+            {displayEvents.map((event) => {
               const isPast = new Date(event.startDate) < new Date();
               
               return (
