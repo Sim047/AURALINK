@@ -60,7 +60,7 @@ export default function MyEvents({ token, onNavigate }: { token: string; onNavig
   const [newOther, setNewOther] = useState<{ title: string; caption: string; location: string; tags: string; imageUrl: string }>({ title: "", caption: "", location: "", tags: "event", imageUrl: "" });
   const [uploadingOtherImage, setUploadingOtherImage] = useState<boolean>(false);
   const [otherSearchTerm, setOtherSearchTerm] = useState<string>("");
-  const [otherListOpen, setOtherListOpen] = useState<boolean>(false);
+  const [otherListOpen, setOtherListOpen] = useState<boolean>(true);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" | "warning" } | null>(null);
   const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
 
@@ -581,6 +581,7 @@ export default function MyEvents({ token, onNavigate }: { token: string; onNavig
                                   onChange={(e) => setOtherSearchTerm(e.target.value)}
                                   className="w-full pl-9 pr-3 py-2 rounded-lg input"
                                   placeholder="Search other events by title, tag, or caption"
+                                  aria-label="Search other events"
                                 />
                               </div>
                               <div className="flex items-center gap-2">
