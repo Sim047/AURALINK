@@ -700,21 +700,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
             </div>
           </div>
 
-          {/* Quick Stats */}
-          <div className="mt-16 grid grid-cols-2 gap-6 max-w-3xl mx-auto">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-heading">
-                {services.length || 0}
-              </div>
-              <div className="text-theme-secondary text-sm mt-1">Services Available</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-heading">
-                {marketplaceItems.length || 0}
-              </div>
-              <div className="text-theme-secondary text-sm mt-1">Items for Sale</div>
-            </div>
-          </div>
+          {/* Quick Stats removed as requested */}
         </div>
       </div>
     );
@@ -1280,6 +1266,64 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
 
   // Other Events View (posts tagged as events)
   if (activeCategory === "other") {
+    const [createOtherOpen, setCreateOtherOpen] = React.useState(false);
+    const [newOther, setNewOther] = React.useState({ caption: "", imageUrl: "", location: "", tags: "event" });
+    const [uploadingOtherImage, setUploadingOtherImage] = React.useState(false);
+
+    const handleOtherImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      if (file.size > 10 * 1024 * 1024) {
+        alert("Image must be under 10MB");
+        return;
+      }
+      try {
+        setUploadingOtherImage(true);
+        const formData = new FormData();
+        formData.append("file", file);
+        const res = await axios.post(`${API_URL}/files/upload`, formData, {
+          headers: {
+            Authorization: token ? `Bearer ${token}` : undefined,
+            "Content-Type": "multipart/form-data",
+          },
+        });
+        setNewOther((p) => ({ ...p, imageUrl: res.data.url }));
+      } catch (err) {
+        console.error("Upload failed:", err);
+        alert("Failed to upload image");
+      } finally {
+        setUploadingOtherImage(false);
+      }
+    };
+
+    const handleCreateOther = async () => {
+      if (!token) {
+        alert("Please log in to create an event post");
+        return;
+      }
+      if (!newOther.caption.trim() && !newOther.imageUrl) {
+        alert("Please add a caption or image");
+        return;
+      }
+      try {
+        const tags = (newOther.tags || "")
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean);
+        const res = await axios.post(
+          `${API_URL}/posts`,
+          { caption: newOther.caption, imageUrl: newOther.imageUrl, tags, location: newOther.location },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setOtherEvents((prev) => [res.data, ...prev]);
+        setNewOther({ caption: "", imageUrl: "", location: "", tags: "event" });
+        setCreateOtherOpen(false);
+      } catch (err) {
+        console.error("Failed to create event post:", err);
+        alert("Failed to create event post");
+      }
+    };
+
     return (
       <div className="min-h-screen themed-page">
         <div className="max-w-6xl mx-auto px-4 py-8">
@@ -1292,11 +1336,75 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
               <ChevronLeft className="w-5 h-5 mr-1" />
               Back to Discover
             </button>
-            <h1 className="text-4xl font-bold text-heading mb-2">
-              Other Events <Calendar className="inline w-8 h-8 text-blue-300 ml-2" />
-            </h1>
-            <p className="text-theme-secondary">Community posts related to events and announcements</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-4xl font-bold text-heading mb-2">
+                  Other Events <Calendar className="inline w-8 h-8 text-blue-300 ml-2" />
+                </h1>
+                <p className="text-theme-secondary">Community posts related to events and announcements</p>
+              </div>
+              <button
+                onClick={() => setCreateOtherOpen((v) => !v)}
+                className="btn flex items-center gap-2"
+              >
+                <Plus className="w-5 h-5" />
+                Create Other Event
+              </button>
+            </div>
           </div>
+
+          {/* Create Other Event Form */}
+          {createOtherOpen && (
+            <div className="rounded-2xl p-6 mb-6 themed-card">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm text-theme-secondary">Caption</label>
+                  <textarea
+                    value={newOther.caption}
+                    onChange={(e) => setNewOther((p) => ({ ...p, caption: e.target.value }))}
+                    className="w-full mt-1 rounded-lg input min-h-24"
+                    placeholder="Describe your event or announcement"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-theme-secondary">Location (optional)</label>
+                  <input
+                    value={newOther.location}
+                    onChange={(e) => setNewOther((p) => ({ ...p, location: e.target.value }))}
+                    className="w-full mt-1 rounded-lg input"
+                    placeholder="City or venue"
+                  />
+                </div>
+              </div>
+              <div className="grid md:grid-cols-2 gap-4 mt-4">
+                <div>
+                  <label className="text-sm text-theme-secondary">Tags</label>
+                  <input
+                    value={newOther.tags}
+                    onChange={(e) => setNewOther((p) => ({ ...p, tags: e.target.value }))}
+                    className="w-full mt-1 rounded-lg input"
+                    placeholder="Comma-separated tags (default: event)"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-theme-secondary">Image</label>
+                  <div className="flex items-center gap-3 mt-1">
+                    <input type="file" accept="image/*" onChange={handleOtherImageUpload} />
+                    {uploadingOtherImage && <span className="text-xs text-theme-secondary">Uploading...</span>}
+                  </div>
+                  {newOther.imageUrl && (
+                    <div className="mt-3 rounded-lg overflow-hidden border" style={{ borderColor: 'var(--border)' }}>
+                      <img src={newOther.imageUrl} alt="Preview" className="w-full h-40 object-cover" />
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 mt-4">
+                <button className="btn" onClick={handleCreateOther}>Publish</button>
+                <button className="btn" onClick={() => setCreateOtherOpen(false)}>Cancel</button>
+              </div>
+            </div>
+          )}
 
           {/* Search */}
           <div className="mb-6">
