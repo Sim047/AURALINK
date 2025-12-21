@@ -1831,7 +1831,7 @@ function onMyStatusUpdated(newStatus: any) {
 
               <div className="flex flex-col gap-3">
                 <textarea
-                  className="input w-full pt-3 pl-3 pr-3 pb-3 rounded-2xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-500 dark:placeholder:text-slate-400 border border-slate-300 dark:border-slate-600 resize-none overflow-y-auto overflow-x-hidden leading-6"
+                  className="input composer-input w-full pt-3 pl-3 pr-3 pb-3 rounded-2xl resize-none overflow-y-auto overflow-x-hidden leading-6"
                   style={{ 
                     minHeight: '48px',
                     maxHeight: '144px',
@@ -1855,7 +1855,7 @@ function onMyStatusUpdated(newStatus: any) {
                 />
                 <div className="flex flex-wrap items-center justify-end gap-2">
                   {/* Image Button with Icon */}
-                  <label className="cursor-pointer p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors bg-white dark:bg-slate-800">
+                  <label className="cursor-pointer composer-icon-btn">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       width="20"
@@ -1866,7 +1866,7 @@ function onMyStatusUpdated(newStatus: any) {
                       strokeWidth="2"
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      className="text-slate-600 dark:text-slate-400"
+                      className="text-theme-secondary"
                     >
                       <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
                       <circle cx="8.5" cy="8.5" r="1.5" />
@@ -1882,7 +1882,7 @@ function onMyStatusUpdated(newStatus: any) {
                   </label>
 
                   <button 
-                    className="p-2 rounded-full bg-gradient-to-r from-cyan-400 to-purple-500 hover:shadow-lg transition-all w-full sm:w-auto mt-2 sm:mt-0" 
+                    className="composer-send-btn w-full sm:w-auto mt-2 sm:mt-0" 
                     type="submit"
                     title="Send message"
                   >
@@ -1892,7 +1892,7 @@ function onMyStatusUpdated(newStatus: any) {
                       height="20"
                       viewBox="0 0 24 24"
                       fill="none"
-                      stroke="white"
+                      stroke="currentColor"
                       strokeWidth="2"
                       strokeLinecap="round"
                       strokeLinejoin="round"

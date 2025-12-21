@@ -517,6 +517,48 @@ textarea,
   min-width: 70px;
 }
 
+/* Theme-aware composer input and buttons (avoid hard-coded colors) */
+.composer-input {
+  background: var(--input-bg) !important;
+  border: 1px solid var(--input-border) !important;
+  color: var(--text) !important;
+}
+.composer-input::placeholder {
+  color: var(--muted) !important;
+}
+
+.composer-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  border-radius: 999px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--text);
+  transition: background-color var(--theme-transition) ease, box-shadow var(--theme-transition) ease;
+}
+.composer-icon-btn:hover { 
+  background: var(--accent-violet-muted);
+  box-shadow: 0 6px 24px rgba(2,6,23,0.18);
+}
+
+.composer-send-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent-start), var(--accent-end));
+  color: var(--btn-text);
+  border: 1px solid rgba(0,0,0,0.08);
+  transition: box-shadow .15s ease, transform .15s ease;
+}
+.composer-send-btn:hover { 
+  box-shadow: 0 10px 30px rgba(2,6,23,0.25);
+  transform: translateY(-1px);
+}
+
 /* Image preview bar in composer */
 .composer > div:first-of-type {
   overflow-x: auto;
