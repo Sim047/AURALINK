@@ -12,6 +12,15 @@ router.get("/", async (req, res) => {
     if (req.query.sport && String(req.query.sport).trim()) {
       q.sport = req.query.sport;
     }
+    if (req.query.category) {
+      const cat = String(req.query.category).toLowerCase();
+      if (cat === "sports") {
+        q.sport = { $exists: true, $nin: [null, ""] };
+      } else if (cat === "other") {
+        // events without a sport set are considered "Other Events"
+        q.$or = [{ sport: { $exists: false } }, { sport: null }, { sport: "" }];
+      }
+    }
     const events = await Event.find(q)
       .populate("organizer", "username avatar")
       .sort({ startDate: 1 })
@@ -34,6 +43,14 @@ router.get("/user/:userId", async (req, res) => {
     const query = { status: "published", organizer: userId };
     if (req.query.sport && String(req.query.sport).trim()) {
       query.sport = req.query.sport;
+    }
+    if (req.query.category) {
+      const cat = String(req.query.category).toLowerCase();
+      if (cat === "sports") {
+        query.sport = { $exists: true, $nin: [null, ""] };
+      } else if (cat === "other") {
+        query.$or = [{ sport: { $exists: false } }, { sport: null }, { sport: "" }];
+      }
     }
     const [events, total] = await Promise.all([
       Event.find(query)

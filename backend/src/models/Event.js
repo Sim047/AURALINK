@@ -8,6 +8,8 @@ const EventSchema = new Schema(
     title: { type: String, required: true, trim: true },
     description: { type: String, default: "" },
     organizer: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    // Optional sport type: when present, treated as a sports event
+    sport: { type: String, default: undefined },
     startDate: { type: Date, required: true },
     time: { type: String },
     location: {
