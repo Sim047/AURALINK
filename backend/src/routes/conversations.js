@@ -13,13 +13,83 @@ const router = express.Router();
 router.get('/', auth, async (req, res) => {
   try {
     const userId = req.user.id;
-    const convs = await Conversation.find({ participants: userId })
+    let convs = await Conversation.find({ participants: userId })
       .populate('participants', 'username avatar email')
       .populate({
         path: 'lastMessage',
         populate: { path: 'sender', select: 'username avatar' },
       })
       .sort({ updatedAt: -1 });
+
+    // BACKFILL: If user has messages in objectId-like rooms without a Conversation doc,
+    // create lightweight conversations so their history appears in lists.
+    if (!convs || convs.length === 0) {
+      try {
+        // Find recent rooms the user participated in (by sender/readBy/deliveredTo)
+        const recentRooms = await Message.aggregate([
+          {
+            $match: {
+              hiddenFor: { $ne: new Conversation()._id.constructor(userId) },
+              $or: [
+                { sender: new Conversation()._id.constructor(userId) },
+                { readBy: new Conversation()._id.constructor(userId) },
+                { deliveredTo: new Conversation()._id.constructor(userId) },
+              ],
+            },
+          },
+          // only consider objectId-like rooms (potential conversation ids)
+          { $match: { room: { $regex: /^[0-9a-fA-F]{24}$/ } } },
+          {
+            $group: {
+              _id: '$room',
+              lastAt: { $max: '$createdAt' },
+            },
+          },
+          { $sort: { lastAt: -1 } },
+          { $limit: 50 },
+        ]);
+
+        for (const r of recentRooms) {
+          const roomId = String(r._id);
+          const existing = await Conversation.findById(roomId);
+          if (existing) continue;
+
+          // Gather participants from messages in this room
+          const msgs = await Message.find({ room: roomId }).select('sender readBy deliveredTo createdAt').sort({ createdAt: -1 }).limit(200);
+          const ids = new Set();
+          for (const m of msgs) {
+            if (m.sender) ids.add(String(m.sender));
+            (m.readBy || []).forEach((u) => ids.add(String(u)));
+            (m.deliveredTo || []).forEach((u) => ids.add(String(u)));
+          }
+          ids.add(String(userId));
+          const parts = Array.from(ids);
+          if (parts.length < 2) continue;
+
+          const lastMsg = msgs[0];
+          try {
+            await Conversation.create({
+              _id: roomId,
+              participants: parts,
+              isGroup: parts.length > 2,
+              name: '',
+              lastMessage: lastMsg ? lastMsg._id : null,
+              updatedAt: lastMsg ? lastMsg.createdAt : new Date(),
+            });
+          } catch (e) {
+            // ignore duplicate key or invalid id
+          }
+        }
+
+        // re-fetch with newly created conversations
+        convs = await Conversation.find({ participants: userId })
+          .populate('participants', 'username avatar email')
+          .populate({ path: 'lastMessage', populate: { path: 'sender', select: 'username avatar' } })
+          .sort({ updatedAt: -1 });
+      } catch (e) {
+        console.warn('[conversations/get] backfill failed', e?.message || e);
+      }
+    }
 
     // Calculate unread count for each conversation and filter out empty ones
     const convsWithUnread = await Promise.all(
