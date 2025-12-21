@@ -17,6 +17,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import CreateEventModal from "../components/CreateEventModal";
 import EventDetailModal from "../components/EventDetailModal";
 import EventParticipantsModal from "../components/EventParticipantsModal";
+import GlobalSearch from "../components/GlobalSearch";
 // Removed booking-related pages
 import AllEvents from "./AllEvents";
 import NotificationsPage from "./Notifications";
@@ -183,6 +184,10 @@ export default function Dashboard({ token, onNavigate }: any) {
     const saved = localStorage.getItem('auralink-dashboard-show-events');
     return saved ? JSON.parse(saved) : false;
   });
+  // Global Search Component
+  <div className="rounded-2xl p-4 themed-card">
+    <GlobalSearch token={token} onNavigate={onNavigate} />
+  </div>
   const [loading, setLoading] = useState(true);
   const [notifications, setNotifications] = useState<any[]>([]);
     // Persist dashboard UI state
@@ -401,6 +406,11 @@ export default function Dashboard({ token, onNavigate }: any) {
               Here's what's happening with your bookings and events
             </p>
           </div>
+        </div>
+
+        {/* Global Search across users, events, posts, services */}
+        <div className="rounded-2xl p-4 themed-card">
+          <GlobalSearch token={token} onNavigate={onNavigate} />
         </div>
 
         {/* Stats Cards (bookings removed) */}

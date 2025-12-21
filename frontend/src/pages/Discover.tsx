@@ -730,8 +730,30 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
             </p>
           </div>
 
-          {/* Category Cards */}
+          {/* Category Cards (Other Events first) */}
           <div className="grid md:grid-cols-3 gap-8 lg:grid-cols-4">
+            {/* Other Events Card */}
+            <div
+              onClick={() => setActiveCategory("other")}
+              className="group cursor-pointer rounded-2xl p-8 border hover:border-blue-500/40 transition-all themed-card"
+            >
+              <div className="flex justify-center mb-6">
+                <div className="bg-blue-400/10 p-6 rounded-2xl group-hover:scale-110 transition-transform duration-300">
+                  <Calendar className="w-12 h-12 text-blue-300" />
+                </div>
+              </div>
+              <h2 className="text-2xl font-bold text-heading text-center mb-3">
+                Other Events
+              </h2>
+              <p className="text-theme-secondary text-center mb-6">
+                See community posts tagged as events
+              </p>
+              <div className="flex items-center justify-center text-blue-300 group-hover:text-blue-200 transition-colors">
+                <span className="font-semibold">Explore</span>
+                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </div>
+
             {/* Sports Events Card */}
             <div
               onClick={() => setActiveCategory("sports")}
@@ -798,27 +820,6 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
               </div>
             </div>
 
-            {/* Other Events Card */}
-            <div
-              onClick={() => setActiveCategory("other")}
-              className="group cursor-pointer rounded-2xl p-8 border hover:border-blue-500/40 transition-all themed-card"
-            >
-              <div className="flex justify-center mb-6">
-                <div className="bg-blue-400/10 p-6 rounded-2xl group-hover:scale-110 transition-transform duration-300">
-                  <Calendar className="w-12 h-12 text-blue-300" />
-                </div>
-              </div>
-              <h2 className="text-2xl font-bold text-heading text-center mb-3">
-                Other Events
-              </h2>
-              <p className="text-theme-secondary text-center mb-6">
-                See community posts tagged as events
-              </p>
-              <div className="flex items-center justify-center text-blue-300 group-hover:text-blue-200 transition-colors">
-                <span className="font-semibold">Explore</span>
-                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-              </div>
-            </div>
           </div>
 
           {/* Quick Stats removed as requested */}
