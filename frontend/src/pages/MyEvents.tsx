@@ -43,6 +43,10 @@ export default function MyEvents({ token, onNavigate }: { token: string; onNavig
   const [eventsCreated, setEventsCreated] = useState<any[]>([]);
   const [eventsJoined, setEventsJoined] = useState<any[]>([]);
   const [archivedEvents, setArchivedEvents] = useState<any[]>([]);
+  const [showPastEvents, setShowPastEvents] = useState<boolean>(() => {
+    const saved = localStorage.getItem('auralink-show-past-events');
+    return saved === null ? true : saved === 'true';
+  });
   const [eventsTab, setEventsTab] = useState<'organizing' | 'joined'>('organizing');
   const [services, setServices] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
@@ -79,6 +83,10 @@ export default function MyEvents({ token, onNavigate }: { token: string; onNavig
       localStorage.removeItem('auralink-my-activities-tab');
     }
   }, [token]);
+
+  useEffect(() => {
+    try { localStorage.setItem('auralink-show-past-events', String(showPastEvents)); } catch {}
+  }, [showPastEvents]);
 
   async function loadMyEventsAll() {
     try {
@@ -745,6 +753,15 @@ export default function MyEvents({ token, onNavigate }: { token: string; onNavig
                       />
                       Hide drafts/cancelled
                     </label>
+                    <label className="inline-flex items-center gap-2 text-sm text-theme-secondary">
+                      <input
+                        type="checkbox"
+                        checked={showPastEvents}
+                        onChange={(e) => setShowPastEvents(e.target.checked)}
+                        className="rounded"
+                      />
+                      Show Past Events
+                    </label>
                   </div>
                 </div>
                 {(eventsTab==='organizing' ? eventsCreated : eventsJoined).filter((e:any)=> hideInactiveEvents ? e.status === 'published' : true).length === 0 ? (
@@ -912,6 +929,7 @@ export default function MyEvents({ token, onNavigate }: { token: string; onNavig
                   </div>
                 )}
                 {/* Past Events */}
+                {showPastEvents && (
                 <div className="mt-10">
                   <div className="rounded-2xl p-6 themed-card">
                     <div className="flex items-center justify-between">
@@ -956,6 +974,7 @@ export default function MyEvents({ token, onNavigate }: { token: string; onNavig
                     )}
                   </div>
                 </div>
+                )}
               {/* Removed duplicate bottom Other Events section (now placed at top) */}
             </div>
             );
