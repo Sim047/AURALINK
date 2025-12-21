@@ -244,6 +244,18 @@ export default function App() {
   const [openMessageActions, setOpenMessageActions] = useState<string | null>(null);
   const messagePressTimer = useRef<number | null>(null);
   const DEFAULT_REACTION_EMOJI = "❤️";
+  const AVAILABLE_REACTIONS = ["❤️", "🔥", "😂", "😔"];
+  const [reactionPickerFor, setReactionPickerFor] = useState<string | null>(null);
+  const [messageReactionChoice, setMessageReactionChoice] = useState<Record<string, string>>({});
+
+  function currentReactionEmojiFor(msg: any) {
+    // Prefer the emoji the current user has reacted with on this message
+    for (const e of AVAILABLE_REACTIONS) {
+      if (hasReacted(msg, e)) return e;
+    }
+    // Fall back to a locally chosen emoji (not yet reacted) or default
+    return messageReactionChoice[msg._id] || DEFAULT_REACTION_EMOJI;
+  }
 
   function startMessagePress(id: string) {
     try {
@@ -1244,27 +1256,73 @@ function onMyStatusUpdated(newStatus: any) {
                 </>
               )}
 
+              {/* Compact reaction bar: shows only one emoji, with dropdown to switch */}
+              <div className="mt-2 flex items-center gap-2">
+                {(() => {
+                  const emoji = currentReactionEmojiFor(m);
+                  return (
+                    <button
+                      className={clsx(
+                        "px-3 py-1 rounded-full border bg-white dark:bg-slate-800",
+                        hasReacted(m, emoji) && "reacted"
+                      )}
+                      style={{ borderColor: 'var(--border)' }}
+                      onClick={() => toggleReaction(m, emoji)}
+                      title="React"
+                    >
+                      {emoji} {reactionCount(m, emoji) || ""}
+                    </button>
+                  );
+                })()}
+                <button
+                  className="text-xs px-2 py-1 rounded-md border hover:bg-slate-100 dark:hover:bg-slate-800"
+                  style={{ borderColor: 'var(--border)' }}
+                  onClick={(e) => { e.stopPropagation(); setReactionPickerFor(reactionPickerFor === m._id ? null : m._id); }}
+                  title="Choose another reaction"
+                >
+                  ▾
+                </button>
+                {reactionPickerFor === m._id && (
+                  <div className="relative">
+                    <div
+                      className="absolute z-20 mt-1 p-2 rounded-lg border bg-white dark:bg-slate-800 shadow-xl flex items-center gap-2"
+                      style={{ borderColor: 'var(--border)' }}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {AVAILABLE_REACTIONS.filter((e) => e !== currentReactionEmojiFor(m)).map((e) => (
+                        <button
+                          key={e}
+                          className="px-2 py-1 rounded-full border"
+                          style={{ borderColor: 'var(--border)' }}
+                          onClick={() => {
+                            const curr = currentReactionEmojiFor(m);
+                            // Switch reaction: remove current (if mine) then add chosen
+                            if (hasReacted(m, curr)) toggleReaction(m, curr);
+                            setMessageReactionChoice((prev) => ({ ...prev, [m._id]: e }));
+                            toggleReaction(m, e);
+                            setReactionPickerFor(null);
+                          }}
+                        >
+                          {e} {reactionCount(m, e) || ""}
+                        </button>
+                      ))}
+                      <button
+                        className="text-[11px] px-2 py-1 rounded-md hover:opacity-80"
+                        onClick={() => setReactionPickerFor(null)}
+                      >
+                        Close
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
               {openMessageActions === m._id && (
                 <div
                   className="mt-2 p-2 rounded-lg border bg-white dark:bg-slate-800 flex flex-wrap items-center gap-2 text-sm"
                   style={{ borderColor: 'var(--border)' }}
                   onClick={(e) => e.stopPropagation()}
                 >
-                  {(() => {
-                    const emoji = DEFAULT_REACTION_EMOJI;
-                    return (
-                      <button
-                        className={clsx(
-                          "px-2 py-1 rounded-full border",
-                          hasReacted(m, emoji) && "reacted"
-                        )}
-                        onClick={() => toggleReaction(m, emoji)}
-                      >
-                        {emoji} {reactionCount(m, emoji) || ""}
-                      </button>
-                    );
-                  })()}
-
                   {String(m.sender?._id) === String(user?._id) && (
                     <div className="ml-2 flex gap-2 text-xs">
                       <button onClick={() => startEdit(m)}>Edit</button>
