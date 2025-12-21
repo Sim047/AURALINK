@@ -25,9 +25,17 @@ export default function GlobalSearch({ token, onNavigate, onViewProfile }: Globa
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<ResultItem[]>([]);
   const [open, setOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const debouncedQ = useDebounce(q, 300);
+
+  useEffect(() => {
+    const updateMobile = () => setIsMobile(window.innerWidth <= 640);
+    updateMobile();
+    window.addEventListener('resize', updateMobile);
+    return () => window.removeEventListener('resize', updateMobile);
+  }, []);
 
   useEffect(() => {
     if (!debouncedQ || debouncedQ.trim().length < 2) {
@@ -157,7 +165,27 @@ export default function GlobalSearch({ token, onNavigate, onViewProfile }: Globa
 
       {/* Overlay */}
       {open && (
-        <div className="absolute left-0 right-0 mt-2 rounded-2xl border p-4 z-20 themed-card" style={{ borderColor: 'var(--border)' }}>
+        <div
+          className={
+            isMobile
+              ? "fixed inset-0 z-40 p-4"
+              : "absolute left-0 right-0 mt-2 rounded-2xl border p-4 z-20 themed-card"
+          }
+          style={isMobile ? { background: 'var(--page)' } : { borderColor: 'var(--border)' }}
+        >
+          {/* Close bar on mobile */}
+          {isMobile && (
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Search className="w-5 h-5 text-theme-secondary" />
+                <span className="text-heading font-semibold">Search</span>
+              </div>
+              <button className="px-3 py-2 rounded-lg border text-sm" style={{ borderColor: 'var(--border)' }} onClick={handleClose}>
+                Close
+              </button>
+            </div>
+          )}
+
           <div className="flex items-center gap-2 mb-3">
             <Search className="w-4 h-4 text-theme-secondary" />
             <input
@@ -165,36 +193,42 @@ export default function GlobalSearch({ token, onNavigate, onViewProfile }: Globa
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Type to search across the app…"
-              className="flex-1 input rounded-lg"
+              className={`flex-1 input rounded-lg ${isMobile ? 'text-base py-3' : ''}`}
             />
-            <button className="p-2 rounded-lg border" style={{ borderColor: 'var(--border)' }} onClick={handleClose}>
-              <X className="w-4 h-4" />
-            </button>
+            {!isMobile && (
+              <button className="p-2 rounded-lg border" style={{ borderColor: 'var(--border)' }} onClick={handleClose}>
+                <X className="w-4 h-4" />
+              </button>
+            )}
           </div>
 
-          <div className="text-xs text-theme-secondary mb-2">{loading ? "Searching…" : `${results.length} results`}</div>
+          <div className={`text-theme-secondary mb-2 ${isMobile ? 'text-sm' : 'text-xs'}`}>{loading ? "Searching…" : `${results.length} results`}</div>
 
           {results.length === 0 ? (
             <div className="text-theme-secondary text-sm">No matches</div>
           ) : (
-            <div className="max-h-80 overflow-y-auto space-y-1">
+            <div className={`${isMobile ? 'max-h-[70vh]' : 'max-h-80'} overflow-y-auto space-y-1`}>
               {results.map((r) => (
                 <button
                   key={`${r.type}-${r.id}`}
                   onClick={() => handleSelect(r)}
-                  className="w-full text-left p-3 rounded-lg themed-card hover:shadow-sm flex items-center gap-3"
+                  className={`w-full text-left rounded-lg themed-card hover:shadow-sm flex items-center gap-3 ${isMobile ? 'p-4' : 'p-3'}`}
                 >
                   {iconFor(r.type)}
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium text-heading truncate">{r.title}</div>
+                    <div className={`font-medium text-heading truncate ${isMobile ? 'text-base' : ''}`}>{r.title}</div>
                     {r.subtitle && (
-                      <div className="text-xs text-theme-secondary truncate">{r.subtitle}</div>
+                      <div className={`text-theme-secondary truncate ${isMobile ? 'text-sm' : 'text-xs'}`}>{r.subtitle}</div>
                     )}
                   </div>
-                  <div className="text-xs px-2 py-1 rounded-md border" style={{ borderColor: 'var(--border)' }}>{labelFor(r.type)}</div>
+                  <div className={`px-2 py-1 rounded-md border ${isMobile ? 'text-sm' : 'text-xs'}`} style={{ borderColor: 'var(--border)' }}>{labelFor(r.type)}</div>
                 </button>
               ))}
             </div>
+          )}
+          {/* Backdrop click to close on mobile */}
+          {isMobile && (
+            <div className="fixed inset-0 -z-10" onClick={handleClose} />
           )}
         </div>
       )}

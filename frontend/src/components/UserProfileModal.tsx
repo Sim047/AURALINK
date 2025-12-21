@@ -11,7 +11,8 @@ export default function UserProfileModal({
   onClose,
   token,
   onOpenConversation,
-  currentUserId
+  currentUserId,
+  onNavigate,
 }: any) {
   if (!visible || !user) return null;
 
@@ -197,7 +198,14 @@ export default function UserProfileModal({
                   <div className="text-center text-gray-400 text-sm py-6">No events yet</div>
                 ) : (
                   events.map((ev: any) => (
-                    <div key={ev._id} className="bg-white/5 rounded-xl p-3 border border-white/10 hover:border-cyan-500/40 transition-colors">
+                    <button
+                      key={ev._id}
+                      onClick={() => {
+                        try { localStorage.setItem('auralink-highlight-event', ev._id); } catch {}
+                        if (onNavigate) onNavigate('discover'); else window.location.href = '/';
+                      }}
+                      className="w-full text-left bg-white/5 rounded-xl p-3 border border-white/10 hover:border-cyan-500/40 transition-colors"
+                    >
                       <div className="flex items-center gap-3">
                         <img src={ev.image || PLACEHOLDER} alt={ev.title} className="w-12 h-12 rounded-lg object-cover" />
                         <div className="flex-1">
@@ -206,7 +214,7 @@ export default function UserProfileModal({
                           <div className="text-xs text-cyan-300">{ev.startDate ? new Date(ev.startDate).toLocaleDateString() : ""}</div>
                         </div>
                       </div>
-                    </div>
+                    </button>
                   ))
                 )}
               </div>
@@ -216,7 +224,14 @@ export default function UserProfileModal({
                   <div className="text-center text-gray-400 text-sm py-6">No posts yet</div>
                 ) : (
                   posts.map((po: any) => (
-                    <div key={po._id} className="bg-white/5 rounded-xl p-3 border border-white/10 hover:border-purple-500/40 transition-colors">
+                    <button
+                      key={po._id}
+                      onClick={() => {
+                        try { localStorage.setItem('auralink-highlight-post', po._id); } catch {}
+                        if (onNavigate) onNavigate('posts'); else window.location.href = '/';
+                      }}
+                      className="w-full text-left bg-white/5 rounded-xl p-3 border border-white/10 hover:border-purple-500/40 transition-colors"
+                    >
                       <div className="flex items-center gap-3">
                         <img src={po.imageUrl || PLACEHOLDER} alt={po.title || "Post"} className="w-12 h-12 rounded-lg object-cover" />
                         <div className="flex-1">
@@ -224,7 +239,7 @@ export default function UserProfileModal({
                           <div className="text-xs text-gray-400 line-clamp-2">{po.caption || ""}</div>
                         </div>
                       </div>
-                    </div>
+                    </button>
                   ))
                 )}
               </div>
