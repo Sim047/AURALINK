@@ -33,6 +33,13 @@ export default function AllEvents({ token, onBack, onNavigate, onViewEvent }: an
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
+  const [showPastOnly, setShowPastOnly] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('auralink-all-events-filter') === 'past';
+    } catch {
+      return false;
+    }
+  });
 
   useEffect(() => {
     loadEvents();
@@ -108,6 +115,12 @@ export default function AllEvents({ token, onBack, onNavigate, onViewEvent }: an
       String(e.sport || "").toLowerCase().includes(q) ||
       String(loc).toLowerCase().includes(q)
     );
+  }).filter((e) => {
+    if (!showPastOnly) return true;
+    // Past applies only to real events (not Other Events/posts)
+    const isArchived = !!(e as any).archivedAt;
+    const isPastDate = !isArchived && !e.isOther && new Date(e.startDate) < new Date();
+    return !e.isOther && (isArchived || isPastDate);
   });
 
   return (
@@ -132,6 +145,23 @@ export default function AllEvents({ token, onBack, onNavigate, onViewEvent }: an
                 Manage all your events in one place
               </p>
             </div>
+            {showPastOnly && (
+              <div className="flex items-center gap-2">
+                <span className="px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700 dark:bg-gray-900/50 dark:text-gray-400">
+                  Showing: Past
+                </span>
+                <button
+                  onClick={() => {
+                    try { localStorage.setItem('auralink-all-events-filter', 'all'); } catch {}
+                    setShowPastOnly(false);
+                  }}
+                  className="text-sm px-3 py-1 rounded-lg border"
+                  style={{ borderColor: 'var(--border)', color: 'var(--text)' }}
+                >
+                  Show All
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -162,19 +192,10 @@ export default function AllEvents({ token, onBack, onNavigate, onViewEvent }: an
           <div className="rounded-2xl p-12 text-center themed-card">
             <Calendar className="w-16 h-16 text-theme-secondary mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-heading mb-2">
-              No {filter !== "all" ? filter : ""} events
+              {showPastOnly ? 'No past events' : 'No events'}
             </h3>
             <p className="text-theme-secondary">
-              {filter === "organizing" 
-                ? "You haven't created any events yet"
-                : filter === "participating"
-                ? "You're not participating in any events"
-                : filter === "upcoming"
-                ? "No upcoming events"
-                : filter === "past"
-                ? "No past events"
-                : "No events found"
-              }
+              {showPastOnly ? 'You have no past events yet' : 'Try adjusting your search or check back later'}
             </p>
           </div>
         ) : (

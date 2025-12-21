@@ -542,13 +542,24 @@ export default function Dashboard({ token, onNavigate, onViewProfile }: any) {
                   {showEvents ? 'Hide' : 'Show'}
                 </button>
               </div>
-              <button
-                onClick={() => setCreateEventModalOpen(true)}
-                className="px-4 py-2 bg-gradient-to-r from-accent to-accentViolet-light hover:from-accent-dark hover:to-accentViolet-dark text-white text-sm font-medium rounded-xl transition-all duration-300 flex items-center gap-2 shadow-lg"
-              >
-                <Plus className="w-4 h-4" />
-                Create Event
-              </button>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => {
+                    try { localStorage.setItem('auralink-all-events-filter', 'past'); } catch {}
+                    setViewMode('allEvents');
+                  }}
+                  className="px-4 py-2 bg-gradient-to-r from-gray-700 to-gray-500 hover:from-gray-800 hover:to-gray-600 text-white text-sm font-medium rounded-xl transition-all duration-300 shadow-lg"
+                >
+                  View Past Events
+                </button>
+                <button
+                  onClick={() => setCreateEventModalOpen(true)}
+                  className="px-4 py-2 bg-gradient-to-r from-accent to-accentViolet-light hover:from-accent-dark hover:to-accentViolet-dark text-white text-sm font-medium rounded-xl transition-all duration-300 flex items-center gap-2 shadow-lg"
+                >
+                  <Plus className="w-4 h-4" />
+                  Create Event
+                </button>
+              </div>
             </div>
           </div>
 
