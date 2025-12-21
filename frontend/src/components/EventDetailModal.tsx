@@ -111,9 +111,9 @@ export default function EventDetailModal({
 
           {/* Organizer Info */}
           <div className="bg-white/5 backdrop-blur rounded-xl p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <div 
-                className="flex items-center gap-3 cursor-pointer hover:bg-white/5 rounded-lg p-2 -m-2 transition-colors"
+                className="flex items-center gap-3 cursor-pointer hover:bg-white/5 rounded-lg p-2 transition-colors"
                 onClick={() => onViewProfile && onViewProfile(event.organizer._id)}
               >
                 <img
@@ -131,7 +131,7 @@ export default function EventDetailModal({
               {!isOrganizer && (
                 <button
                   onClick={() => onMessage(event.organizer._id)}
-                  className="flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white px-4 py-2 rounded-lg font-semibold transition-all shadow-lg"
+                  className="flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white px-4 py-2 rounded-lg font-semibold transition-all shadow-lg w-full sm:w-auto mt-2 sm:mt-0"
                 >
                   <MessageCircle className="w-4 h-4" />
                   Message Organizer

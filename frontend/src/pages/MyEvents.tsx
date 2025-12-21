@@ -504,12 +504,12 @@ export default function MyEvents({ token, onNavigate }: { token: string; onNavig
                 {/* Inline discover: Other Events (top) */}
                 <div className="mb-6">
                   <div className="rounded-2xl p-6 themed-card">
-                    <div className="flex items-start justify-between gap-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                       <div>
                         <h3 className="text-xl font-bold text-heading mb-1">Other Events</h3>
                         <p className="text-theme-secondary">Discover community activities beyond sports.</p>
                       </div>
-                      <div className="flex w-full sm:w-auto sm:items-center gap-2 sm:gap-3 sm:justify-end flex-col sm:flex-row">
+                      <div className="flex w-full sm:w-auto items-center gap-2 sm:gap-3 justify-start sm:justify-end flex-col sm:flex-row sm:shrink-0">
                         <button
                           onClick={() => {
                             localStorage.setItem('auralink-discover-category', 'other');
