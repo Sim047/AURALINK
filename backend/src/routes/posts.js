@@ -42,6 +42,14 @@ router.get("/user/:userId", auth, async (req, res) => {
     const skip = (page - 1) * limit;
 
     const q = { author: req.params.userId };
+    const search = String(req.query.search || '').trim();
+    if (search) {
+      q.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { caption: { $regex: search, $options: 'i' } },
+        { tags: { $regex: search, $options: 'i' } },
+      ];
+    }
     const [posts, total] = await Promise.all([
       Post.find(q)
         .populate("author", "username avatar email")

@@ -14,6 +14,9 @@ export default function UserContent({ token, onNavigate }: any) {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [total, setTotal] = useState<number | null>(null);
+  const [search, setSearch] = useState<string>("");
+  const [sport, setSport] = useState<string>("All Sports");
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -43,15 +46,18 @@ export default function UserContent({ token, onNavigate }: any) {
     setLoading(true);
     const headers = { Authorization: `Bearer ${token}` };
     const limit = 20;
+    const sportParam = tab === 'events' && sport !== 'All Sports' ? `&sport=${encodeURIComponent(sport)}` : '';
+    const searchParam = tab === 'posts' && search.trim() ? `&search=${encodeURIComponent(search.trim())}` : '';
     const url = tab === "events"
-      ? `${API}/api/events/user/${userId}?page=${p}&limit=${limit}`
-      : `${API}/api/posts/user/${userId}?page=${p}&limit=${limit}`;
+      ? `${API}/api/events/user/${userId}?page=${p}&limit=${limit}${sportParam}`
+      : `${API}/api/posts/user/${userId}?page=${p}&limit=${limit}${searchParam}`;
     axios
       .get(url, { headers })
       .then((r) => {
         const list = tab === "events" ? (r.data.events || []) : (r.data.posts || []);
         setItems((prev) => [...prev, ...list]);
-        const total = (tab === "events" ? r.data.total : r.data.totalPosts) || list.length;
+        const totalCount = (tab === "events" ? r.data.total : r.data.totalPosts) || list.length;
+        setTotal(totalCount);
         const totalPages = r.data.totalPages || 1;
         setHasMore(p < totalPages);
       })
@@ -64,7 +70,7 @@ export default function UserContent({ token, onNavigate }: any) {
       if (entries[0].isIntersecting && hasMore && !loading) {
         setPage((pp) => pp + 1);
       }
-    });
+    }, { rootMargin: '200px' });
     io.observe(sentinelRef.current);
     return () => io.disconnect();
   }, [hasMore, loading]);
@@ -104,7 +110,7 @@ export default function UserContent({ token, onNavigate }: any) {
           <button className="text-sm px-3 py-2 rounded-xl border" style={{ borderColor: 'var(--border)' }} onClick={() => onNavigate && onNavigate('dashboard')}>Back</button>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           <button
             className={`px-3 py-2 rounded-xl text-sm font-semibold ${tab === 'events' ? 'bg-cyan-600 text-white' : 'themed-card'}`}
             onClick={() => { setTab('events'); localStorage.setItem('auralink-user-content-tab', 'events'); }}
@@ -117,6 +123,28 @@ export default function UserContent({ token, onNavigate }: any) {
           >
             Posts
           </button>
+
+          {tab === 'events' ? (
+            <>
+              <select value={sport} onChange={(e) => { setItems([]); setPage(1); setHasMore(true); setSport(e.target.value); }} className="input text-sm rounded-xl">
+                <option>All Sports</option>
+                <option>Football/Soccer</option>
+                <option>Basketball</option>
+                <option>Tennis</option>
+                <option>Swimming</option>
+                <option>Athletics/Track & Field</option>
+                {/* Add more as needed */}
+              </select>
+            </>
+          ) : (
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') { setItems([]); setPage(1); setHasMore(true); } }}
+              placeholder="Search posts (title, caption, tags)…"
+              className="input text-sm rounded-xl flex-1 min-w-[220px]"
+            />
+          )}
         </div>
 
         <div className="space-y-3">
@@ -142,9 +170,21 @@ export default function UserContent({ token, onNavigate }: any) {
               )}
             </button>
           ))}
-
+          {loading && (
+            <div className="space-y-2">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="h-16 rounded-xl themed-card animate-pulse" />
+              ))}
+            </div>
+          )}
+          <div className="flex items-center justify-between text-sm text-theme-secondary">
+            <span>{total !== null ? `${items.length} / ${total} loaded` : `${items.length} loaded`}</span>
+            {!hasMore && <span>End of results</span>}
+          </div>
           <div ref={sentinelRef} className="py-4 text-center text-sm text-theme-secondary">
-            {loading ? 'Loading…' : (hasMore ? 'Scroll to load more' : 'End of results')}
+            {hasMore && !loading && (
+              <button className="px-3 py-2 rounded-xl border" style={{ borderColor: 'var(--border)' }} onClick={() => setPage((p) => p + 1)}>Load more</button>
+            )}
           </div>
         </div>
       </div>

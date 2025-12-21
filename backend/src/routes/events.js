@@ -32,6 +32,9 @@ router.get("/user/:userId", async (req, res) => {
     const skip = (page - 1) * limit;
 
     const query = { status: "published", organizer: userId };
+    if (req.query.sport && String(req.query.sport).trim()) {
+      query.sport = req.query.sport;
+    }
     const [events, total] = await Promise.all([
       Event.find(query)
         .populate("organizer", "username avatar")
