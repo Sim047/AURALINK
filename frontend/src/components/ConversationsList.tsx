@@ -4,6 +4,11 @@ import axios from "axios";
 import Avatar from "./Avatar";
 import { Menu } from "@headlessui/react";
 import { MoreVertical, Trash2, MessageSquareOff } from "lucide-react";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import { socket } from "../socket";
+
+dayjs.extend(relativeTime);
 
 const API = import.meta.env.VITE_API_URL || "";
 const PLACEHOLDER = "https://ui-avatars.com/api/?name=User&background=0D8ABC&color=fff";
@@ -20,24 +25,100 @@ export default function ConversationsList({
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState<string>("");
   const [showAll, setShowAll] = useState<boolean>(false);
+  const [debouncedQuery, setDebouncedQuery] = useState<string>("");
+
+  // Cache TTL in ms (2 minutes)
+  const CACHE_KEY = "auralink-conversations-cache";
+  const CACHE_TTL = 2 * 60 * 1000;
 
   useEffect(() => {
     if (!token) return;
     // Show cached conversations instantly for perceived performance
     try {
-      const cached = localStorage.getItem("auralink-conversations-cache");
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed)) {
-          const sorted = sortConversations(parsed);
-          setConversations(sorted);
-          setTotalUnread(sorted.reduce((sum: number, c: any) => sum + (c.unreadCount || 0), 0));
-          setLoading(true); // still fetch fresh data
+      const raw = localStorage.getItem(CACHE_KEY);
+      if (raw) {
+        const cached = JSON.parse(raw);
+        const list = Array.isArray(cached?.data) ? cached.data : Array.isArray(cached) ? cached : [];
+        const sorted = sortConversations(list);
+        setConversations(sorted);
+        setTotalUnread(sorted.reduce((sum: number, c: any) => sum + (c.unreadCount || 0), 0));
+        const age = cached?.ts ? Date.now() - cached.ts : CACHE_TTL + 1;
+        if (age <= CACHE_TTL) {
+          // Fresh cache; skip immediate network fetch
+          setLoading(false);
+        } else {
+          setLoading(true);
+          loadConversations();
         }
+      } else {
+        loadConversations();
       }
-    } catch {}
-    loadConversations();
+    } catch {
+      loadConversations();
+    }
   }, [token]);
+
+  // Debounce search input
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedQuery(query.trim().toLowerCase()), 200);
+    return () => clearTimeout(t);
+  }, [query]);
+
+  // Live updates: bump conversations on incoming messages
+  useEffect(() => {
+    function onReceiveMessage(msg: any) {
+      try {
+        const convId = msg?.conversationId || msg?.conversation?._id;
+        if (!convId) return;
+        setConversations((prev) => {
+          const idx = prev.findIndex((c: any) => String(c._id) === String(convId));
+          if (idx === -1) return prev;
+          const c = prev[idx];
+          const isMine = String(msg?.sender?._id || msg?.senderId) === String(currentUserId);
+          const updated: any = {
+            ...c,
+            lastMessage: msg?.message || msg?.text ? { text: msg.message || msg.text, createdAt: msg.createdAt || Date.now(), sender: msg.sender } : c.lastMessage,
+            updatedAt: msg?.createdAt || Date.now(),
+            unreadCount: isMine ? c.unreadCount || 0 : (c.unreadCount || 0) + 1,
+          };
+          const next = [...prev];
+          next[idx] = updated;
+          return sortConversations(next);
+        });
+      } catch {}
+    }
+
+    function onMessageEdited(payload: any) {
+      try {
+        const convId = payload?.conversationId || payload?.conversation?._id;
+        if (!convId) return;
+        setConversations((prev) => {
+          const idx = prev.findIndex((c: any) => String(c._id) === String(convId));
+          if (idx === -1) return prev;
+          const c = prev[idx];
+          const isLast = String(c.lastMessage?._id) === String(payload?._id);
+          const updated = {
+            ...c,
+            lastMessage: isLast ? { ...c.lastMessage, text: payload?.text || payload?.message } : c.lastMessage,
+          };
+          const next = [...prev];
+          next[idx] = updated;
+          return next;
+        });
+      } catch {}
+    }
+
+    try {
+      socket?.on("receive_message", onReceiveMessage);
+      socket?.on("message_edited", onMessageEdited);
+    } catch {}
+    return () => {
+      try {
+        socket?.off("receive_message", onReceiveMessage);
+        socket?.off("message_edited", onMessageEdited);
+      } catch {}
+    };
+  }, [currentUserId]);
 
   function loadConversations() {
     setLoading(true);
@@ -49,7 +130,9 @@ export default function ConversationsList({
         const convs = Array.isArray(r.data) ? r.data : (r.data || []);
         const sorted = sortConversations(convs);
         setConversations(sorted);
-        localStorage.setItem("auralink-conversations-cache", JSON.stringify(sorted));
+        try {
+          localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data: sorted }));
+        } catch {}
         const total = sorted.reduce((sum: number, c: any) => sum + (c.unreadCount || 0), 0);
         setTotalUnread(total);
       })
@@ -115,7 +198,7 @@ export default function ConversationsList({
   }
 
   const filtered = React.useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = debouncedQuery;
     if (!q) return conversations;
     return conversations.filter((c: any) => {
       const partner = (c.participants || []).find((p: any) => String(p._id) !== String(currentUserId));
@@ -125,7 +208,7 @@ export default function ConversationsList({
         String(u.email || "").toLowerCase().includes(q)
       );
     });
-  }, [conversations, query, currentUserId]);
+  }, [conversations, debouncedQuery, currentUserId]);
 
   const visible = React.useMemo(() => {
     if (showAll) return filtered;
@@ -149,11 +232,21 @@ export default function ConversationsList({
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
-        {filtered.length > 50 && (
-          <button className="text-xs px-3 py-1.5 rounded-md border" style={{ borderColor: 'var(--border)' }} onClick={() => setShowAll((v) => !v)}>
-            {showAll ? 'Show first 50' : `Show all (${filtered.length})`}
+        <div className="flex items-center gap-2">
+          <button
+            className="text-xs px-3 py-1.5 rounded-md border"
+            style={{ borderColor: 'var(--border)' }}
+            onClick={() => loadConversations()}
+            title="Refresh"
+          >
+            Refresh
           </button>
-        )}
+          {filtered.length > 50 && (
+            <button className="text-xs px-3 py-1.5 rounded-md border" style={{ borderColor: 'var(--border)' }} onClick={() => setShowAll((v) => !v)}>
+              {showAll ? 'Show first 50' : `Show all (${filtered.length})`}
+            </button>
+          )}
+        </div>
       </div>
 
       {loading ? (
@@ -216,6 +309,7 @@ export default function ConversationsList({
                     onClick={() => onShowProfile(partner)}
                     className="w-12 h-12 sm:w-14 sm:h-14 rounded-md object-cover cursor-pointer hover:scale-105 transition-transform"
                     alt={partner.username}
+                    loading="lazy"
                   />
                   {/* Online status indicator */}
                   {onlineUsers?.has(partner._id) && (
@@ -232,6 +326,13 @@ export default function ConversationsList({
                   </div>
                   <div className="text-xs text-slate-600 dark:text-slate-400 truncate">
                     {partner.email}
+                  </div>
+                  {/* Last message preview + relative time */}
+                  <div className="text-xs mt-0.5 text-slate-500 dark:text-slate-400 truncate">
+                    {c.lastMessage?.text ? c.lastMessage.text : (c.lastMessage ? "(attachment)" : "")}
+                    {c.lastMessage?.createdAt && (
+                      <span className="ml-2 text-[10px] text-slate-400">• {dayjs(c.lastMessage.createdAt).fromNow()}</span>
+                    )}
                   </div>
                 </div>
               </div>
