@@ -128,6 +128,27 @@ function WebScreen({ navigation }: any) {
   const webUrl = (process.env.EXPO_PUBLIC_WEB_URL as string) || (Constants.expoConfig?.extra as any)?.webUrl || 'http://localhost:5173';
   const webRef = React.useRef<WebView>(null);
   const [canGoBack, setCanGoBack] = useState(false);
+  const [authScript, setAuthScript] = useState<string>("");
+
+  useEffect(() => {
+    // Build injected auth script from native token + user profile
+    const loadAuth = async () => {
+      try {
+        const token = await readToken();
+        if (!token) { setAuthScript(""); return; }
+        let userJson = "";
+        try {
+          const res = await api.get('/users/me');
+          userJson = JSON.stringify({ _id: res.data._id, username: res.data.username, email: res.data.email, avatar: res.data.avatar });
+        } catch {
+          userJson = "{}";
+        }
+        const script = `try{ localStorage.setItem('token', ${JSON.stringify(token)}); localStorage.setItem('user', ${JSON.stringify(userJson)}); }catch(e){}`;
+        setAuthScript(script);
+      } catch { setAuthScript(""); }
+    };
+    loadAuth();
+  }, []);
 
   useEffect(() => {
     const sub = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -160,6 +181,7 @@ function WebScreen({ navigation }: any) {
         domStorageEnabled
         injectedJavaScriptBeforeContentLoaded={`(function(){
           try {
+            ${authScript}
             if (!window.__RN_NAV_DEPTH) window.__RN_NAV_DEPTH = 1;
             function post(){
               try { window.ReactNativeWebView && window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'nav', depth: window.__RN_NAV_DEPTH, href: location.href })); } catch(e) {}
