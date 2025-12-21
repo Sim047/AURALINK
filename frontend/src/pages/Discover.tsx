@@ -516,9 +516,20 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
 
   // Ensure we display fully populated event (participants with usernames)
   const openEventDetails = async (eventId: string) => {
+    const cacheKey = `auralink-cache-event:${eventId}`;
     try {
-      const resp = await axios.get(`${API_URL}/events/${eventId}`);
+      const cachedRaw = localStorage.getItem(cacheKey);
+      if (cachedRaw) {
+        const obj = JSON.parse(cachedRaw);
+        if (obj && obj.ts && Date.now() - obj.ts < 5 * 60 * 1000) {
+          setSelectedEvent(obj.data);
+        }
+      }
+    } catch {}
+    try {
+      const resp = await axios.get(`${API_URL}/events/${eventId}`, { timeout: 8000 });
       setSelectedEvent(resp.data);
+      try { localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), data: resp.data })); } catch {}
     } catch (e) {
       console.error("[Discover] Failed to fetch event details, falling back to cached event:", e);
       const fallback = events.find(e => e._id === eventId) || null;

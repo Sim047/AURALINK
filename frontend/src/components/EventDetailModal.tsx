@@ -57,6 +57,14 @@ export default function EventDetailModal({
   currentUserId 
 }: EventDetailModalProps) {
     if (!event) return null; // Guard against null event prop
+    // Preload organizer avatar to avoid layout shift and slow renders
+    React.useEffect(() => {
+      try {
+        const img = new Image();
+        const src = event?.organizer?.avatar || (event?.organizer?.username ? `https://ui-avatars.com/api/?name=${event.organizer.username}` : "");
+        if (src) img.src = src;
+      } catch {}
+    }, [event?.organizer?.avatar, event?.organizer?.username]);
 
   const [participantsCollapsed, setParticipantsCollapsed] = useState(true);
 

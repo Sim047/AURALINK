@@ -26,16 +26,38 @@ export default function UserProfileModal({
   const [eventCount, setEventCount] = React.useState<number>(0);
   const [postCount, setPostCount] = React.useState<number>(0);
 
+  const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+  function readCache(key: string) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) return null;
+      const obj = JSON.parse(raw);
+      if (!obj || !obj.ts || Date.now() - obj.ts > CACHE_TTL) return null;
+      return obj.data;
+    } catch { return null; }
+  }
+  function writeCache(key: string, data: any) {
+    try { localStorage.setItem(key, JSON.stringify({ ts: Date.now(), data })); } catch {}
+  }
+
   React.useEffect(() => {
     if (!token || !user) return;
 
     setLoading(true);
+    const cacheKey = `auralink-cache-user:${user._id}`;
+    const cached = readCache(cacheKey);
+    if (cached) {
+      setDetails(cached);
+      setLoading(false);
+    }
     axios
       .get(API + "/api/users/" + user._id, {
-        headers: { Authorization: "Bearer " + token }
+        headers: { Authorization: "Bearer " + token },
+        timeout: 8000,
       })
       .then((r) => {
         setDetails(r.data);
+        writeCache(cacheKey, r.data);
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -45,8 +67,20 @@ export default function UserProfileModal({
     if (!user || !visible) return;
     setLoadingContent(true);
     const headers = token ? { Authorization: "Bearer " + token } : undefined;
-    const eventsReq = axios.get(`${API}/api/events/user/${user._id}?page=1&limit=10`, headers ? { headers } : {});
-    const postsReq = axios.get(`${API}/api/posts/user/${user._id}?page=1&limit=10`, headers ? { headers } : {});
+    const evCacheKey = `auralink-cache-user-events:${user._id}`;
+    const poCacheKey = `auralink-cache-user-posts:${user._id}`;
+    const cachedEv = readCache(evCacheKey);
+    const cachedPo = readCache(poCacheKey);
+    if (cachedEv) {
+      setEvents(cachedEv.events || cachedEv);
+      setEventCount(cachedEv.total || (cachedEv.events ? cachedEv.events.length : cachedEv.length) || 0);
+    }
+    if (cachedPo) {
+      setPosts(cachedPo.posts || cachedPo);
+      setPostCount(cachedPo.totalPosts || (cachedPo.posts ? cachedPo.posts.length : cachedPo.length) || 0);
+    }
+    const eventsReq = axios.get(`${API}/api/events/user/${user._id}?page=1&limit=10`, { ...(headers ? { headers } : {}), timeout: 8000 });
+    const postsReq = axios.get(`${API}/api/posts/user/${user._id}?page=1&limit=10`, { ...(headers ? { headers } : {}), timeout: 8000 });
     Promise.allSettled([eventsReq, postsReq])
       .then((results) => {
         const evResp = results[0].status === "fulfilled" ? (results[0] as any).value.data : {};
@@ -57,6 +91,8 @@ export default function UserProfileModal({
         setPosts(po);
         setEventCount(evResp.total || ev.length || 0);
         setPostCount(poResp.totalPosts || po.length || 0);
+        if (ev.length) writeCache(evCacheKey, evResp.total ? { events: ev, total: evResp.total } : ev);
+        if (po.length) writeCache(poCacheKey, poResp.totalPosts ? { posts: po, totalPosts: poResp.totalPosts } : po);
       })
       .finally(() => setLoadingContent(false));
   }, [user, visible, token]);
