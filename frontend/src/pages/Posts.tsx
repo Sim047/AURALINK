@@ -1,8 +1,7 @@
 // frontend/src/pages/Posts.tsx
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Heart, MessageCircle, Send, MoreVertical, Trash2, Edit, X, Image as ImageIcon, Plus, ArrowUp, Share } from "lucide-react";
-import { Menu } from "@headlessui/react";
+import { Heart, MessageCircle, Send, Trash2, Edit, X, Image as ImageIcon, Plus, ArrowUp, Share } from "lucide-react";
 import Avatar from "../components/Avatar";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -78,6 +77,26 @@ export default function Posts({ token, currentUserId, onShowProfile }: any) {
   
   // Scroll to top state
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [longPressPostId, setLongPressPostId] = useState<string | null>(null);
+  const pressTimerRef = React.useRef<number | null>(null);
+
+  function startPostPress(postId: string) {
+    try {
+      if (pressTimerRef.current) {
+        window.clearTimeout(pressTimerRef.current);
+        pressTimerRef.current = null;
+      }
+      pressTimerRef.current = window.setTimeout(() => setLongPressPostId(postId), 500) as any;
+    } catch {}
+  }
+  function cancelPostPress() {
+    try {
+      if (pressTimerRef.current) {
+        window.clearTimeout(pressTimerRef.current);
+        pressTimerRef.current = null;
+      }
+    } catch {}
+  }
 
   useEffect(() => {
     if (token) loadPosts();
@@ -502,6 +521,11 @@ export default function Posts({ token, currentUserId, onShowProfile }: any) {
                 id={`post-${post._id}`}
                 className="rounded-2xl shadow-md themed-card"
                 style={{ overflow: 'visible' }}
+                onMouseDown={() => startPostPress(post._id)}
+                onMouseUp={cancelPostPress}
+                onMouseLeave={cancelPostPress}
+                onTouchStart={() => startPostPress(post._id)}
+                onTouchEnd={cancelPostPress}
               >
                 {/* Post Header */}
                 <div className="flex items-center justify-between p-3 relative z-10" style={{ overflow: 'visible' }}>
@@ -525,8 +549,8 @@ export default function Posts({ token, currentUserId, onShowProfile }: any) {
                     </div>
                   </div>
 
-                  {/* Options Menu */}
-                  <div className="flex items-center gap-1.5">
+                  {/* Share + Long-press actions */}
+                  <div className="flex items-center gap-1.5 relative">
                     <button
                       onClick={() => handleSharePost(post)}
                       className="p-2 hover:opacity-80 rounded-full themed-card"
@@ -534,36 +558,34 @@ export default function Posts({ token, currentUserId, onShowProfile }: any) {
                     >
                       <Share className="w-5 h-5 text-theme-secondary" />
                     </button>
-                    {post.author._id === currentUserId && (
-                      <Menu as="div" className="relative">
-                        <Menu.Button className="p-2 hover:opacity-80 rounded-full themed-card">
-                          <MoreVertical className="w-5 h-5 text-theme-secondary" />
-                        </Menu.Button>
-                        <Menu.Items className="absolute right-0 mt-2 w-48 shadow-lg z-20 themed-menu" style={{ overflow: 'visible' }}>
-                          <Menu.Item>
-                            {({ active }) => (
-                              <button
-                                onClick={() => startEditPost(post)}
-                                className={`flex items-center gap-2 w-full px-4 py-2 text-sm text-theme ${active ? 'opacity-90' : ''}`}
-                              >
-                                <Edit className="w-4 h-4" />
-                                Edit Post
-                              </button>
-                            )}
-                          </Menu.Item>
-                          <Menu.Item>
-                            {({ active }) => (
-                              <button
-                                onClick={() => handleDeletePost(post._id)}
-                                className={`flex items-center gap-2 w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 ${active ? 'opacity-90' : ''}`}
-                              >
-                                <Trash2 className="w-4 h-4" />
-                                Delete Post
-                              </button>
-                            )}
-                          </Menu.Item>
-                        </Menu.Items>
-                      </Menu>
+                    {post.author._id === currentUserId && longPressPostId === post._id && (
+                      <div
+                        className="absolute right-0 top-10 z-20 w-56 rounded-lg shadow-2xl themed-menu"
+                        style={{ overflow: 'visible' }}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <button
+                          onClick={() => { setLongPressPostId(null); startEditPost(post); }}
+                          className="flex items-center gap-2 w-full px-4 py-2 text-sm text-theme hover:opacity-90"
+                        >
+                          <Edit className="w-4 h-4" />
+                          Edit Post
+                        </button>
+                        <button
+                          onClick={() => { setLongPressPostId(null); handleDeletePost(post._id); }}
+                          className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:opacity-90"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          Delete Post
+                        </button>
+                        <div className="border-t" style={{ borderColor: 'var(--border)' }} />
+                        <button
+                          onClick={() => setLongPressPostId(null)}
+                          className="w-full px-4 py-2 text-xs text-theme-secondary text-left hover:opacity-80"
+                        >
+                          Close
+                        </button>
+                      </div>
                     )}
                   </div>
                 </div>

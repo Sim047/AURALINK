@@ -8,7 +8,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import updateLocale from "dayjs/plugin/updateLocale";
 import clsx from "clsx";
 import { Menu, Transition } from "@headlessui/react";
-import { Settings, Send, Trash2, X, Zap } from "lucide-react";
+import { Send, Trash2, X, Zap } from "lucide-react";
 
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -120,6 +120,26 @@ export default function App() {
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [messagesLoading, setMessagesLoading] = useState(false);
   const [expandedMessages, setExpandedMessages] = useState<Record<string, boolean>>({});
+  const [showChatActions, setShowChatActions] = useState(false);
+  const headerPressTimer = useRef<number | null>(null);
+
+  function startHeaderPress() {
+    try {
+      if (headerPressTimer.current) {
+        window.clearTimeout(headerPressTimer.current);
+        headerPressTimer.current = null;
+      }
+      headerPressTimer.current = window.setTimeout(() => setShowChatActions(true), 500) as any;
+    } catch {}
+  }
+  function cancelHeaderPress() {
+    try {
+      if (headerPressTimer.current) {
+        window.clearTimeout(headerPressTimer.current);
+        headerPressTimer.current = null;
+      }
+    } catch {}
+  }
 
   // DM & conversations
   const [conversations, setConversations] = useState<any[]>([]);
@@ -1382,7 +1402,15 @@ function onMyStatusUpdated(newStatus: any) {
         {/* CHAT / DM PAGE */}
         {view === "chat" && (
           <div className="h-full grid grid-rows-[auto_1fr_auto]">
-            <header className="flex flex-wrap items-center justify-between gap-2 p-4 border-b relative z-10" style={{ borderColor: 'var(--border)', overflow: 'visible' }}>
+            <header
+              className="flex flex-wrap items-center justify-between gap-2 p-4 border-b relative z-10"
+              style={{ borderColor: 'var(--border)', overflow: 'visible' }}
+              onMouseDown={startHeaderPress}
+              onMouseUp={cancelHeaderPress}
+              onMouseLeave={cancelHeaderPress}
+              onTouchStart={startHeaderPress}
+              onTouchEnd={cancelHeaderPress}
+            >
               {inDM && activeConversation ? (
                 <div className="flex items-center gap-3">
                   {(() => {
@@ -1462,135 +1490,101 @@ function onMyStatusUpdated(newStatus: any) {
                   </button>
                 )}
                 
-                {/* Settings Dropdown */}
-                <Menu as="div" className="relative inline-block text-left">
-                  <Menu.Button className="text-xs px-3 py-1.5 bg-slate-700 hover:bg-slate-600 rounded-lg text-white font-medium transition-all shadow-sm flex items-center gap-1.5">
-                    <Settings className="w-3.5 h-3.5" />
-                    Settings
-                  </Menu.Button>
-                  
-                  <Transition
-                    as={Fragment}
-                    enter="transition ease-out duration-100"
-                    enterFrom="transform opacity-0 scale-95"
-                    enterTo="transform opacity-100 scale-100"
-                    leave="transition ease-in duration-75"
-                    leaveFrom="transform opacity-100 scale-100"
-                    leaveTo="transform opacity-0 scale-95"
+                {/* Long-press chat actions sheet */}
+                {showChatActions && (
+                  <div
+                    className="absolute right-4 top-14 bg-white dark:bg-slate-900 border rounded-lg shadow-2xl z-20 w-64"
+                    style={{ borderColor: 'var(--border)' }}
+                    onClick={(e) => e.stopPropagation()}
                   >
-                    <Menu.Items className="absolute right-0 mt-2 w-56 origin-top-right rounded-lg shadow-2xl focus:outline-none bg-slate-900 border border-slate-700 text-white" style={{ zIndex: 9999 }}>
-                      <div className="py-1">
-                        {/* Enter Key Toggle */}
-                        <Menu.Item>
-                          {({ active }) => (
-                            <button
-                              onClick={toggleEnterToSend}
-                              className="w-full text-left px-4 py-2.5 text-sm flex items-center gap-2 hover:opacity-80 transition-opacity"
-                            >
-                              <Zap className={clsx('w-4 h-4', enterToSend ? 'text-green-500' : 'text-gray-400')} />
-                              <div className="flex-1">
-                                <div className="font-medium">Send on Enter</div>
-                                <div className="text-xs opacity-70">
-                                  {enterToSend ? 'Enabled (Press Enter)' : 'Disabled (Press Ctrl+Enter)'}
-                                </div>
-                              </div>
-                              <div className={clsx(
-                                'w-10 h-5 rounded-full transition-colors relative',
-                                enterToSend ? 'bg-green-500' : 'bg-gray-400'
-                              )}>
-                                <div className={clsx(
-                                  'absolute top-0.5 w-4 h-4 bg-white rounded-full transition-transform',
-                                  enterToSend ? 'left-5' : 'left-0.5'
-                                )} />
-                              </div>
-                            </button>
-                          )}
-                        </Menu.Item>
-                        
-                        <div className="border-t" style={{ borderColor: 'var(--border)' }} />
-                        
-                        {/* Clear Chat */}
-                        <Menu.Item>
-                          {({ active }) => (
-                            <button
-                              onClick={async () => {
-                                if (!confirm("Clear all messages in this chat? This cannot be undone.")) return;
-                                
-                                try {
-                                  if (inDM && activeConversation) {
-                                    await axios.delete(
-                                      `${API}/api/conversations/${activeConversation._id}/messages`,
-                                      { headers: { Authorization: `Bearer ${token}` } }
-                                    );
-                                  } else {
-                                    await axios.delete(
-                                      `${API}/api/messages/room/${room}/clear`,
-                                      { headers: { Authorization: `Bearer ${token}` } }
-                                    );
-                                  }
-                                  setMessages([]);
-                                } catch (e) {
-                                  console.error("Clear chat error", e);
-                                  alert("Failed to clear chat");
-                                }
-                              }}
-                              className="w-full text-left px-4 py-2.5 text-sm flex items-center gap-2 hover:opacity-80 transition-opacity"
-                            >
-                              <Trash2 className="w-4 h-4 text-orange-500" />
-                              <div>
-                                <div className="font-medium">Clear Chat</div>
-                                <div className="text-xs opacity-70">Remove all messages</div>
-                              </div>
-                            </button>
-                          )}
-                        </Menu.Item>
-                        
-                        {/* Delete Conversation (DM only) */}
-                        {inDM && activeConversation && (
-                          <>
-                            <div className="border-t" style={{ borderColor: 'var(--border)' }} />
-                            <Menu.Item>
-                              {({ active }) => (
-                                <button
-                                  onClick={async () => {
-                                    if (!confirm("Delete this entire conversation permanently? This cannot be undone.")) return;
-                                    
-                                    try {
-                                      await axios.delete(
-                                        `${API}/api/conversations/${activeConversation._id}`,
-                                        { headers: { Authorization: `Bearer ${token}` } }
-                                      );
-                                      setActiveConversation(null);
-                                      setInDM(false);
-                                      setMessages([]);
-                                      setView("direct-messages");
-                                      
-                                      // Refresh conversations list
-                                      const res = await axios.get(`${API}/api/conversations`, {
-                                        headers: { Authorization: `Bearer ${token}` }
-                                      });
-                                      setConversations(res.data || []);
-                                    } catch (e) {
-                                      console.error("Delete conversation error", e);
-                                      alert("Failed to delete conversation");
-                                    }
-                                  }}
-                                  className="w-full text-left px-4 py-2.5 text-sm flex items-center gap-2 hover:opacity-80 transition-opacity"
-                                >
-                                  <X className="w-4 h-4 text-red-500" />
-                                  <div>
-                                    <div className="font-medium text-red-500">Delete Conversation</div>
-                                    <div className="text-xs opacity-70">Permanently remove chat</div>
-                                  </div>
-                                </button>
-                              )}
-                            </Menu.Item>
-                          </>
-                        )}
+                    <button
+                      onClick={toggleEnterToSend}
+                      className="w-full text-left px-4 py-2.5 text-sm flex items-center gap-2 hover:bg-slate-100 dark:hover:bg-slate-800"
+                    >
+                      <Zap className={clsx('w-4 h-4', enterToSend ? 'text-green-500' : 'text-gray-400')} />
+                      <div className="flex-1">
+                        <div className="font-medium">Send on Enter</div>
+                        <div className="text-xs opacity-70">
+                          {enterToSend ? 'Enabled (Press Enter)' : 'Disabled (Press Ctrl+Enter)'}
+                        </div>
                       </div>
-                    </Menu.Items>
-                  </Transition>
-                </Menu>
+                    </button>
+                    <div className="border-t" style={{ borderColor: 'var(--border)' }} />
+                    <button
+                      onClick={async () => {
+                        if (!confirm("Clear all messages in this chat? This cannot be undone.")) return;
+                        try {
+                          if (inDM && activeConversation) {
+                            await axios.delete(
+                              `${API}/api/conversations/${activeConversation._id}/messages`,
+                              { headers: { Authorization: `Bearer ${token}` } }
+                            );
+                          } else {
+                            await axios.delete(
+                              `${API}/api/messages/room/${room}/clear`,
+                              { headers: { Authorization: `Bearer ${token}` } }
+                            );
+                          }
+                          setMessages([]);
+                          setShowChatActions(false);
+                        } catch (e) {
+                          console.error("Clear chat error", e);
+                          alert("Failed to clear chat");
+                        }
+                      }}
+                      className="w-full text-left px-4 py-2.5 text-sm flex items-center gap-2 hover:bg-slate-100 dark:hover:bg-slate-800"
+                    >
+                      <Trash2 className="w-4 h-4 text-orange-500" />
+                      <div>
+                        <div className="font-medium">Clear Chat</div>
+                        <div className="text-xs opacity-70">Remove all messages</div>
+                      </div>
+                    </button>
+                    {inDM && activeConversation && (
+                      <>
+                        <div className="border-t" style={{ borderColor: 'var(--border)' }} />
+                        <button
+                          onClick={async () => {
+                            if (!confirm("Delete this entire conversation permanently? This cannot be undone.")) return;
+                            try {
+                              await axios.delete(
+                                `${API}/api/conversations/${activeConversation._id}`,
+                                { headers: { Authorization: `Bearer ${token}` } }
+                              );
+                              setActiveConversation(null);
+                              setInDM(false);
+                              setMessages([]);
+                              setView("direct-messages");
+                              const res = await axios.get(`${API}/api/conversations`, {
+                                headers: { Authorization: `Bearer ${token}` }
+                              });
+                              setConversations(res.data || []);
+                            } catch (e) {
+                              console.error("Delete conversation error", e);
+                              alert("Failed to delete conversation");
+                            } finally {
+                              setShowChatActions(false);
+                            }
+                          }}
+                          className="w-full text-left px-4 py-2.5 text-sm flex items-center gap-2 hover:bg-slate-100 dark:hover:bg-slate-800"
+                        >
+                          <X className="w-4 h-4 text-red-500" />
+                          <div>
+                            <div className="font-medium text-red-500">Delete Conversation</div>
+                            <div className="text-xs opacity-70">Permanently remove chat</div>
+                          </div>
+                        </button>
+                      </>
+                    )}
+                    <div className="border-t" style={{ borderColor: 'var(--border)' }} />
+                    <button
+                      onClick={() => setShowChatActions(false)}
+                      className="w-full px-4 py-2 text-xs text-theme-secondary hover:opacity-80 text-left"
+                    >
+                      Close
+                    </button>
+                  </div>
+                )}
               </div>
             </header>
 
