@@ -21,6 +21,19 @@ router.get("/", async (req, res) => {
         q.$or = [{ sport: { $exists: false } }, { sport: null }, { sport: "" }];
       }
     }
+    if (req.query.search && String(req.query.search).trim()) {
+      const s = String(req.query.search).trim();
+      const rx = new RegExp(s, "i");
+      const or = [
+        { title: rx },
+        { description: rx },
+        { sport: rx },
+        { "location.name": rx },
+        { "location.city": rx },
+        { "location.address": rx },
+      ];
+      q.$or = q.$or ? q.$or.concat(or) : or;
+    }
     const events = await Event.find(q)
       .populate("organizer", "username avatar")
       .sort({ startDate: 1 })
@@ -51,6 +64,19 @@ router.get("/user/:userId", async (req, res) => {
       } else if (cat === "other") {
         query.$or = [{ sport: { $exists: false } }, { sport: null }, { sport: "" }];
       }
+    }
+    if (req.query.search && String(req.query.search).trim()) {
+      const s = String(req.query.search).trim();
+      const rx = new RegExp(s, "i");
+      const or = [
+        { title: rx },
+        { description: rx },
+        { sport: rx },
+        { "location.name": rx },
+        { "location.city": rx },
+        { "location.address": rx },
+      ];
+      query.$or = query.$or ? query.$or.concat(or) : or;
     }
     const [events, total] = await Promise.all([
       Event.find(query)

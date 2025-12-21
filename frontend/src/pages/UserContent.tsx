@@ -16,8 +16,14 @@ export default function UserContent({ token, onNavigate }: any) {
   const [loading, setLoading] = useState(false);
   const [total, setTotal] = useState<number | null>(null);
   const [search, setSearch] = useState<string>("");
-  const [sport, setSport] = useState<string>("All Sports");
-  const [eventCategory, setEventCategory] = useState<string>("All");
+  const [eventFilter, setEventFilter] = useState<string>("All"); // "All" | "Other" | specific sport
+  const SPORTS = [
+    "Football/Soccer",
+    "Basketball",
+    "Tennis",
+    "Swimming",
+    "Athletics/Track & Field",
+  ];
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -47,11 +53,15 @@ export default function UserContent({ token, onNavigate }: any) {
     setLoading(true);
     const headers = { Authorization: `Bearer ${token}` };
     const limit = 20;
-    const sportParam = tab === 'events' && sport !== 'All Sports' && eventCategory === 'Sports' ? `&sport=${encodeURIComponent(sport)}` : '';
-    const categoryParam = tab === 'events' && eventCategory !== 'All' ? `&category=${encodeURIComponent(eventCategory.toLowerCase())}` : '';
-    const searchParam = tab === 'posts' && search.trim() ? `&search=${encodeURIComponent(search.trim())}` : '';
+    const isEvents = tab === 'events';
+    const isPosts = tab === 'posts';
+    const searchParam = search.trim() ? `&search=${encodeURIComponent(search.trim())}` : '';
+    const isSportsSelection = isEvents && SPORTS.includes(eventFilter);
+    const isOtherSelection = isEvents && eventFilter === 'Other';
+    const sportParam = isSportsSelection ? `&sport=${encodeURIComponent(eventFilter)}` : '';
+    const categoryParam = isOtherSelection ? `&category=other` : (isSportsSelection ? `&category=sports` : '');
     const url = tab === "events"
-      ? `${API}/api/events/user/${userId}?page=${p}&limit=${limit}${sportParam}${categoryParam}`
+      ? `${API}/api/events/user/${userId}?page=${p}&limit=${limit}${sportParam}${categoryParam}${searchParam}`
       : `${API}/api/posts/user/${userId}?page=${p}&limit=${limit}${searchParam}`;
     axios
       .get(url, { headers })
@@ -126,32 +136,28 @@ export default function UserContent({ token, onNavigate }: any) {
             Posts
           </button>
 
-          {tab === 'events' ? (
-            <>
-              <select value={eventCategory} onChange={(e) => { setEventCategory(e.target.value); setItems([]); setPage(1); setHasMore(true); }} className="input text-sm rounded-xl">
-                <option>All</option>
-                <option>Sports</option>
-                <option>Other</option>
-              </select>
-              {eventCategory === 'Sports' && (
-                <select value={sport} onChange={(e) => { setItems([]); setPage(1); setHasMore(true); setSport(e.target.value); }} className="input text-sm rounded-xl">
-                  <option>All Sports</option>
-                  <option>Football/Soccer</option>
-                  <option>Basketball</option>
-                  <option>Tennis</option>
-                  <option>Swimming</option>
-                  <option>Athletics/Track & Field</option>
-                </select>
-              )}
-            </>
-          ) : (
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter') { setItems([]); setPage(1); setHasMore(true); } }}
-              placeholder="Search posts (title, caption, tags)…"
-              className="input text-sm rounded-xl flex-1 min-w-[220px]"
-            />
+          {/* Unified search + filter */}
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') { setItems([]); setPage(1); setHasMore(true); } }}
+            placeholder={tab === 'events' ? 'Search events (title, sport, location)…' : 'Search posts (title, caption, tags)…'}
+            className="input text-sm rounded-xl flex-1 min-w-[220px]"
+          />
+          {tab === 'events' && (
+            <select
+              value={eventFilter}
+              onChange={(e) => { setEventFilter(e.target.value); setItems([]); setPage(1); setHasMore(true); }}
+              className="input text-sm rounded-xl min-w-[180px]"
+            >
+              <option>All</option>
+              <option>Other</option>
+              <optgroup label="Sports">
+                {SPORTS.map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </optgroup>
+            </select>
           )}
         </div>
 
