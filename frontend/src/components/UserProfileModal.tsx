@@ -99,8 +99,8 @@ export default function UserProfileModal({
   }
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl w-full max-w-md overflow-hidden border border-cyan-500/30 shadow-2xl">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
+      <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl w-full max-w-md max-h-[85vh] overflow-y-auto border border-cyan-500/30 shadow-2xl">
         
         {/* Header with gradient */}
         <div className="bg-gradient-to-r from-cyan-600 to-purple-600 p-6 text-center relative">

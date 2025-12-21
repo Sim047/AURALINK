@@ -155,15 +155,21 @@ export default function GlobalSearch({ token, onNavigate, onViewProfile }: Globa
 
   return (
     <div className="relative">
-      {/* Trigger */}
-      <button
-        onClick={handleOpen}
-        className="w-full flex items-center gap-2 px-4 py-3 rounded-xl themed-card hover:shadow-md transition-all"
-        aria-expanded={open}
+      {/* Trigger: input-style, responsive */}
+      <div
+        className="w-full flex items-center gap-2 px-4 py-2.5 sm:py-3 rounded-xl border transition-all"
+        style={{ borderColor: 'var(--border)', background: 'var(--card)', color: 'var(--text)' }}
       >
-        <Search className="w-4 h-4" />
-        <span className="text-sm">Search everything… users, events, posts, services</span>
-      </button>
+        <Search className="w-4 h-4 text-theme-secondary" />
+        <input
+          readOnly
+          onFocus={handleOpen}
+          onClick={handleOpen}
+          placeholder="Search everything… users, events, posts, services"
+          className="flex-1 bg-transparent outline-none text-sm sm:text-base"
+        />
+        <span className="hidden sm:inline text-xs text-theme-secondary">Press Ctrl+K</span>
+      </div>
 
       {/* Overlay */}
       {open && (
