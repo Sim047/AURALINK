@@ -15,6 +15,21 @@ const API = (import.meta as any).env?.VITE_API_URL || "";
 
 type FilterType = "all" | "participating" | "organizing" | "upcoming" | "past";
 
+function toOtherItem(p: any, role: "organizing" | "participating") {
+  return {
+    _id: p._id,
+    title: p.title || p.caption || "Post",
+    startDate: p.createdAt,
+    time: null,
+    location: p.location || "",
+    participants: p.participants || [],
+    organizer: p.author ? { _id: p.author._id || p.author, username: p.author.username, avatar: p.author.avatar } : undefined,
+    role,
+    isOther: true,
+    source: "post",
+  };
+}
+
 export default function AllEvents({ token, onBack, onNavigate, onViewEvent }: any) {
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,35 +46,54 @@ export default function AllEvents({ token, onBack, onNavigate, onViewEvent }: an
       setLoading(true);
       setError("");
       
-      // Load all events (both created and participating)
-      const [createdRes, participatingRes] = await Promise.all([
+      // Load all events (created + participating) and other events (posts tagged as events)
+      const [createdRes, participatingRes, postsRes] = await Promise.all([
         axios.get(`${API}/api/events/my/created`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
         axios.get(`${API}/api/events?status=published`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
+        axios.get(`${API}/api/posts`, {
+          params: { limit: 200 },
+          headers: { Authorization: `Bearer ${token}` },
+        }),
       ]);
 
-      const created = (createdRes.data.events || []).map((e: any) => ({ ...e, role: "organizing" }));
+      const created = (createdRes.data.events || []).map((e: any) => ({ ...e, role: "organizing", isOther: false, source: "event" }));
       const all = participatingRes.data.events || [];
+      const postsAll = (postsRes.data?.posts || postsRes.data || []).filter((p: any) => {
+        const tags = Array.isArray(p.tags) ? p.tags : (p.tags ? [p.tags] : []);
+        return tags.some((t: any) => String(t || "").toLowerCase().includes("event"));
+      });
       
       // Get user ID from token
-      const userId = JSON.parse(atob(token.split('.')[1])).id;
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const userId = payload.id || payload._id;
       
       const participating = all
         .filter((e: any) => e.participants?.some((p: any) => p._id === userId || p === userId))
-        .map((e: any) => ({ ...e, role: "participating" }));
+        .map((e: any) => ({ ...e, role: "participating", isOther: false, source: "event" }));
 
-      // Combine and deduplicate
-      const combined = [...created];
-      participating.forEach((p: any) => {
-        if (!combined.find((c: any) => c._id === p._id)) {
-          combined.push(p);
-        }
+      // Other Events (posts): authored and participating
+      const authoredOther = postsAll
+        .filter((p: any) => String(p.author?._id || p.author) === String(userId))
+        .map((p: any) => toOtherItem(p, "organizing"));
+      const participatingOther = postsAll
+        .filter((p: any) => (p.participants || []).some((u: any) => String(u?._id || u) === String(userId)))
+        .map((p: any) => toOtherItem(p, "participating"));
+
+      // Combine and deduplicate across sources
+      const combined = [...created, ...participating, ...authoredOther, ...participatingOther];
+      const seen = new Set<string>();
+      const deduped = combined.filter((item: any) => {
+        const key = `${item.source}:${item._id}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
       });
 
-      setEvents(combined);
+      setEvents(deduped);
     } catch (err: any) {
       console.error("Load events error:", err);
       setError(err.response?.data?.error || "Failed to load events");
@@ -101,8 +135,8 @@ export default function AllEvents({ token, onBack, onNavigate, onViewEvent }: an
     all: events.length,
     organizing: events.filter(e => e.role === "organizing").length,
     participating: events.filter(e => e.role === "participating").length,
-    upcoming: events.filter(e => new Date(e.startDate) >= new Date()).length,
-    past: events.filter(e => new Date(e.startDate) < new Date()).length,
+    upcoming: events.filter(e => !e.isOther && new Date(e.startDate) >= new Date()).length,
+    past: events.filter(e => !e.isOther && new Date(e.startDate) < new Date()).length,
   };
 
   return (
@@ -247,12 +281,20 @@ export default function AllEvents({ token, onBack, onNavigate, onViewEvent }: an
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {displayEvents.map((event) => {
-              const isPast = new Date(event.startDate) < new Date();
+              const isPast = !event.isOther && new Date(event.startDate) < new Date();
               
               return (
                 <div
                   key={event._id}
-                  onClick={() => onViewEvent && onViewEvent(event._id)}
+                  onClick={() => {
+                    if (event.isOther) {
+                      try { localStorage.setItem("auralink-highlight-post", event._id); } catch {}
+                      localStorage.setItem("auralink-discover-category", "other");
+                      onNavigate && onNavigate("discover");
+                    } else {
+                      onViewEvent && onViewEvent(event._id);
+                    }
+                  }}
                   className="rounded-2xl p-6 hover:shadow-xl transition-all duration-300 cursor-pointer group relative overflow-hidden themed-card"
                 >
                   {/* Role Badge */}
@@ -281,7 +323,7 @@ export default function AllEvents({ token, onBack, onNavigate, onViewEvent }: an
 
                   <div className={`space-y-4 ${isPast ? 'opacity-60' : ''}`}>
                     {/* Sport Badge */}
-                    {event.sport && (
+                    {event.sport && !event.isOther && (
                       <div className="flex items-center gap-2 mt-8">
                         <Trophy className="w-4 h-4 text-blue-500" />
                         <span className="text-sm font-medium text-theme-secondary">
@@ -296,19 +338,28 @@ export default function AllEvents({ token, onBack, onNavigate, onViewEvent }: an
                     </h3>
 
                     {/* Details */}
-                    <div className="space-y-2 text-sm text-theme-secondary">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4 text-blue-500" />
-                        <span>{dayjs(event.startDate).format("MMM D, YYYY")}</span>
-                        {event.time && <span>at {event.time}</span>}
-                      </div>
+                      <div className="space-y-2 text-sm text-theme-secondary">
+                      {event.isOther ? (
+                        <div className="flex items-center gap-2">
+                          <Calendar className="w-4 h-4 text-blue-500" />
+                          <span>Community event</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <Calendar className="w-4 h-4 text-blue-500" />
+                          <span>{dayjs(event.startDate).format("MMM D, YYYY")}</span>
+                          {event.time && <span>at {event.time}</span>}
+                        </div>
+                      )}
 
                       {event.location && (
                         <div className="flex items-center gap-2">
                           <MapPin className="w-4 h-4 text-red-500" />
                           <span>
-                            {event.location.city || event.location.name}
-                            {event.location.state && `, ${event.location.state}`}
+                            {event.isOther
+                              ? String(event.location || "")
+                              : `${event.location.city || event.location.name}${event.location.state ? `, ${event.location.state}` : ""}`
+                            }
                           </span>
                         </div>
                       )}
@@ -316,11 +367,12 @@ export default function AllEvents({ token, onBack, onNavigate, onViewEvent }: an
                       <div className="flex items-center gap-2">
                         <Users className="w-4 h-4 text-purple-500" />
                         <span>
-                          {event.participants?.length || 0} / {event.capacity?.max || 0} participants
+                          {event.participants?.length || 0}
+                          {!event.isOther && <> / {event.capacity?.max || 0} participants</>}
                         </span>
                       </div>
 
-                      {event.pricing && event.pricing.amount > 0 && (
+                      {!event.isOther && event.pricing && event.pricing.amount > 0 && (
                         <div className="flex items-center gap-2">
                           <DollarSign className="w-4 h-4 text-green-500" />
                           <span className="font-semibold">
