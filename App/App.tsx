@@ -130,6 +130,16 @@ function WebScreen({ navigation }: any) {
   const [canGoBack, setCanGoBack] = useState(false);
   const [authScript, setAuthScript] = useState<string>("");
 
+  // Hard refresh once auth script is ready so injection applies before content
+  useEffect(() => {
+    if (authScript) {
+      const t = setTimeout(() => {
+        try { webRef.current?.reload(); } catch {}
+      }, 50);
+      return () => clearTimeout(t);
+    }
+  }, [authScript]);
+
   useEffect(() => {
     // Build injected auth script from native token + user profile
     const loadAuth = async () => {
@@ -176,6 +186,17 @@ function WebScreen({ navigation }: any) {
     return () => sub.remove();
   }, [canGoBack, navigation]);
 
+  // Add a header Refresh button to hard refresh on demand
+  useEffect(() => {
+    try {
+      navigation.setOptions({
+        headerRight: () => (
+          <Button title='Refresh' onPress={() => { try { webRef.current?.reload(); } catch {} }} />
+        )
+      });
+    } catch {}
+  }, [navigation]);
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#000' }}>
       <WebView
@@ -184,6 +205,8 @@ function WebScreen({ navigation }: any) {
         startInLoadingState
         javaScriptEnabled
         domStorageEnabled
+        cacheEnabled={false}
+        pullToRefreshEnabled={true}
         injectedJavaScriptBeforeContentLoaded={`(function(){
           try {
             ${authScript}
