@@ -1256,21 +1256,25 @@ function onMyStatusUpdated(newStatus: any) {
                 </>
               )}
 
-              {/* Compact reaction bar: shows only one emoji, with dropdown to switch */}
+              {/* Compact reaction bar: single emoji with dropdown to switch */}
               <div className="mt-2 flex items-center gap-2">
                 {(() => {
                   const emoji = currentReactionEmojiFor(m);
                   return (
                     <button
                       className={clsx(
-                        "px-3 py-1 rounded-full border bg-white dark:bg-slate-800",
+                        "px-3 py-1 rounded-full border transition-colors",
+                        "hover:bg-slate-100 dark:hover:bg-slate-800",
                         hasReacted(m, emoji) && "reacted"
                       )}
                       style={{ borderColor: 'var(--border)' }}
                       onClick={() => toggleReaction(m, emoji)}
                       title="React"
                     >
-                      {emoji} {reactionCount(m, emoji) || ""}
+                      <span>{emoji}</span>
+                      <span className="ml-1 text-xs font-medium opacity-80">
+                        {reactionCount(m, emoji) || ""}
+                      </span>
                     </button>
                   );
                 })()}
@@ -1285,14 +1289,14 @@ function onMyStatusUpdated(newStatus: any) {
                 {reactionPickerFor === m._id && (
                   <div className="relative">
                     <div
-                      className="absolute z-20 mt-1 p-2 rounded-lg border bg-white dark:bg-slate-800 shadow-xl flex items-center gap-2"
-                      style={{ borderColor: 'var(--border)' }}
+                      className="absolute z-20 mt-1 p-2 rounded-lg border shadow-xl flex items-center gap-2"
+                      style={{ borderColor: 'var(--border)', background: 'var(--bg)' }}
                       onClick={(e) => e.stopPropagation()}
                     >
                       {AVAILABLE_REACTIONS.filter((e) => e !== currentReactionEmojiFor(m)).map((e) => (
                         <button
                           key={e}
-                          className="px-2 py-1 rounded-full border"
+                          className="px-2 py-1 rounded-full border transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
                           style={{ borderColor: 'var(--border)' }}
                           onClick={() => {
                             const curr = currentReactionEmojiFor(m);
