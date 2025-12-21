@@ -1,5 +1,5 @@
 // frontend/src/components/ConversationsList.tsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import Avatar from "./Avatar";
 import { Menu } from "@headlessui/react";
@@ -28,6 +28,8 @@ export default function ConversationsList({
   const [debouncedQuery, setDebouncedQuery] = useState<string>("");
   const refreshTimer = React.useRef<number | null>(null);
   const pollingTimer = React.useRef<number | null>(null);
+  const [longPressFor, setLongPressFor] = useState<string | null>(null);
+  const pressTimer = useRef<number | null>(null);
 
   // Cache TTL in ms (2 minutes)
   const CACHE_KEY = "auralink-conversations-cache";
@@ -234,6 +236,27 @@ export default function ConversationsList({
     return filtered.slice(0, 50);
   }, [filtered, showAll]);
 
+  function startPress(id: string) {
+    try {
+      if (pressTimer.current) {
+        window.clearTimeout(pressTimer.current);
+        pressTimer.current = null;
+      }
+      pressTimer.current = window.setTimeout(() => {
+        setLongPressFor(id);
+      }, 500) as any;
+    } catch {}
+  }
+
+  function cancelPress() {
+    try {
+      if (pressTimer.current) {
+        window.clearTimeout(pressTimer.current);
+        pressTimer.current = null;
+      }
+    } catch {}
+  }
+
   return (
     <div className="flex flex-col gap-2 sm:gap-3">
       {/* Total Unread Badge - only show if there are actual conversations with unread messages */}
@@ -313,6 +336,11 @@ export default function ConversationsList({
                 }
                 gap-3 relative
               `}
+              onMouseDown={() => startPress(c._id)}
+              onMouseUp={cancelPress}
+              onMouseLeave={cancelPress}
+              onTouchStart={() => startPress(c._id)}
+              onTouchEnd={cancelPress}
             >
               {/* Unread Badge */}
               {unreadCount > 0 && (
@@ -367,40 +395,45 @@ export default function ConversationsList({
               </div>
 
               <div className="flex items-center gap-2 w-full sm:w-auto">
-                {/* Options Menu */}
-                <Menu as="div" className="relative">
-                  <Menu.Button className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                    <MoreVertical className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                  </Menu.Button>
-                  <Menu.Items className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden z-20">
-                    <Menu.Item>
-                      {({ active }) => (
-                        <button
-                          onClick={(e) => handleClearMessages(c._id, e)}
-                          className={`${
-                            active ? 'bg-gray-100 dark:bg-gray-700' : ''
-                          } flex items-center gap-2 w-full px-4 py-2 text-sm text-left text-gray-700 dark:text-gray-300`}
-                        >
-                          <MessageSquareOff className="w-4 h-4" />
-                          Clear Messages
-                        </button>
-                      )}
-                    </Menu.Item>
-                    <Menu.Item>
-                      {({ active }) => (
-                        <button
-                          onClick={(e) => handleDeleteConversation(c._id, e)}
-                          className={`${
-                            active ? 'bg-red-50 dark:bg-red-900/20' : ''
-                          } flex items-center gap-2 w-full px-4 py-2 text-sm text-left text-red-600 dark:text-red-400`}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                          Delete Conversation
-                        </button>
-                      )}
-                    </Menu.Item>
-                  </Menu.Items>
-                </Menu>
+                {/* Long-press action sheet */}
+                {longPressFor === c._id && (
+                  <div
+                    className="absolute right-3 top-3 z-20 rounded-lg shadow-xl border bg-white dark:bg-slate-800"
+                    style={{ borderColor: 'var(--border)' }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <button
+                      onClick={(e) => {
+                        handleClearMessages(c._id, e);
+                        setLongPressFor(null);
+                      }}
+                      className="flex items-center gap-2 w-full px-4 py-2 text-sm text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                      <MessageSquareOff className="w-4 h-4" />
+                      Clear Messages
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        handleDeleteConversation(c._id, e);
+                        setLongPressFor(null);
+                      }}
+                      className="flex items-center gap-2 w-full px-4 py-2 text-sm text-left text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      Delete Conversation
+                    </button>
+                    <div className="border-t" style={{ borderColor: 'var(--border)' }} />
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setLongPressFor(null);
+                      }}
+                      className="w-full px-4 py-2 text-xs text-theme-secondary hover:opacity-80 text-left"
+                    >
+                      Close
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           );
