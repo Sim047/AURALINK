@@ -26,6 +26,8 @@ export default function ConversationsList({
   const [query, setQuery] = useState<string>("");
   const [showAll, setShowAll] = useState<boolean>(false);
   const [debouncedQuery, setDebouncedQuery] = useState<string>("");
+  const refreshTimer = React.useRef<number | null>(null);
+  const pollingTimer = React.useRef<number | null>(null);
 
   // Cache TTL in ms (2 minutes)
   const CACHE_KEY = "auralink-conversations-cache";
@@ -45,7 +47,7 @@ export default function ConversationsList({
         const age = cached?.ts ? Date.now() - cached.ts : CACHE_TTL + 1;
         if (age <= CACHE_TTL) {
           // Fresh cache; skip immediate network fetch
-          setLoading(false);
+          setLoading(false); 
         } else {
           setLoading(true);
           loadConversations();
@@ -56,6 +58,20 @@ export default function ConversationsList({
     } catch {
       loadConversations();
     }
+    // Background silent refresh every 30s to keep unread counts fresh
+    if (pollingTimer.current) {
+      try { window.clearInterval(pollingTimer.current); } catch {}
+      pollingTimer.current = null;
+    }
+    pollingTimer.current = window.setInterval(() => {
+      loadConversations(true);
+    }, 30000) as any;
+    return () => {
+      if (pollingTimer.current) {
+        try { window.clearInterval(pollingTimer.current); } catch {}
+        pollingTimer.current = null;
+      }
+    };
   }, [token]);
 
   // Debounce search input
@@ -108,6 +124,11 @@ export default function ConversationsList({
       } catch {}
     }
 
+          function updateConversations(list: any[]) {
+            setConversations(list);
+            const total = list.reduce((sum: number, c: any) => sum + (c.unreadCount || 0), 0);
+            setTotalUnread(total);
+          }
     try {
       socket?.on("receive_message", onReceiveMessage);
       socket?.on("message_edited", onMessageEdited);
@@ -120,8 +141,8 @@ export default function ConversationsList({
     };
   }, [currentUserId]);
 
-  function loadConversations() {
-    setLoading(true);
+  function loadConversations(silent: boolean = false) {
+    if (!silent) setLoading(true);
     axios
       .get(API + "/api/conversations", {
         headers: { Authorization: "Bearer " + token },
@@ -129,19 +150,17 @@ export default function ConversationsList({
       .then((r) => {
         const convs = Array.isArray(r.data) ? r.data : (r.data || []);
         const sorted = sortConversations(convs);
-        setConversations(sorted);
+        updateConversations(sorted);
         try {
           localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data: sorted }));
         } catch {}
-        const total = sorted.reduce((sum: number, c: any) => sum + (c.unreadCount || 0), 0);
-        setTotalUnread(total);
       })
       .catch((err) => {
         console.error("ConversationsList error:", err);
         // keep any cached list rather than clearing to empty
       })
       .finally(() => {
-        setLoading(false);
+        if (!silent) setLoading(false);
       });
   }
 
@@ -340,7 +359,21 @@ export default function ConversationsList({
               <div className="flex items-center gap-2 w-full sm:w-auto">
                 <button
                   className="flex-1 sm:flex-none px-4 py-2 rounded-md bg-gradient-to-r from-cyan-400 to-purple-500 text-white text-sm font-medium hover:shadow-md transition-shadow"
-                  onClick={() => onOpenConversation(c)}
+                  onClick={() => {
+                    // Optimistically zero unread for this conversation
+                    setConversations((prev) => {
+                      const idx = prev.findIndex((x: any) => String(x._id) === String(c._id));
+                      if (idx === -1) return prev;
+                      const next = [...prev];
+                      next[idx] = { ...next[idx], unreadCount: 0 };
+                      // Recompute totals
+                      setTotalUnread(next.reduce((sum: number, x: any) => sum + (x.unreadCount || 0), 0));
+                      // Update cache
+                      try { localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data: next })); } catch {}
+                      return next;
+                    });
+                    onOpenConversation(c);
+                  }}
                 >
                   {c.unreadCount > 0 ? 'Open Chat (' + c.unreadCount + ')' : 'Open Chat'}
                 </button>
