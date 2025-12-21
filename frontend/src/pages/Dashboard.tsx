@@ -174,7 +174,7 @@ type Event = {
   maxParticipants?: number;
 };
 
-export default function Dashboard({ token, onNavigate }: any) {
+export default function Dashboard({ token, onNavigate, onViewProfile }: any) {
   const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
   const [eventsFilter, setEventsFilter] = useState<'all' | 'free' | 'paid'>(() => {
     const saved = localStorage.getItem('auralink-dashboard-events-filter');
@@ -410,7 +410,7 @@ export default function Dashboard({ token, onNavigate }: any) {
 
         {/* Global Search across users, events, posts, services */}
         <div className="rounded-2xl p-4 themed-card">
-          <GlobalSearch token={token} onNavigate={onNavigate} />
+          <GlobalSearch token={token} onNavigate={onNavigate} onViewProfile={onViewProfile} />
         </div>
 
         {/* Stats Cards (bookings removed) */}
