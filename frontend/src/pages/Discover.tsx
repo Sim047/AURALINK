@@ -268,8 +268,16 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
   const fetchEvents = async () => {
     setLoading(true);
     try {
-      const sport = selectedSport === "All Sports" ? "" : selectedSport;
-      const response = await axios.get(`${API_URL}/events?sport=${sport}`);
+      const params = new URLSearchParams();
+      const sport = selectedSport === "All Sports" || selectedSport === "Other Events" ? "" : selectedSport;
+      if (sport) {
+        params.append("category", "sports");
+        params.append("sport", sport);
+      } else if (selectedSport === "Other Events") {
+        params.append("category", "other");
+      }
+      if (searchTerm && searchTerm.trim()) params.append("search", searchTerm.trim());
+      const response = await axios.get(`${API_URL}/events?${params.toString()}`);
       setEvents(response.data.events || response.data);
     } catch (error) {
       console.error("Error fetching events:", error);
@@ -856,7 +864,7 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
 
   // Sports Events View
   if (activeCategory === "sports") {
-    const sportsList = ["All Sports", "Football", "Basketball", "Tennis", "Running", "Swimming", "Cycling", "Gym", "Volleyball", "Baseball"];
+    const sportsList = ["All Sports", "Football/Soccer", "Basketball", "Tennis", "Running", "Swimming", "Cycling", "Volleyball", "Baseball", "Other Events"];
 
     return (
       <div className="min-h-screen themed-page">
@@ -884,7 +892,8 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search by title, sport, or location"
-                className="w-full pl-10 pr-4 py-2 rounded-lg input"
+                className="w-full pl-10 pr-4 py-2 rounded-xl border"
+                style={{ borderColor: 'var(--border)', background: 'var(--card)', color: 'var(--text)' }}
               />
             </div>
           </div>
@@ -895,11 +904,12 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
               <button
                 key={sport}
                 onClick={() => setSelectedSport(sport)}
-                className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-all ${
+                className={`px-4 py-2 rounded-xl font-medium whitespace-nowrap transition-all ${
                     selectedSport === sport
                       ? "bg-gradient-to-r from-cyan-500 to-purple-500 text-white"
-                      : "themed-card hover:opacity-90"
+                      : "border"
                   }`}
+                style={selectedSport === sport ? undefined : { borderColor: 'var(--border)', background: 'var(--card)', color: 'var(--text)' }}
               >
                 {sport}
               </button>
@@ -938,7 +948,8 @@ export default function Discover({ token, onViewProfile, onStartConversation }: 
                 <div
                   key={event._id}
                   onClick={() => openEventDetails(event._id)}
-                  className="rounded-xl p-6 hover:scale-105 cursor-pointer themed-card"
+                  className="rounded-xl p-6 hover:scale-105 cursor-pointer border"
+                  style={{ borderColor: 'var(--border)', background: 'var(--card)', color: 'var(--text)' }}
                 >
                   <div className="flex items-start justify-between mb-4">
                     <div>
