@@ -1015,8 +1015,8 @@ function onMyStatusUpdated(newStatus: any) {
 
           <div
             className={clsx(
-              "message flex gap-3 items-start",
-              m.sender?._id === user?._id && "msg-mine"
+              "flex items-start gap-3",
+              String(m.sender?._id) === String(user?._id) && "justify-end"
             )}
             style={{
               transition: "opacity .25s, transform .25s",
@@ -1024,19 +1024,21 @@ function onMyStatusUpdated(newStatus: any) {
               transform: ready ? "translateY(0)" : "translateY(6px)"
             }}
           >
-            {showAvatar ? (
-              <Avatar
-                src={makeAvatarUrl(m.sender?.avatar)}
-                className="avatar w-10 h-10 rounded-md object-cover"
-                alt={m.sender?.username || "User"}
-              />
-            ) : (
-              <div style={{ width: 40 }} />
-            )}
+            {String(m.sender?._id) !== String(user?._id) ? (
+              showAvatar ? (
+                <Avatar
+                  src={makeAvatarUrl(m.sender?.avatar)}
+                  className="avatar w-10 h-10 rounded-md object-cover"
+                  alt={m.sender?.username || "User"}
+                />
+              ) : (
+                <div style={{ width: 40 }} />
+              )
+            ) : null}
 
-            <div className="flex-1">
+            <div className={clsx("message", String(m.sender?._id) === String(user?._id) && "msg-mine")}> 
               <div className="flex items-center gap-2">
-                {showAvatar && <strong>{m.sender?.username}</strong>}
+                {String(m.sender?._id) !== String(user?._id) && showAvatar && <strong>{m.sender?.username}</strong>}
                 <span
                   className="text-xs opacity-60"
                   title={dayjs(m.createdAt).format(
