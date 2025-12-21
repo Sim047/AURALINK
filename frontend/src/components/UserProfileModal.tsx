@@ -23,6 +23,8 @@ export default function UserProfileModal({
   const [events, setEvents] = React.useState<any[]>([]);
   const [posts, setPosts] = React.useState<any[]>([]);
   const [loadingContent, setLoadingContent] = React.useState(false);
+  const [eventCount, setEventCount] = React.useState<number>(0);
+  const [postCount, setPostCount] = React.useState<number>(0);
 
   React.useEffect(() => {
     if (!token || !user) return;
@@ -47,11 +49,14 @@ export default function UserProfileModal({
     const postsReq = axios.get(`${API}/api/posts/user/${user._id}?page=1&limit=10`, headers ? { headers } : {});
     Promise.allSettled([eventsReq, postsReq])
       .then((results) => {
-        const ev = results[0].status === "fulfilled" ? ((results[0] as any).value.data.events || (results[0] as any).value.data || []) : [];
-        const poData = results[1].status === "fulfilled" ? (results[1] as any).value.data : [];
-        const po = Array.isArray(poData) ? poData : (poData.posts || []);
+        const evResp = results[0].status === "fulfilled" ? (results[0] as any).value.data : {};
+        const ev = evResp.events || (Array.isArray(evResp) ? evResp : []);
+        const poResp = results[1].status === "fulfilled" ? (results[1] as any).value.data : {};
+        const po = poResp.posts || (Array.isArray(poResp) ? poResp : []);
         setEvents(ev);
         setPosts(po);
+        setEventCount(evResp.total || ev.length || 0);
+        setPostCount(poResp.totalPosts || po.length || 0);
       })
       .finally(() => setLoadingContent(false));
   }, [user, visible, token]);
@@ -192,13 +197,13 @@ export default function UserProfileModal({
                 className={`px-3 py-2 rounded-xl text-sm font-semibold transition-colors ${tab === "events" ? "bg-cyan-600 text-white" : "bg-white/10 text-gray-300 hover:bg-white/20"}`}
                 onClick={() => setTab("events")}
               >
-                Events {events.length ? `(${events.length})` : ""}
+                Events {eventCount ? `(${eventCount})` : ""}
               </button>
               <button
                 className={`px-3 py-2 rounded-xl text-sm font-semibold transition-colors ${tab === "posts" ? "bg-purple-600 text-white" : "bg-white/10 text-gray-300 hover:bg-white/20"}`}
                 onClick={() => setTab("posts")}
               >
-                Posts {posts.length ? `(${posts.length})` : ""}
+                Posts {postCount ? `(${postCount})` : ""}
               </button>
               <button
                 className="px-3 py-2 rounded-xl text-sm font-semibold bg-white/10 text-gray-300 hover:bg-white/20"
@@ -219,57 +224,63 @@ export default function UserProfileModal({
             {loadingContent ? (
               <div className="text-center py-6 text-gray-400">Loading {tab}...</div>
             ) : tab === "events" ? (
-              <div className="space-y-3 max-h-64 overflow-auto pr-1">
+              <div className="space-y-3 pr-1">
                 {events.length === 0 ? (
                   <div className="text-center text-gray-400 text-sm py-6">No events yet</div>
                 ) : (
-                  events.map((ev: any) => (
-                    <button
-                      key={ev._id}
-                      onClick={() => {
-                        try {
-                          localStorage.setItem('auralink-highlight-event', ev._id);
-                          localStorage.setItem('auralink-discover-category', 'sports');
-                        } catch {}
-                        if (onNavigate) onNavigate('discover'); else window.location.href = '/';
-                      }}
-                      className="w-full text-left bg-white/5 rounded-xl p-3 border border-white/10 hover:border-cyan-500/40 transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <img src={ev.image || PLACEHOLDER} alt={ev.title} className="w-12 h-12 rounded-lg object-cover" />
-                        <div className="flex-1">
-                          <div className="text-white font-semibold text-sm">{ev.title || "Untitled Event"}</div>
-                          <div className="text-xs text-gray-400">{formatLocation(ev.location)}</div>
-                          <div className="text-xs text-cyan-300">{ev.startDate ? new Date(ev.startDate).toLocaleDateString() : ""}</div>
+                  (() => {
+                    const ev = [...events].sort((a: any, b: any) => new Date(b.startDate || 0).getTime() - new Date(a.startDate || 0).getTime())[0];
+                    return (
+                      <button
+                        key={ev._id}
+                        onClick={() => {
+                          try {
+                            localStorage.setItem('auralink-highlight-event', ev._id);
+                            localStorage.setItem('auralink-discover-category', 'sports');
+                          } catch {}
+                          if (onNavigate) onNavigate('discover'); else window.location.href = '/';
+                        }}
+                        className="w-full text-left bg-white/5 rounded-xl p-3 border border-white/10 hover:border-cyan-500/40 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <img src={ev.image || PLACEHOLDER} alt={ev.title} className="w-12 h-12 rounded-lg object-cover" />
+                          <div className="flex-1">
+                            <div className="text-white font-semibold text-sm">{ev.title || "Untitled Event"}</div>
+                            <div className="text-xs text-gray-400">{formatLocation(ev.location)}</div>
+                            <div className="text-xs text-cyan-300">{ev.startDate ? new Date(ev.startDate).toLocaleDateString() : ""}</div>
+                          </div>
                         </div>
-                      </div>
-                    </button>
-                  ))
+                      </button>
+                    );
+                  })()
                 )}
               </div>
             ) : (
-              <div className="space-y-3 max-h-64 overflow-auto pr-1">
+              <div className="space-y-3 pr-1">
                 {posts.length === 0 ? (
                   <div className="text-center text-gray-400 text-sm py-6">No posts yet</div>
                 ) : (
-                  posts.map((po: any) => (
-                    <button
-                      key={po._id}
-                      onClick={() => {
-                        try { localStorage.setItem('auralink-highlight-post', po._id); } catch {}
-                        if (onNavigate) onNavigate('posts'); else window.location.href = '/';
-                      }}
-                      className="w-full text-left bg-white/5 rounded-xl p-3 border border-white/10 hover:border-purple-500/40 transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <img src={po.imageUrl || PLACEHOLDER} alt={po.title || "Post"} className="w-12 h-12 rounded-lg object-cover" />
-                        <div className="flex-1">
-                          <div className="text-white font-semibold text-sm">{po.title || "Post"}</div>
-                          <div className="text-xs text-gray-400 line-clamp-2">{po.caption || ""}</div>
+                  (() => {
+                    const po = [...posts].sort((a: any, b: any) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())[0];
+                    return (
+                      <button
+                        key={po._id}
+                        onClick={() => {
+                          try { localStorage.setItem('auralink-highlight-post', po._id); } catch {}
+                          if (onNavigate) onNavigate('posts'); else window.location.href = '/';
+                        }}
+                        className="w-full text-left bg-white/5 rounded-xl p-3 border border-white/10 hover:border-purple-500/40 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <img src={po.imageUrl || PLACEHOLDER} alt={po.title || 'Post'} className="w-12 h-12 rounded-lg object-cover" />
+                          <div className="flex-1">
+                            <div className="text-white font-semibold text-sm">{po.title || 'Post'}</div>
+                            <div className="text-xs text-gray-400 line-clamp-2">{po.caption || ''}</div>
+                          </div>
                         </div>
-                      </div>
-                    </button>
-                  ))
+                      </button>
+                    );
+                  })()
                 )}
               </div>
             )}
